@@ -43,3 +43,10 @@ The final synthetic reference-to-report journey was exercised in the real browse
 The report package was extracted into a separate temporary directory and its included `reproduce.py` actually executed. Full displacement relative difference: 5.06e-11; peak stress relative difference: 7.12e-11. All 18 manifest entries verified. The four-page PDF was rendered and each page visually inspected, including the reference and annotation text. The final report, package, original result and verification are in `evidence/demo/`.
 
 The saved study preserves reference, annotations, chat, material, fixtures, forces, CAD ID and run ID. A browser reload restored the reference/chat/CAD successfully. Stress and displacement views, explicit deformation exaggeration, reset camera and save-study controls were exercised. During development, a transient interaction stall after hot reload required reloading; the built app is the final handoff surface. No mobile-sized viewport or physical camera test is claimed. The final TypeScript/Vite build passed; the bundled Three.js chunk triggers a non-blocking bundle-size advisory.
+
+The built app was opened at `http://127.0.0.1:8000/`, its saved-study picker restored the full completed study, and its results/Stress controls displayed the saved run with no captured console errors. Current screenshots are preserved in the Co-review record `af7148a48b474b5ab72689e2c71e6f3b`, bound to source revision `d6f8148`; its exact page was opened and the reference, built result, GPU detail and report evidence options were verified. Screenshot data returned as JPEG was transcoded to PNG for the review importer; the page content was not edited.
+
+- Review: http://127.0.0.1:8848/reviews/?id=af7148a48b474b5ab72689e2c71e6f3b
+- All reviews: http://127.0.0.1:8848/reviews/
+
+Human review remains open; verification does not mark the design accepted.

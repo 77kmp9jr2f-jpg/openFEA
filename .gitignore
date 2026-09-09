@@ -11,3 +11,4 @@ playwright-report/
 test-results/
 review/.history/
 *.tsbuildinfo
+review/exports/drag-cache/
