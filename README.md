@@ -82,3 +82,7 @@ This server is intended for the local machine. It rejects foreign browser origin
 | Codex CLI | Optional authenticated Astra transport | Apache-2.0; hosted model access separate |
 
 FEA-R source is GPL-3.0-or-later; see [LICENSE](LICENSE). Dependency versions are pinned by `requirements.txt` and `package-lock.json`. No Gmsh or other dependency binaries are vendored. See upstream [Gmsh licensing](https://gmsh.info/doc/texinfo/#License) and [Codex non-interactive documentation](https://learn.chatgpt.com/docs/non-interactive-mode) for their own terms and behavior.
+
+## Verified example
+
+A completed synthetic reference study is included as [PDF report](evidence/demo/FEA-R-demo-report.pdf) and [reproducibility package](evidence/demo/FEA-R-demo-package.zip). Its real local-GPU run was independently reproduced on the CPU. The example's dimensions and material are supplied demonstration inputs, not measurements or certified design data.

@@ -1,0 +1,21 @@
+{
+  "run_id": "af02566402df43b2b0125ff688188e74",
+  "reference_id": "52b767032c7c4646b91b72ffaec2670c",
+  "annotations": 1,
+  "execution": {
+    "backend": "webgpu",
+    "device": "apple \u00b7 metal-3",
+    "precision": "GPU float32 with browser float64 iterative refinement",
+    "method": "WebGPU conjugate gradient, symmetric Jacobi scaling",
+    "iterations": 3500,
+    "refinements": 3,
+    "gpu_seconds": 14.683899999976159,
+    "device_source": "Browser-reported adapter; numerical residual independently verified on server"
+  },
+  "relative_displacement_error": 5.063324700195831e-11,
+  "peak_stress_relative_error": 7.117129108280551e-11,
+  "server_verified_relative_residual": 7.736652189166088e-09,
+  "verified_manifest_entries": 18,
+  "pdf_sha256": "7d1717f713db20a085aa833c2c93b24a2d88d69bcc50e812bcc6db6b7e35a340",
+  "zip_sha256": "013a65912dcad1aadca6d41e16c1a8978889c698db5002005e94f22594cca63a"
+}

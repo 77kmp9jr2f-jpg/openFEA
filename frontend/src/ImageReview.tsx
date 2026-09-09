@@ -94,7 +94,8 @@ export default function ImageReview({
   }
   function end(e: React.PointerEvent) {
     if (moving.current) {
-      setPast((p) => [...p.slice(-39), moving.current!.before]);
+      const beforeMove = moving.current.before;
+      setPast((p) => [...p.slice(-39), beforeMove]);
       setFuture([]);
       moving.current = null;
       return;
