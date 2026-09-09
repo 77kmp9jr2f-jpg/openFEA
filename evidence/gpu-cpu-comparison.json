@@ -1,0 +1,31 @@
+{
+  "gpu_run": "43cbbb492a5d4edd9f5c386abcde3190",
+  "cpu_run": "fd0ee6db8cd94f368b8d6a6e1fdce6f5",
+  "model_id": "eeb6372cf5014c3c806b399e051086d6",
+  "mesh_sha256": "ae89ee14fde1a053926e5e488efe2e9dabc50356ee878bad18152e2c008338ec",
+  "device": {
+    "backend": "webgpu",
+    "device": "apple \u00b7 metal-3",
+    "precision": "GPU float32 with browser float64 iterative refinement",
+    "method": "WebGPU conjugate gradient, symmetric Jacobi scaling",
+    "iterations": 3560,
+    "refinements": 3,
+    "gpu_seconds": 37.93789999997616,
+    "device_source": "Browser-reported adapter; numerical residual independently verified on server"
+  },
+  "dofs": 16980,
+  "elements": 3072,
+  "displacement_relative_l2_error": 1.1329204169722478e-11,
+  "peak_stress_relative_error": 1.3427481349026493e-11,
+  "gpu_relative_residual": 2.57239605475497e-10,
+  "cpu_relative_residual": 6.11894933378174e-11,
+  "gpu_seconds": 38.927,
+  "cpu_seconds": 1.85,
+  "gpu_peak_stress_mpa": 14.65855855386696,
+  "gpu_max_displacement_mm": 0.11939154513883565,
+  "gates": {
+    "relative_displacement_error_lt_1e-5": true,
+    "relative_stress_error_lt_1e-4": true,
+    "gpu_residual_lt_1e-7": true
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "message": "Synthetic demo geometry proposal, using the supplied dimensions. Later simulation: illustrative aluminum (E=69,000 MPa, \u03bd=0.33, yield=240 MPa); fully restrain XYZ on the rear X=0 face and uniformly distribute total force [0,0,-100] N over the X=80 end face. Global Z points upward. Apply and confirm geometry, material, and boundary conditions before solving; no analysis results are implied.",
+  "questions": [],
+  "proposal": {
+    "name": "Synthetic demo mounting bracket",
+    "kind": "bracket",
+    "length": 80.0,
+    "width": 40.0,
+    "height": 60.0,
+    "thickness": 8.0,
+    "hole_diameter": 8.0,
+    "mesh_size": 7.0,
+    "features": [],
+    "step_id": null,
+    "provenance": "image_proposal",
+    "assumptions": [
+      "All dimensions are in mm and explicitly supplied for this synthetic demonstration, not measured from image pixels.",
+      "Base spans X=0\u201380, Y=0\u201340, Z=0\u20138; upright spans X=0\u20138, Y=0\u201340, Z=0\u201360. Legs meet at 90 degrees.",
+      "Both plain through-bores are diameter 8: base bore along Z at X=57.6, Y=20; upright bore along X at Y=20, Z=43.2.",
+      "No fillets or hidden features. Stress at the sharp internal corner is mesh-dependent.",
+      "Requested mesh size is 7 mm; stress assessment requires mesh-convergence checks.",
+      "Aluminum properties are illustrative, not certified material data."
+    ]
+  },
+  "model": "gpt-6-astra",
+  "live": true
+}

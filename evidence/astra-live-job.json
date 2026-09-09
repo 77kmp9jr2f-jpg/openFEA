@@ -1,0 +1,13 @@
+{
+  "image": {
+    "id": "9c8be252df01448192bdfcb10e33b2ac",
+    "name": "Synthetic bracket reference",
+    "width": 1200,
+    "height": 900,
+    "url": "/api/images/9c8be252df01448192bdfcb10e33b2ac"
+  },
+  "job": {
+    "id": "52baca1e5d9a412e80853d2b95a7a42b",
+    "status": "queued"
+  }
+}

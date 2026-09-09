@@ -1,0 +1,11 @@
+{
+  "message": "The image shows an L-shaped bracket with a horizontal base, an upright leg, and one apparent bore in each leg. No scale or dimensions are provided, so I cannot determine its size from the image.",
+  "questions": [
+    "What are the overall base length (X), bracket width (Y), upright height (Z), and thickness of each leg in mm? Is the bend exactly 90\u00b0?",
+    "What are the two hole diameters and their center positions measured from the edges? Are both plain through-holes?",
+    "Are there any fillets, chamfers, gussets, or hidden features that should be modeled?"
+  ],
+  "proposal": null,
+  "model": "gpt-6-astra",
+  "live": true
+}
