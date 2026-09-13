@@ -1,10 +1,10 @@
-# Validation record — 2026-09-09
+# Validation record — updated 2026-09-13
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
 
 ## Automated checks
 
-26 pytest checks passed on macOS arm64 / Python 3.12.14. The suite covers exact 3D uniform tension, bending at two mesh sizes versus a Timoshenko beam, force and moment balance, strain energy, force/stiffness scaling, STEP round trip, connected custom CSG, invalid input/foreign-origin rejection, study persistence, archive hashes, and independently accepted/rejected solution submissions. The mocked numerical submission test is not GPU execution evidence. Two dependency deprecation warnings remain (Starlette HTTPX / AnyIO aliases).
+45 pytest checks passed on macOS arm64 / Python 3.12.14 on September 13. The suite covers exact 3D uniform tension, bending at two mesh sizes versus a Timoshenko beam, force and moment balance, strain energy, force/stiffness scaling, STEP round trip, connected custom CSG, invalid input/foreign-origin rejection, study persistence, archive hashes, independently accepted/rejected solution submissions, and the proposal checks described below. The mocked numerical submission test is not GPU execution evidence. Two dependency deprecation warnings remain (Starlette HTTPX / AnyIO aliases).
 
 The measured cantilever has approximately 0.98% coarse-mesh and 0.78% fine-mesh tip displacement error against the analytic beam model, and 0.20% mesh-to-mesh change. Predetermined gates are below 5% analytic error and below 2% mesh change. These are displacement checks; they do not validate peak stress convergence at the bracket's sharp corner. Exact values: `evidence/numerical-benchmark.json`.
 
@@ -50,3 +50,11 @@ The built app was opened at `http://127.0.0.1:8000/`, its saved-study picker res
 - All reviews: http://127.0.0.1:8848/reviews/
 
 Human review remains open; verification does not mark the design accepted.
+
+## Conversational setup checkpoint
+
+The 19 additional automated checks cover complete proposal application without automatic confirmation, changed context and CAD revisions, invented or conflicting face assignments, explicit material/force inputs, structured answer validation, the apply endpoint, provenance tampering, and an actual archived CPU reproduction preserving its proposal and interview transcript. The complete 45-test suite and TypeScript/Vite build passed again on September 13. The existing bundle-size advisory remains.
+
+Two live Astra calls were exercised in the browser on September 9. An ambiguous heavy-load request returned three questions with no setup proposal. Explicit illustrative material, rear X=0 restraint and total [0,0,-150] N on the selected X=80 face returned proposal `cebc9a619837423188d290b01629635d`, bound to CAD revision `f5f0cb3a22034e0f8b67f1b4733b5573`. Inputs and replies are preserved in `evidence/conversational/`. Changing Young's modulus disabled the proposal; restoring the original value allowed preview, with Run simulation disabled during preview.
+
+The latest preview-scroll correction builds successfully but has not yet received a fresh visual check. Browser application of this new proposal, a new GPU solve carrying its provenance, saved-study reload, and a fresh PDF/visual-review handoff remain to be exercised. The earlier verified GPU runs and report artifacts above remain separate evidence; they do not establish completion of that new journey.

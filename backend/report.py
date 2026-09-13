@@ -60,6 +60,7 @@ def _rows(result,model):
         ['Compute device',result.get('execution',{}).get('device','Local CPU / sparse direct')],
         ['Solver method',result.get('execution',{}).get('method','Sparse direct solve')],
         ['Precision',result.get('execution',{}).get('precision','float64')],
+        ['Setup proposal',result['setup'].get('setup_proposal_id') or 'Manually assigned'],
         ['Material',mat['name']],['Young modulus',f"{mat['young_mpa']:g} MPa"],['Poisson ratio',f"{mat['poisson']:g}"],
         ['Supplied yield strength',f"{mat['yield_mpa']:g} MPa"],['Density',f"{mat['density_kg_m3']:g} kg/m3"],
         ['Geometry source',model['spec']['provenance']],['CAD volume',f"{model['volume_mm3']:.5g} mm3"],
@@ -139,8 +140,12 @@ def export_report(rid,format):
         for name in ['model.step','model.stl','mesh.msh','mesh.npz','model.json']:files['model/'+name]=mf/name
         for name in ['report.pdf','report.html','result.json','solution.npz','nodes.csv']:files[name]=folder/name
         files['LICENSE']=ROOT/'LICENSE'
+        if result['setup'].get('setup_proposal_id'):
+            files['setup-proposal.json']=resource('setup_proposals',result['setup']['setup_proposal_id']).with_suffix('.json')
+        write_json(folder/'interview.json',result['setup'].get('conversation',[]))
+        files['interview.json']=folder/'interview.json'
         files['source/gpu.ts']=ROOT/'frontend'/'src'/'gpu.ts'
-        for name in ['__init__.py','solver.py','schemas.py','storage.py']:files['source/backend/'+name]=ROOT/'backend'/name
+        for name in ['__init__.py','solver.py','schemas.py','storage.py','simulation_proposals.py']:files['source/backend/'+name]=ROOT/'backend'/name
         files['source/requirements.txt']=ROOT/'requirements.txt'
         ref=_reference(result)
         if ref and ref.exists():files['reference.png']=ref
@@ -154,6 +159,7 @@ This archive is a simulation snapshot, not certification. Read report.pdf or rep
 All lengths are mm, forces N, stresses MPa. The JSON setup is the authoritative input.
 The NPZ retains all quadratic DOFs and quadrature stresses; CSV/viewport values sample mesh vertices.
 Reference annotations are in result.json > setup > annotations (normalized coordinates).
+The interview transcript is in interview.json; an applied Astra setup is in setup-proposal.json when present.
 
 ## Reproduce the solve
 
@@ -173,6 +179,8 @@ from backend.solver import solve_model
 target=root/'reproduced'/'models'/'{model['id']}'
 shutil.copytree(root/'model',target,dirs_exist_ok=True)
 original=json.loads((root/'result.json').read_text())
+if original['setup'].get('setup_proposal_id'):
+    shutil.copyfile(root/'setup-proposal.json',root/'reproduced'/'setup_proposals'/(original['setup']['setup_proposal_id']+'.json'))
 result=solve_model(Analysis.model_validate(original['setup']))
 print(json.dumps({{k:result[k] for k in ('id','peak_von_mises_mpa','max_displacement_mm','force_balance_error_n')}},indent=2))
 ''')

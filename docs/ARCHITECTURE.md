@@ -9,7 +9,10 @@ flowchart LR
   STEP[Single-solid STEP] --> G[Gmsh / OpenCASCADE]
   R --> G
   G --> M[CAD revision + tetrahedral mesh]
-  M --> U[Select faces / material / XYZ forces]
+  M --> L[Astra loading interview / actual face context]
+  L --> R2[Preview proposal / apply / confirm]
+  R2 --> U[Material / supports / global XYZ forces]
+  M --> U
   U --> P[Quadratic scikit-fem matrix assembly]
   P --> GPU[Browser WebGPU sparse CG]
   P --> CPU[Explicit SciPy CPU reference]
@@ -22,6 +25,8 @@ flowchart LR
 `backend/schemas.py` is the input boundary. All mechanical numeric values reject NaN/Infinity, and geometry/load/material ranges are bounded. Astra output is JSON schema constrained, then revalidated through the same geometry schema. It produces parameters and ordered boolean primitives; the application executes fixed, checked modelling code.
 
 `geometry.py` creates one OpenCASCADE solid or reads STEP, creates a linear tetrahedral geometry mesh and records the triangle membership of every CAD face. The solver upgrades displacement interpolation to P2 through scikit-fem. Face loads and constraints are selected by CAD face ID bound to the model revision. Faces are reselected after every rebuild, even if the mesher happens to reuse a numeric ID.
+
+`simulation_proposals.py` stores a validated, complete setup with its CAD revision and a SHA-256 binding to the geometry, material, supports, forces, application notes, reference and annotations seen by Astra. Applying requires that context to remain unchanged. The browser shows a separate preview, applies only after an explicit click, and never checks confirmation automatically. Manual edits clear proposal provenance. The solver verifies that a claimed applied proposal matches the submitted material/conditions/notes/reference before assembly. The exported interview is a bounded transcript snapshot; it is not independently authenticated evidence of the user's statements.
 
 `solver.py` maps CAD triangles to mesh facets. For each force it computes the discrete face area and integrates a constant traction, ensuring the requested total force is preserved. Dirichlet constraints include vertex and quadratic edge DOFs. The solution checks free-DOF residuals and computes all fixed-DOF reactions and moment balance. It writes full solution arrays and separately produces vertex samples for the viewer.
 

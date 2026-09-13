@@ -79,6 +79,8 @@ class Analysis(StrictModel):
     confirmed: bool = False
     reference_id: str | None = Field(default=None,pattern=r'^[a-f0-9]{32}$')
     annotations: list['Annotation'] = Field(default_factory=list,max_length=100)
+    setup_proposal_id: str | None = Field(default=None,pattern=r'^[a-f0-9]{32}$')
+    conversation: list['InterviewMessage'] = Field(default_factory=list,max_length=24)
     @model_validator(mode='after')
     def validate_setup(self):
         if not self.confirmed:
@@ -86,6 +88,11 @@ class Analysis(StrictModel):
         if set(self.fixed_faces) & {load.face_id for load in self.loads}:
             raise ValueError('A face cannot be both fully fixed and loaded.')
         return self
+
+class InterviewMessage(StrictModel):
+    role: Literal['user','assistant']
+    text: str = Field(max_length=20000)
+    live: bool = False
 
 class Annotation(StrictModel):
     id: str = Field(max_length=80)
@@ -110,6 +117,8 @@ class AssistantRequest(StrictModel):
     loads: list[Force] = Field(default_factory=list,max_length=20)
     application_notes: str = Field(default='',max_length=12000)
     run_id: str | None = Field(default=None,pattern=r'^[a-f0-9]{32}$')
+    selected_face: int | None = Field(default=None,gt=0)
+    stage: Literal['geometry','loading','results'] = 'geometry'
 
 class Study(StrictModel):
     name: str = Field(max_length=120)
@@ -124,3 +133,39 @@ class GPUSolution(StrictModel):
     iterations: int = Field(ge=1,le=20000)
     refinements: int = Field(ge=1,le=10)
     seconds: Number = Field(ge=0,le=600)
+
+class SimulationContext(StrictModel):
+    model_id: str = Field(pattern=r'^[a-f0-9]{32}$')
+    geometry: Geometry
+    material: Material
+    fixed_faces: list[int] = Field(default_factory=list,max_length=50)
+    loads: list[Force] = Field(default_factory=list,max_length=20)
+    notes: str = Field(default='',max_length=12000)
+    reference_id: str | None = Field(default=None,pattern=r'^[a-f0-9]{32}$')
+    annotations: list[Annotation] = Field(default_factory=list,max_length=100)
+
+class SimulationDraft(StrictModel):
+    material: Material
+    fixed_faces: list[int] = Field(min_length=1,max_length=50)
+    loads: list[Force] = Field(min_length=1,max_length=20)
+    notes: str = Field(max_length=6000)
+    assumptions: list[str] = Field(max_length=20)
+
+    @model_validator(mode='before')
+    @classmethod
+    def complete_inputs(cls,value):
+        if isinstance(value,dict):
+            material=value.get('material',{})
+            if isinstance(material,dict) and not set(Material.model_fields)<=set(material):
+                raise ValueError('A simulation proposal must supply all material properties explicitly.')
+            if any(isinstance(load,dict) and not {'face_id','vector'}<=set(load) for load in value.get('loads',[])):
+                raise ValueError('Every proposed force needs an explicit face and vector.')
+        return value
+
+    @model_validator(mode='after')
+    def valid_draft(self):
+        if set(self.fixed_faces) & {load.face_id for load in self.loads}:
+            raise ValueError('A face cannot be both fully fixed and loaded.')
+        if sum(len(s) for s in self.assumptions)>5000:
+            raise ValueError('Setup assumptions must total at most 5,000 characters.')
+        return self

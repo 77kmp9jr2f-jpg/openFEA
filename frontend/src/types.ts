@@ -93,11 +93,54 @@ export type ReferenceImage = {
   height: number;
   url: string;
 };
+export type SimulationContext = {
+  model_id: string;
+  geometry: Geometry;
+  material: Material;
+  fixed_faces: number[];
+  loads: Load[];
+  notes: string;
+  reference_id: string | null;
+  annotations: Mark[];
+};
+export type SimulationProposal = {
+  id: string;
+  model_id: string;
+  source_context: SimulationContext;
+  source_hash: string;
+  material: Material;
+  fixed_faces: number[];
+  loads: Load[];
+  notes: string;
+  assumptions: string[];
+};
+export type AppliedSetup = {
+  model_id: string;
+  material: Material;
+  fixed_faces: number[];
+  loads: Load[];
+  notes: string;
+  setup_proposal_id: string;
+  confirmed: false;
+};
+export function contextKey(value: unknown): string {
+  return JSON.stringify(value, (_key, item) =>
+    item && typeof item === "object" && !Array.isArray(item)
+      ? Object.fromEntries(
+          Object.keys(item)
+            .sort()
+            .map((key) => [key, item[key]]),
+        )
+      : item,
+  );
+}
 export type Message = {
   role: "assistant" | "user";
   text: string;
   questions?: string[];
   proposal?: Geometry;
+  simulation_proposal?: SimulationProposal;
+  interviewFor?: string;
   live?: boolean;
 };
 export const demoGeometry: Geometry = {

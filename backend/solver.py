@@ -15,6 +15,8 @@ from .schemas import Analysis, GPUSolution
 from .storage import DATA, resource, identifier, read_json, write_json
 
 def assemble_system(setup: Analysis):
+    from .simulation_proposals import verify_applied_setup
+    verify_applied_setup(setup)
     folder = resource('models',setup.model_id)
     model = read_json(folder/'model.json')
     arrays = np.load(folder/'mesh.npz')

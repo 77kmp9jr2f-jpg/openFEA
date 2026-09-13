@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps, UnidentifiedImageError
 from .storage import ROOT, DATA, identifier, resource, write_json, read_json
-from .schemas import Geometry, Analysis, AssistantRequest, ImageInput, Study, GPUSolution
+from .schemas import Geometry, Analysis, AssistantRequest, ImageInput, Study, GPUSolution, SimulationContext
 from .jobs import start_job
 from .assistant import assistant_status
 
@@ -65,6 +65,11 @@ def run(rid: str):
 @app.post('/api/assistant')
 def assistant(req: AssistantRequest):
     return start_job('assistant',req.model_dump())
+
+@app.post('/api/setup-proposals/{pid}/apply')
+def apply_simulation_proposal(pid: str, context: SimulationContext):
+    from .simulation_proposals import apply_setup
+    return apply_setup(pid,context.model_dump())
 
 @app.get('/api/jobs/{jid}')
 def job(jid: str):

@@ -14,4 +14,11 @@ Completion gates:
 - Export a reproducible report and documentation bundle; preserve immutable geometry and simulation IDs.
 - Verify numerical results against analytic tension and bending cases, test failure gates and browser interaction, inspect current evidence in a saved visual review, commit locally.
 
-Scope: one connected homogeneous isotropic solid; small-strain static elasticity. No assemblies/contact, plasticity, buckling, fatigue, transient loads or certified material data. Photographic proposals are unmeasured until the user supplies/accepts specifications.
+Currently implemented analysis scope: one connected homogeneous isotropic solid; small-strain static elasticity. No assemblies/contact, plasticity, buckling, fatigue, transient loads or certified material data. Photographic proposals are unmeasured until the user supplies/accepts specifications.
+
+## Outstanding requested scope at the September 13 checkpoint
+
+- Finish browser verification of the conversational proposal through apply, confirmation, GPU solve, saved-study reload and a fresh report/review. Automated proposal and archive-reproduction checks pass; see `VALIDATION.md` for the exact evidence boundary.
+- Add a dedicated 3D-printing section accepting STL input and addressing infill, print orientation, walls and related print settings. STL import and print-specific mechanical modelling are not implemented in this checkpoint. Their effect on results must be supported by an explicit model and verification, rather than presented as certified printed-part strength.
+- Evaluate current image-generation/image-to-3D tools for the sketch-to-mesh step in the separately requested research task. Creation of that task was rejected by automatic approval review because of an account usage limit; it was not created and this research remains pending.
+- Keep ChatGPT Sites publishing at the planning stage. Push and deployment require explicit user authorization.

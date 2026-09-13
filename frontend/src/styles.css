@@ -2145,3 +2145,76 @@ h1 {
   border-radius: 4px;
   line-height: 1.8;
 }
+.interview-invite,
+.setup-preview-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #eef3e8;
+  border: 1px solid #cad8bc;
+  border-radius: 9px;
+  color: #3e5433;
+}
+.interview-invite {
+  margin-bottom: 20px;
+}
+.interview-invite > div,
+.setup-preview-banner > div {
+  flex: 1;
+}
+.interview-invite p {
+  font-size: 12px;
+  margin: 5px 0 0;
+  line-height: 1.6;
+}
+.interview-invite button,
+.setup-preview-banner button {
+  flex-shrink: 0;
+}
+.setup-preview-banner {
+  margin-top: 12px;
+}
+.setup-preview-banner span {
+  display: block;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.simulation-proposal .proposal-revision {
+  font-size: 11px;
+  color: #617356;
+}
+.simulation-proposal .proposal-condition {
+  display: block;
+  border-top: 1px solid #d7e0ce;
+  padding-top: 10px;
+}
+.simulation-proposal .proposal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.simulation-proposal .proposal-actions button {
+  width: 100%;
+  justify-content: center;
+}
+.simulation-proposal .proposal-stale {
+  color: #8c4e24;
+}
+.simulation-proposal .proposal-applied {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: #456330;
+  font-weight: 600;
+}
+@media (max-width: 800px) {
+  .interview-invite,
+  .setup-preview-banner {
+    flex-wrap: wrap;
+  }
+  .interview-invite > div,
+  .setup-preview-banner > div {
+    min-width: 160px;
+  }
+}

@@ -35,7 +35,8 @@ import {
   type GPUCapability,
 } from "./gpu";
 import ImageReview from "./ImageReview";
-import { api, job, demoGeometry, materials, format } from "./types";
+import SetupProposalCard from "./SetupProposalCard";
+import { api, job, demoGeometry, materials, format, contextKey } from "./types";
 import type {
   Geometry,
   Model,
@@ -46,6 +47,9 @@ import type {
   ReferenceImage,
   Mark,
   Message,
+  SimulationContext,
+  SimulationProposal,
+  AppliedSetup,
 } from "./types";
 
 type Tab = "reference" | "model" | "setup" | "results";
@@ -60,6 +64,7 @@ type Saved = {
   marks: Mark[];
   messages: Message[];
   notes: string;
+  setupProposalId?: string | null;
 };
 const intro: Message = {
   role: "assistant",
@@ -103,6 +108,10 @@ export default function App() {
     [featureText, setFeatureText] = useState(""),
     [featureError, setFeatureError] = useState("");
   const [compute, setCompute] = useState<"webgpu" | "cpu">("webgpu");
+  const [setupPreview, setSetupPreview] = useState<SimulationProposal | null>(
+    null,
+  );
+  const [setupProposalId, setSetupProposalId] = useState<string | null>(null);
   const [gpu, setGpu] = useState<GPUCapability>({
     available: false,
     device: "Checking local GPU…",
@@ -112,8 +121,37 @@ export default function App() {
   }, []);
   const started = useRef(false),
     stepFile = useRef<HTMLInputElement>(null),
+    stageElement = useRef<HTMLDivElement>(null),
     chatEnd = useRef<HTMLDivElement>(null);
   const dirty = !!model && JSON.stringify(spec) !== JSON.stringify(model.spec);
+  const simulationContext: SimulationContext | null = model
+    ? {
+        model_id: model.id,
+        geometry: spec,
+        material,
+        fixed_faces: fixed,
+        loads,
+        notes,
+        reference_id: image?.id || null,
+        annotations: marks,
+      }
+    : null;
+  function proposalCurrent(proposal: SimulationProposal) {
+    return (
+      !dirty &&
+      !!simulationContext &&
+      contextKey(simulationContext) === contextKey(proposal.source_context)
+    );
+  }
+  const previewing =
+    tab === "setup" && !!setupPreview && proposalCurrent(setupPreview);
+  useEffect(() => {
+    if (previewing)
+      stageElement.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+  }, [previewing]);
   function flash(text: string) {
     setToast(text);
     setTimeout(() => setToast(""), 4500);
@@ -122,6 +160,8 @@ export default function App() {
     setConfirmed(false);
     setResult(null);
     setField("solid");
+    setSetupPreview(null);
+    setSetupProposalId(null);
   }
   function updateSpec(patch: Partial<Geometry>) {
     setSpec((s) => ({
@@ -143,6 +183,7 @@ export default function App() {
       marks,
       messages,
       notes,
+      setupProposalId,
     };
   }
   async function restore(s: Saved) {
@@ -154,6 +195,9 @@ export default function App() {
     setMarks(s.marks || []);
     setMessages(s.messages || [intro]);
     setNotes(s.notes || "");
+    setSetupProposalId(s.setupProposalId || null);
+    setSetupPreview(null);
+    setSelected(null);
     setConfirmed(false);
     setResult(null);
     setModel(null);
@@ -183,6 +227,24 @@ export default function App() {
       );
       setSelected(null);
       setTab("model");
+      setMessages((messages) =>
+        messages.some((message) => message.interviewFor === m.id)
+          ? messages
+          : [
+              ...messages,
+              {
+                role: "assistant",
+                live: false,
+                interviewFor: m.id,
+                text: "Your solid and mesh are ready. Next, let’s describe how the part is used so Astra can propose the simulation setup.",
+                questions: [
+                  "Which material properties should we use?",
+                  "How is it attached or held? Select a face if that helps.",
+                  "Where does the load act, and what is its magnitude and global X/Y/Z direction?",
+                ],
+              },
+            ],
+      );
       flash(`${m.tetrahedra.toLocaleString()} tetrahedra · solid ready`);
     } catch (e) {
       setError((e as Error).message);
@@ -238,6 +300,7 @@ export default function App() {
     marks,
     messages,
     notes,
+    setupProposalId,
     ready,
   ]);
   useEffect(() => {
@@ -260,6 +323,7 @@ export default function App() {
       });
       setImage(img);
       setMarks([]);
+      invalidate();
       setTab("reference");
       flash(
         "Reference ready. Annotate a known dimension or ask Astra to inspect it.",
@@ -297,7 +361,10 @@ export default function App() {
       setBusy("");
     }
   }
-  async function ask(text = prompt) {
+  async function ask(
+    text = prompt,
+    stage?: "geometry" | "loading" | "results",
+  ) {
     if (!text.trim() || aiBusy) return;
     setPrompt("");
     setAiBusy(true);
@@ -311,6 +378,7 @@ export default function App() {
         message: string;
         questions: string[];
         proposal: Geometry | null;
+        simulation_proposal: SimulationProposal | null;
         live: boolean;
       }>("/assistant", {
         message: text,
@@ -324,6 +392,14 @@ export default function App() {
         loads,
         application_notes: notes,
         run_id: result?.id || null,
+        selected_face: selected,
+        stage:
+          stage ||
+          (tab === "setup"
+            ? "loading"
+            : tab === "results"
+              ? "results"
+              : "geometry"),
       });
       setMessages((m) => [
         ...m,
@@ -332,6 +408,7 @@ export default function App() {
           text: answer.message,
           questions: answer.questions,
           proposal: answer.proposal || undefined,
+          simulation_proposal: answer.simulation_proposal || undefined,
           live: answer.live,
         },
       ]);
@@ -343,6 +420,39 @@ export default function App() {
       ]);
     } finally {
       setAiBusy(false);
+    }
+  }
+  function startInterview() {
+    setTab("setup");
+    setField("solid");
+    ask(
+      "Help me define the simulation for this built part. Interview me about the material, how it is held, and the magnitude, global direction and location of the loads. Ask only for missing inputs before proposing a complete setup.",
+      "loading",
+    );
+  }
+  async function applySimulation(proposal: SimulationProposal) {
+    if (!simulationContext || !proposalCurrent(proposal) || busy) return;
+    setBusy("Applying reviewed setup");
+    setError("");
+    try {
+      const applied = await api<AppliedSetup>(
+        `/setup-proposals/${proposal.id}/apply`,
+        simulationContext,
+      );
+      invalidate();
+      setMaterial(applied.material);
+      setFixed(applied.fixed_faces);
+      setLoads(applied.loads);
+      setNotes(applied.notes);
+      setSetupProposalId(applied.setup_proposal_id);
+      setTab("setup");
+      flash(
+        "Astra’s setup applied. Review the model and confirm before running.",
+      );
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy("");
     }
   }
   async function solve() {
@@ -359,6 +469,10 @@ export default function App() {
         notes,
         reference_id: image?.id || null,
         annotations: marks,
+        setup_proposal_id: setupProposalId,
+        conversation: messages
+          .slice(-24)
+          .map(({ role, text, live }) => ({ role, text, live: !!live })),
       };
       let r: Result;
       if (compute === "webgpu") {
@@ -402,6 +516,7 @@ export default function App() {
       !!fixed.length &&
       !!loads.length &&
       confirmed &&
+      !previewing &&
       (compute === "cpu" || gpu.available) &&
       !busy;
   const steps: [Tab, string, typeof Box][] = [
@@ -515,6 +630,9 @@ export default function App() {
                     )
                   }
                 >
+                  <option value={-1} disabled>
+                    Custom material
+                  </option>
                   {materials.map((m, i) => (
                     <option key={m.name} value={i}>
                       {m.name}
@@ -726,7 +844,7 @@ export default function App() {
                 : tab === "results"
                   ? "Traceable results, from applied loads to support reactions."
                   : tab === "setup"
-                    ? "Select a face, set a fixture, and tell us where the load acts."
+                    ? "Describe the application to Astra, then review the proposed supports and forces."
                     : "From a reference to a solid, ready for the questions that matter."}
             </p>
           </div>
@@ -771,30 +889,33 @@ export default function App() {
             </button>
           </div>
         )}
-        <div className="main-stage">
+        <div className="main-stage" ref={stageElement}>
           {tab === "reference" ? (
             <ImageReview
               key={image?.id || "empty"}
               image={image}
               marks={marks}
-              onChange={setMarks}
+              onChange={(marks) => {
+                setMarks(marks);
+                invalidate();
+              }}
               upload={upload}
               disabled={!!busy}
             />
           ) : (
             <Viewport
               model={model}
-              result={result}
-              fixed={fixed}
-              loads={loads}
+              result={previewing ? null : result}
+              fixed={previewing ? setupPreview!.fixed_faces : fixed}
+              loads={previewing ? setupPreview!.loads : loads}
               selected={selected}
               onSelect={(id) => {
                 if (busy) return;
                 setSelected(id);
                 if (tab === "model") setTab("setup");
               }}
-              field={field}
-              deform={deform}
+              field={previewing ? "solid" : field}
+              deform={previewing ? false : deform}
               wireframe={wireframe}
               setWireframe={setWireframe}
             />
@@ -807,6 +928,31 @@ export default function App() {
             </div>
           )}
         </div>
+        {previewing && (
+          <div className="setup-preview-banner" role="status">
+            <div>
+              <b>Previewing Astra’s setup</b>
+              <span>
+                Fixtures and arrows show the proposal. Apply it to update your
+                simulation.
+              </span>
+            </div>
+            <button
+              className="primary small"
+              disabled={!!busy}
+              onClick={() => applySimulation(setupPreview!)}
+            >
+              Apply reviewed setup
+            </button>
+            <button
+              className="icon-button"
+              aria-label="Close setup preview"
+              onClick={() => setSetupPreview(null)}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
         {tab === "results" && result ? (
           <>
             <div className="result-toolbar">
@@ -901,6 +1047,23 @@ export default function App() {
           </>
         ) : tab === "setup" ? (
           <fieldset className="setup-panel" disabled={!!busy}>
+            <div className="interview-invite">
+              <Sparkles size={19} />
+              <div>
+                <b>Describe how this part is used.</b>
+                <p>
+                  Astra will ask for missing details and propose material,
+                  supports and forces for your review.
+                </p>
+              </div>
+              <button
+                className="outline-button"
+                disabled={!model || dirty || aiBusy || !aiAvailable}
+                onClick={startInterview}
+              >
+                Discuss loading <ArrowRight size={14} />
+              </button>
+            </div>
             <div className="setup-top">
               <div>
                 <span className="eyebrow">BOUNDARY CONDITIONS</span>
@@ -1070,6 +1233,13 @@ export default function App() {
               >
                 Set up simulation <ArrowRight size={15} />
               </button>
+              <button
+                className="text-button"
+                disabled={!model || dirty || aiBusy || !aiAvailable || !!busy}
+                onClick={startInterview}
+              >
+                Discuss loading with Astra
+              </button>
             </div>
           </div>
         ) : (
@@ -1136,7 +1306,7 @@ export default function App() {
                 <input
                   type="checkbox"
                   checked={confirmed}
-                  disabled={!model || dirty || !!busy}
+                  disabled={!model || dirty || !!busy || previewing}
                   onChange={(e) => setConfirmed(e.target.checked)}
                 />
                 <span>
@@ -1242,6 +1412,22 @@ export default function App() {
                   </button>
                 </div>
               )}
+              {m.simulation_proposal && (
+                <SetupProposalCard
+                  proposal={m.simulation_proposal}
+                  model={model}
+                  current={proposalCurrent(m.simulation_proposal)}
+                  applied={setupProposalId === m.simulation_proposal.id}
+                  busy={!!busy}
+                  preview={() => {
+                    setSetupPreview(m.simulation_proposal!);
+                    setSelected(null);
+                    setTab("setup");
+                    setField("solid");
+                  }}
+                  apply={() => applySimulation(m.simulation_proposal!)}
+                />
+              )}
             </div>
           ))}
           {aiBusy && (
@@ -1265,13 +1451,23 @@ export default function App() {
               disabled={aiBusy}
               onClick={() =>
                 ask(
-                  image
-                    ? "Inspect the reference image. What dimensions and missing details do you need before modelling?"
-                    : "Explain the current bracket, its force direction and fixtures. Which assumptions should I review?",
+                  tab === "setup"
+                    ? "Help me finish the loading interview for this built part. What material, support, load or operating details are still missing?"
+                    : tab === "results" && result
+                      ? "Explain the actual simulation results, the assumptions that matter most, and what I should verify next."
+                      : image
+                        ? "Inspect the reference image. What dimensions and missing details do you need before modelling?"
+                        : "Explain the current bracket, its force direction and fixtures. Which assumptions should I review?",
                 )
               }
             >
-              {image ? "Inspect reference" : "Review this setup"}{" "}
+              {tab === "setup"
+                ? "Continue load interview"
+                : tab === "results" && result
+                  ? "Interpret results"
+                  : image
+                    ? "Inspect reference"
+                    : "Review this setup"}{" "}
               <Plus size={12} />
             </button>
             <button
@@ -1294,7 +1490,12 @@ export default function App() {
           >
             <textarea
               aria-label="Message Astra"
-              placeholder="Describe your part or ask Astra…"
+              placeholder={
+                tab === "setup"
+                  ? "How is it held? What forces act on it?"
+                  : "Describe your part or ask Astra…"
+              }
+              maxLength={16000}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => {
