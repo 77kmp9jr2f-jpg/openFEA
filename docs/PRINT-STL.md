@@ -17,11 +17,13 @@ Open or multi-shell meshes can be inspected. They cannot be meshed. `scaled_stl_
 
 Gmsh then runs `classifySurfaces` so clustered triangles become selectable faces. Those patches are not CAD faces. After a rebuild, fixtures and loads must be chosen again.
 
+A first visit with an empty workspace opens the example coupon on the local CPU, checks confirmation, and leaves **Run simulation** available. GPU remains an explicit choice.
+
 In the workspace:
 
-1. **Import STL** or **Use example print coupon**.
+1. **Import STL** or **Use example print coupon**, or accept the first-visit coupon.
 2. Check the scale, watertightness line, and listed warnings.
-3. Build. The example coupon enables the print model, switches to PLA · illustrative filament, pre-selects the X=0 / X=40 faces, and applies −40 N on +X.
+3. The example coupon enables the print model, switches to PLA · illustrative filament, pre-selects the X=0 / X=40 faces, and applies −40 N on +X.
 
 `examples/print-coupon.stl` is a 40 × 10 × 8 mm closed box (3,200 mm³). Dimensions are demonstration inputs.
 
@@ -37,7 +39,7 @@ The Print tab writes `PrintSettings` onto the analysis:
 | Wall count × line width | Solid shell estimated from the oriented bounding box. |
 | Top / bottom layers × layer height | Solid skins estimated from the same box. |
 
-`POST /api/print-preview` returns effective moduli, volume fraction, and filament mass without solving. Changing print settings clears the current result and confirmation; pin a run first if you intend to compare.
+`POST /api/print-preview` returns effective moduli, volume fraction, and filament mass without solving. Changing print settings clears the current result but keeps confirmation and fixtures so a second run is one click. The first print solve is pinned automatically. Results lead with displacement, residual and mass, plus stored `guidance` that says what not to treat as printed strength.
 
 ## Homogenized stiffness
 

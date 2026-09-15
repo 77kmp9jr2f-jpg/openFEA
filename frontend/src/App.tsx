@@ -39,6 +39,7 @@ import ImageReview from "./ImageReview";
 import SetupProposalCard from "./SetupProposalCard";
 import PrintWorkspace from "./PrintWorkspace";
 import CompareTable from "./CompareTable";
+import ResultGuidance from "./ResultGuidance";
 import { api, job, cancelJob, demoGeometry, materials, format, contextKey, defaultPrint } from "./types";
 import type {
   Geometry,
@@ -83,6 +84,11 @@ const intro: Message = {
   ],
   live: false,
 };
+const firstAnalysisIntro: Message = {
+  role: "assistant",
+  text: "This example coupon is ready to solve on this computer. Run the simulation, then change infill and run again. Trust displacement, residual and mass — not peak stress or printed strength.",
+  live: false,
+};
 export default function App() {
   const [spec, setSpec] = useState<Geometry>({ ...demoGeometry }),
     [model, setModel] = useState<Model | null>(null),
@@ -120,7 +126,7 @@ export default function App() {
     [help, setHelp] = useState(false),
     [featureText, setFeatureText] = useState(""),
     [featureError, setFeatureError] = useState("");
-  const [compute, setCompute] = useState<"webgpu" | "cpu">("webgpu");
+  const [compute, setCompute] = useState<"webgpu" | "cpu">("cpu");
   const [setupPreview, setSetupPreview] = useState<SimulationProposal | null>(
     null,
   );
@@ -233,7 +239,9 @@ export default function App() {
   }
   async function build(
     next = spec,
-    options: { demo?: boolean; applyRecommended?: boolean } | boolean = false,
+    options:
+      | { demo?: boolean; applyRecommended?: boolean; firstAnalysis?: boolean }
+      | boolean = false,
   ) {
     const flags =
       typeof options === "boolean" ? { demo: options } : options;
@@ -258,24 +266,30 @@ export default function App() {
       );
       setSelected(null);
       setTab(flags.applyRecommended ? "print" : "model");
-      setMessages((messages) =>
-        messages.some((message) => message.interviewFor === m.id)
-          ? messages
-          : [
-              ...messages,
-              {
-                role: "assistant",
-                live: false,
-                interviewFor: m.id,
-                text: "Your solid and mesh are ready. Next, let’s describe how the part is used so Astra can propose the simulation setup.",
-                questions: [
-                  "Which material properties should we use?",
-                  "How is it attached or held? Select a face if that helps.",
-                  "Where does the load act, and what is its magnitude and global X/Y/Z direction?",
-                ],
-              },
-            ],
-      );
+      if (flags.applyRecommended) setConfirmed(true);
+      if (flags.firstAnalysis) {
+        setCompute("cpu");
+        setMessages([firstAnalysisIntro]);
+      } else {
+        setMessages((messages) =>
+          messages.some((message) => message.interviewFor === m.id)
+            ? messages
+            : [
+                ...messages,
+                {
+                  role: "assistant",
+                  live: false,
+                  interviewFor: m.id,
+                  text: "Your solid and mesh are ready. Next, let’s describe how the part is used so Astra can propose the simulation setup.",
+                  questions: [
+                    "Which material properties should we use?",
+                    "How is it attached or held? Select a face if that helps.",
+                    "Where does the load act, and what is its magnitude and global X/Y/Z direction?",
+                  ],
+                },
+              ],
+        );
+      }
       flash(`${m.tetrahedra.toLocaleString()} tetrahedra · solid ready`);
     } catch (e) {
       setError((e as Error).message);
@@ -300,9 +314,9 @@ export default function App() {
           } catch {
             localStorage.removeItem("openfea-current");
             localStorage.removeItem("fea-r-current");
-            await build(demoGeometry, true);
+            await startFirstAnalysis();
           }
-        } else await build(demoGeometry, true);
+        } else await startFirstAnalysis();
       } catch (e) {
         setError((e as Error).message);
         setStatus("Local engine offline");
@@ -427,7 +441,26 @@ export default function App() {
       setBusy("");
     }
   }
-  async function importStl(file: File) {
+  async function startFirstAnalysis() {
+    setCompute("cpu");
+    try {
+      const response = await fetch("/print-coupon.stl");
+      if (!response.ok) throw new Error("The example coupon is missing.");
+      await importStl(
+        new File([await response.blob()], "print-coupon.stl", {
+          type: "model/stl",
+        }),
+        { firstAnalysis: true },
+      );
+    } catch (e) {
+      setError((e as Error).message);
+      await build(demoGeometry, true);
+    }
+  }
+  async function importStl(
+    file: File,
+    options: { firstAnalysis?: boolean } = {},
+  ) {
     setBusy("Inspecting STL");
     setError("");
     try {
@@ -459,9 +492,14 @@ export default function App() {
         flash("STL inspected. Repair watertightness before meshing.");
         return;
       }
-      await build(s, { applyRecommended: true });
+      await build(s, {
+        applyRecommended: true,
+        firstAnalysis: options.firstAnalysis,
+      });
       flash(
-        "STL meshed. Print settings and end-face supports/loads are ready for review.",
+        options.firstAnalysis
+          ? "Example coupon ready. Run on this computer, then change infill and run again."
+          : "STL meshed. Print settings and end-face supports/loads are ready for review.",
       );
     } catch (e) {
       setError((e as Error).message);
@@ -594,9 +632,14 @@ export default function App() {
       } else r = await job<Result>("/solve", setup);
       setResult(r);
       setTab("results");
-      setField("stress");
+      setField(r.print?.enabled ? "displacement" : "stress");
       setDeform(false);
-      flash(`Analysis complete in ${format(r.seconds)} s`);
+      if (r.print?.enabled && !pinned) {
+        setPinned(r);
+        flash(
+          `Analysis complete in ${format(r.seconds)} s. This run is pinned — change infill and run again.`,
+        );
+      } else flash(`Analysis complete in ${format(r.seconds)} s`);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -1026,7 +1069,7 @@ export default function App() {
                   : tab === "setup"
                     ? "Assign supports and forces on selectable surfaces, then confirm before solving."
                     : tab === "print"
-                      ? "Orientation, walls and infill change stiffness and estimated filament use."
+                      ? "Run the coupon on this computer, then change infill. Settings change a homogenized solid, not a sliced print."
                       : "From a reference, STEP or STL to a solid, ready for the questions that matter."}
             </p>
           </div>
@@ -1042,7 +1085,13 @@ export default function App() {
                 className={tab === key ? "active" : ""}
                 onClick={() => {
                   setTab(key);
-                  setField(key === "results" && result ? "stress" : "solid");
+                  setField(
+                    key === "results" && result
+                      ? result.print?.enabled
+                        ? "displacement"
+                        : "stress"
+                      : "solid",
+                  );
                 }}
               >
                 <span>{i + 1}</span>
@@ -1077,7 +1126,9 @@ export default function App() {
               print={print}
               onChange={(next) => {
                 setPrint(next);
-                invalidate();
+                setResult(null);
+                setField("solid");
+                setCompare(null);
               }}
               model={model}
               material={material}
@@ -1193,30 +1244,13 @@ export default function App() {
                 <ArrowDownToLine size={15} /> Export package
               </a>
             </div>
+            <ResultGuidance result={result} />
             <div className="metrics-grid">
-              <Metric
-                title="Peak von Mises"
-                value={format(result.peak_von_mises_mpa)}
-                unit="MPa"
-                detail="Unaveraged quadrature peak"
-              />
               <Metric
                 title="Max displacement"
                 value={format(result.max_displacement_mm)}
                 unit="mm"
-                detail="Includes quadratic edge nodes"
-              />
-              <Metric
-                title="Yield ratio"
-                value={format(result.yield_ratio)}
-                unit="×"
-                detail="Supplied yield / peak stress"
-              />
-              <Metric
-                title="Force balance error"
-                value={result.force_balance_error_n.toExponential(1)}
-                unit="N"
-                detail={`Residual ${result.relative_residual.toExponential(1)}`}
+                detail="Compare this when print settings change"
               />
               {result.print?.enabled && (
                 <Metric
@@ -1226,6 +1260,24 @@ export default function App() {
                   detail={`${format(100 * result.print.volume_fraction)}% solid equivalent`}
                 />
               )}
+              <Metric
+                title="Solve residual"
+                value={result.relative_residual.toExponential(1)}
+                unit=""
+                detail={`Force balance ${result.force_balance_error_n.toExponential(1)} N`}
+              />
+              <Metric
+                title="Peak von Mises"
+                value={format(result.peak_von_mises_mpa)}
+                unit="MPa"
+                detail="Often singular at fixtures — not printed strength"
+              />
+              <Metric
+                title="Yield ratio"
+                value={format(result.yield_ratio)}
+                unit="×"
+                detail="Uses that peak and the supplied yield"
+              />
             </div>
             <div className="compare-bar">
               <button
@@ -1550,7 +1602,9 @@ export default function App() {
                   ? "Rebuild geometry to update the mesh and reselect faces."
                   : !fixed.length || !loads.length
                     ? "Select at least one fixture and one loaded face."
-                    : "Static · 3D elasticity · quadratic tetrahedra"}
+                    : print.enabled
+                      ? "CPU is the default. Run, then change infill and run again. Trust displacement and mass, not peak stress."
+                      : "Static · 3D elasticity · quadratic tetrahedra"}
               </small>
             </div>
             <button
@@ -1830,25 +1884,25 @@ export default function App() {
             </p>
             <ol>
               <li>
-                Upload or photograph a part. Draw notes, arrows, regions and
-                measured dimensions.
+                A first visit opens the example print coupon on this computer’s
+                CPU. Confirm is already checked. Click Run simulation.
               </li>
               <li>
-                Import a watertight STL or single-solid STEP, or build a
-                parametric solid. Ask Astra only when it is available.
+                Read what to trust (displacement, residual, mass) and what not
+                to treat as printed strength (peak stress, yield ratio).
               </li>
               <li>
-                Use Print to set orientation, walls and infill. Those settings
-                change a homogenized stiffness, not a sliced toolpath.
+                The first print run is pinned. Change infill and run again to
+                compare.
               </li>
               <li>
-                Click faces to set fixed supports and global XYZ forces. Enter
-                verified material properties.
+                For your own part, import a watertight STL or STEP, or build a
+                parametric solid. Print settings change a homogenized
+                stiffness, not a sliced toolpath.
               </li>
               <li>
-                Confirm the setup and run. Inspect stress, displacement,
-                reactions and assumptions; export the report and reproducibility
-                package.
+                Ask Astra only when it is available. Export the report when you
+                want a snapshot.
               </li>
             </ol>
             <div className="stack-grid">

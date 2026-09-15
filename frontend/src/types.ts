@@ -130,6 +130,7 @@ export type Result = {
   nodal_stress_mpa: number[];
   setup: { material: Material; print?: PrintSettings };
   print?: PrintPreview & { mass_g?: number };
+  guidance?: { trust: string[]; caution: string[]; next: string };
 };
 export type CompareSide = {
   id: string;

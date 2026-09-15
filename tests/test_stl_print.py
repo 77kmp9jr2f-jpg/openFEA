@@ -96,6 +96,17 @@ def test_stl_import_builds_selectable_faces_and_print_solve(tmp_path):
     assert sparse['mass_g'] < solid['mass_g'] * 0.7
     assert sparse['print']['enabled']
     assert sparse['relative_residual'] < 1e-7
+    guide = sparse['guidance']
+    assert 'displacement' in guide['trust'][0].lower()
+    assert any('residual' in item.lower() for item in guide['trust'])
+    assert any('filament' in item.lower() for item in guide['trust'])
+    assert any('singular' in item.lower() for item in guide['caution'])
+    assert any('coupon' in item.lower() or 'homogenized' in item.lower() for item in guide['caution'])
+    assert 'Pin this run' in guide['next']
+    from backend.report import export_report
+    html = export_report(sparse['id'], 'html').read_text()
+    assert 'What to trust' in html
+    assert 'Do not treat as printed strength' in html
 
 
 def test_compare_endpoint_reports_print_deltas(tmp_path):

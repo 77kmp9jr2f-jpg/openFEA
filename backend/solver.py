@@ -14,6 +14,7 @@ from skfem.models.elasticity import linear_elasticity, lame_parameters
 from .schemas import Analysis, GPUSolution
 from .storage import DATA, resource, identifier, read_json, write_json
 from .print_model import stiffness, apply_usage
+from .guidance import result_guidance
 
 def assemble_system(setup: Analysis):
     from .simulation_proposals import verify_applied_setup
@@ -187,6 +188,7 @@ def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
               'nodal_stress_mpa':nodal_vm.tolist(),'loads':load_details,'warnings':notes+model['spec']['assumptions'],
               'execution':execution,'seconds':round(time.monotonic()-started+(gpu_solution.seconds if gpu_solution else 0),3),'created_at':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),
               'versions':{'scikit-fem':skfem.__version__,'numpy':np.__version__,'scipy':scipy.__version__,'gmsh':model['gmsh_version']}}
+    result['guidance'] = result_guidance(result)
     np.savez_compressed(out/'solution.npz',dof_displacement=x,dof_coordinates=basis.doflocs,element_stress_mpa=element_vm,quadrature_stress_mpa=vm_q)
     write_json(out/'result.json',result)
     return result
