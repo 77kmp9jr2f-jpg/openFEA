@@ -30,7 +30,7 @@ def test_stl_inspect_flags_open_and_closed_meshes(tmp_path):
 def test_stl_store_rejects_non_stl_and_accepts_box():
     path = DATA / 'stls'
     path.mkdir(parents=True, exist_ok=True)
-    dest = Path('/tmp/fea-r-box.stl')
+    dest = Path('/tmp/openfea-box.stl')
     write_box_stl(dest)
     meta = store_stl(dest.read_bytes(), 'coupon.stl')
     assert meta['watertight']
@@ -41,7 +41,7 @@ def test_stl_store_rejects_non_stl_and_accepts_box():
 
 def test_open_stl_cannot_be_meshed():
     from backend.stl_io import scaled_stl_path
-    dest = Path('/tmp/fea-r-open.stl')
+    dest = Path('/tmp/openfea-open.stl')
     write_binary_stl(dest, _open_square())
     meta = store_stl(dest.read_bytes(), 'open.stl')
     with pytest.raises(ValueError, match='watertight'):

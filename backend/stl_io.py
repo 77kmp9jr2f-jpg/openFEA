@@ -55,7 +55,7 @@ def _parse_ascii(text: str) -> np.ndarray:
 
 def write_binary_stl(path: Path, triangles: np.ndarray) -> None:
     tris = _as_triangles(triangles)
-    path.write_bytes(b'FEA-R scaled STL'.ljust(80, b' ') + struct.pack('<I', len(tris)))
+    path.write_bytes(b'OpenFEA scaled STL'.ljust(80, b' ') + struct.pack('<I', len(tris)))
     with path.open('ab') as handle:
         for tri in tris:
             n = np.cross(tri[1] - tri[0], tri[2] - tri[0])

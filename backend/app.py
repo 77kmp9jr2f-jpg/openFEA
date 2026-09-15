@@ -9,7 +9,7 @@ from .schemas import Geometry, Analysis, AssistantRequest, ImageInput, Study, GP
 from .jobs import start_job
 from .assistant import assistant_status
 
-app = FastAPI(title='openFEA',version='0.1.0')
+app = FastAPI(title='OpenFEA',version='0.1.0')
 Image.MAX_IMAGE_PIXELS = 25_000_000
 
 @app.middleware('http')
@@ -163,7 +163,7 @@ def report(rid: str,format: str):
     if format not in ('html','pdf','zip','json'):
         raise HTTPException(404)
     path = export_report(rid,format)
-    return FileResponse(path,filename=f'openFEA-{rid[:8]}.{format}')
+    return FileResponse(path,filename=f'OpenFEA-{rid[:8]}.{format}')
 
 if (ROOT/'dist').exists():
     app.mount('/',StaticFiles(directory=ROOT/'dist',html=True),name='frontend')

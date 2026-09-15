@@ -291,11 +291,14 @@ export default function App() {
         const h = await api<{ assistant: { available: boolean } }>("/health");
         setAiAvailable(h.assistant.available);
         setStatus("Local engine ready");
-        const saved = localStorage.getItem("fea-r-current");
+        const saved =
+          localStorage.getItem("openfea-current") ||
+          localStorage.getItem("fea-r-current");
         if (saved) {
           try {
             await restore(JSON.parse(saved));
           } catch {
+            localStorage.removeItem("openfea-current");
             localStorage.removeItem("fea-r-current");
             await build(demoGeometry, true);
           }
@@ -312,7 +315,8 @@ export default function App() {
     if (!ready) return;
     const t = setTimeout(() => {
       try {
-        localStorage.setItem("fea-r-current", JSON.stringify(snapshot()));
+        localStorage.setItem("openfea-current", JSON.stringify(snapshot()));
+        localStorage.removeItem("fea-r-current");
       } catch {
         setError(
           "Browser storage is full. Save a study to preserve this work.",
@@ -638,11 +642,11 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <a className="brand" href="/" aria-label="openFEA home">
+        <a className="brand" href="/" aria-label="OpenFEA home">
           <span className="brand-mark">
             <Box size={24} strokeWidth={1.6} />
           </span>
-          <b>openFEA</b>
+          <b>OpenFEA</b>
           <span className="beta">WORKSPACE</span>
         </a>
         <div className="top-center">
@@ -1564,7 +1568,7 @@ export default function App() {
           </div>
         )}
         <footer className="workspace-footer">
-          <span>openFEA / LOCAL</span>
+          <span>OpenFEA / LOCAL</span>
           <span>Engineering insight starts with explicit assumptions.</span>
           <span>mm · N · MPa</span>
         </footer>
@@ -1821,7 +1825,7 @@ export default function App() {
               </button>
             </div>
             <p>
-              openFEA is a local prototype for one connected 3D mechanical
+              OpenFEA is a local prototype for one connected 3D mechanical
               solid. Astra is optional.
             </p>
             <ol>

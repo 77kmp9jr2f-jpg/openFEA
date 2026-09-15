@@ -9,7 +9,7 @@ def main():
     image=Image.new('RGB',(1200,900),'#f6f5ef');draw=ImageDraw.Draw(image)
     font=ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf',24)
     small=ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf',17)
-    draw.text((55,40),'FEA-R / DEMONSTRATION REFERENCE',fill='#55644b',font=font)
+    draw.text((55,40),'OpenFEA / DEMONSTRATION REFERENCE',fill='#55644b',font=font)
     draw.text((55,80),'Synthetic CAD render. Dimensions and scale intentionally omitted.',fill='#8a9680',font=small)
     points=np.array(model['nodes']);eye=np.array([1.6,-2.2,1.6]);eye/=np.linalg.norm(eye)
     right=np.cross([0,0,1],eye);right/=np.linalg.norm(right);up=np.cross(eye,right)

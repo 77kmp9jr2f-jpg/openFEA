@@ -30,7 +30,7 @@ def test_setup_requires_review_and_step_rejects_bad_input():
     assert client.post('/api/stls',content=b'<html>fake</html>').status_code==400
     from backend.stl_io import write_box_stl
     from pathlib import Path
-    coupon=Path('/tmp/fea-r-api-coupon.stl'); write_box_stl(coupon)
+    coupon=Path('/tmp/openfea-api-coupon.stl'); write_box_stl(coupon)
     uploaded=client.post('/api/stls',content=coupon.read_bytes(),headers={'X-Filename':'coupon.stl'})
     assert uploaded.status_code==200 and uploaded.json()['watertight'] is True
 

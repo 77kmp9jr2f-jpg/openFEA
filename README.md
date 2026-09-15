@@ -1,8 +1,8 @@
-# openFEA
+# OpenFEA
 
-A local engineering workspace for designing a 3D part from image references, reviewing its dimensions and loading, running real finite-element analysis, and exporting a traceable report. The repository and product name is **openFEA**; older notes may still say FEA-R.
+A local engineering workspace for designing a 3D part from image references, reviewing its dimensions and loading, running real finite-element analysis, and exporting a traceable report. The product name is **OpenFEA**. Environment variables still use the `FEAR_*` prefix so existing local setups keep working.
 
-openFEA uses open-source geometry, meshing, simulation, and UI components. **Astra is GPT-6 Astra, a separately authenticated proprietary AI service**, accessed through the installed Codex CLI. The modeller, solver, study storage, and exports work without AI.
+OpenFEA uses open-source geometry, meshing, simulation, and UI components. **Astra is GPT-6 Astra, a separately authenticated proprietary AI service**, accessed through the installed Codex CLI. The modeller, solver, study storage, and exports work without AI.
 
 ## Run locally
 
@@ -35,7 +35,7 @@ The development UI is at http://127.0.0.1:5173. API documentation is at http://1
 
 ## Astra connection
 
-Install the official Codex CLI and sign in with `codex login`; ensure your account has access to `gpt-6-astra`. Set `FEAR_CODEX_BIN` if `codex` is not on the server's PATH. Each request uses `codex exec` with structured output, a read-only sandbox, shell tools disabled, ephemeral sessions, and a bounded timeout. User configuration/MCP integrations are not loaded. The CLI performs normal account authentication; FEA-R does not read or expose your authentication tokens.
+Install the official Codex CLI and sign in with `codex login`; ensure your account has access to `gpt-6-astra`. Set `FEAR_CODEX_BIN` if `codex` is not on the server's PATH. Each request uses `codex exec` with structured output, a read-only sandbox, shell tools disabled, ephemeral sessions, and a bounded timeout. User configuration/MCP integrations are not loaded. The CLI performs normal account authentication; OpenFEA does not read or expose your authentication tokens.
 
 Sending a chat message transmits its image, annotations and design context to Astra. The UI labels real replies **ASTRA · LIVE**. Static onboarding text is labelled **WORKFLOW GUIDE**. Failures are surfaced explicitly; there is no simulated AI fallback. A health indicator confirms the CLI exists, not account entitlement or a completed model call.
 
@@ -83,8 +83,8 @@ This server is intended for the local machine. It rejects foreign browser origin
 | Pillow / ReportLab | Reference processing and reports | HPND / BSD |
 | Codex CLI | Optional authenticated Astra transport | Apache-2.0; hosted model access separate |
 
-FEA-R source is GPL-3.0-or-later; see [LICENSE](LICENSE). Dependency versions are pinned by `requirements.txt` and `package-lock.json`. No Gmsh or other dependency binaries are vendored. See upstream [Gmsh licensing](https://gmsh.info/doc/texinfo/#License) and [Codex non-interactive documentation](https://learn.chatgpt.com/docs/non-interactive-mode) for their own terms and behavior.
+OpenFEA source is GPL-3.0-or-later; see [LICENSE](LICENSE). Dependency versions are pinned by `requirements.txt` and `package-lock.json`. No Gmsh or other dependency binaries are vendored. See upstream [Gmsh licensing](https://gmsh.info/doc/texinfo/#License) and [Codex non-interactive documentation](https://learn.chatgpt.com/docs/non-interactive-mode) for their own terms and behavior.
 
 ## Verified example
 
-A completed synthetic reference study is included as [PDF report](evidence/demo/FEA-R-demo-report.pdf) and [reproducibility package](evidence/demo/FEA-R-demo-package.zip). Its real local-GPU run was independently reproduced on the CPU. The example's dimensions and material are supplied demonstration inputs, not measurements or certified design data.
+A completed synthetic reference study is included as [PDF report](evidence/demo/FEA-R-demo-report.pdf) and [reproducibility package](evidence/demo/FEA-R-demo-package.zip). Those files keep the older FEA-R label because they are a hashed handoff snapshot. Its real local-GPU run was independently reproduced on the CPU. The example's dimensions and material are supplied demonstration inputs, not measurements or certified design data.

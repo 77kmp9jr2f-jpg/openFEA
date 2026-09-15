@@ -103,9 +103,9 @@ def _html(result,model,drawing):
     if ref and ref.exists():
         reference='<h2>Reference evidence</h2><img class="reference" alt="Reference supplied with this analysis" src="data:image/png;base64,'+base64.b64encode(ref.read_bytes()).decode()+'"/>'
         reference+='<ol>'+''.join('<li>'+_safe(m['tool'])+': '+_safe(m['text'])+'<small>Normalized coordinates: '+_safe(m['start'])+' to '+_safe(m['end'])+'</small></li>' for m in result['setup'].get('annotations',[]))+'</ol>'
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FEA-R report - {_safe(model['spec']['name'])}</title><style>
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OpenFEA report - {_safe(model['spec']['name'])}</title><style>
     body{{font:14px/1.7 Arial,sans-serif;color:#344638;background:#f1f4eb;margin:0}}main{{max-width:880px;padding:48px;margin:25px auto;background:#fff}}h1{{font-size:32px;letter-spacing:-1px;margin:10px 0}}h2{{font-size:17px;margin-top:30px}}.tag{{font-size:10px;letter-spacing:2px;color:#819574}}.sub{{color:#87977d;font-size:12px}}.metrics{{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#e3ead9;border:1px solid #e3ead9;margin:22px 0}}.metrics>div{{background:#f6f9ef;padding:15px}}.metrics strong{{font-size:22px;display:block;color:#436336}}.metrics span{{font-size:11px;color:#8a9f78}}svg{{width:100%;height:auto}}table{{border-collapse:collapse;width:100%;font-size:12px}}td{{padding:9px 10px;border-bottom:1px solid #e6ecdf;vertical-align:top}}td:first-child{{width:32%;color:#839775}}li{{margin:8px 0}}small{{display:block;font-size:10px;color:#91a380}}.hash{{word-break:break-all;font:10px/1.8 monospace;background:#f4f7ef;padding:12px}}.reference{{max-width:100%;max-height:480px;object-fit:contain}}.notice{{background:#f5f7ef;border-left:3px solid #90a66f;padding:14px 18px;font-size:12px}}@media print{{body{{background:white}}main{{margin:0;padding:10mm}}h2{{break-after:avoid}}tr,.metrics{{break-inside:avoid}}}}
-    </style></head><body><main><div class="tag">FEA-R / STRUCTURAL ANALYSIS</div><h1>{_safe(model['spec']['name'])}</h1><p class="sub">Run {result['id']}<br/>{result['created_at']} / mm, N, MPa</p><div class="metrics">{''.join('<div><span>'+_safe(k)+'</span><strong>'+_safe(v)+'</strong></div>' for k,v in metrics)}</div>{svg}<p class="notice">This is a linear-elastic engineering estimate. Peak stress is unaveraged; the image uses smoothed nodal colors. A single mesh does not establish convergence or physical acceptance.</p><h2>Model and simulation definition</h2><table>{''.join('<tr><td>'+_safe(k)+'</td><td>'+_safe(v)+'</td></tr>' for k,v in rows)}</table><h2>Application notes</h2><p>{_safe(result['setup']['notes']) or 'No application notes supplied.'}</p><h2>Assumptions and interpretation</h2><ul>{''.join('<li>'+_safe(w)+'</li>' for w in result['warnings'])}</ul>{reference}<h2>Reproducibility</h2><p>CAD revision: {model['id']}. Solver versions: {_safe(result['versions'])}. Runtime: {result['seconds']:.3g} seconds. No mesh-convergence study was performed for this run.</p><div class="hash">CAD SHA-256: {model['sha256']}<br/>Mesh SHA-256: {model['mesh_sha256']}</div><p>The archive contains the original mesh, CAD, complete inputs and results, quadratic solution arrays, nodal CSV, solver source, and dependency lock file. Material values are user inputs, not certified data.</p></main></body></html>'''
+    </style></head><body><main><div class="tag">OpenFEA / STRUCTURAL ANALYSIS</div><h1>{_safe(model['spec']['name'])}</h1><p class="sub">Run {result['id']}<br/>{result['created_at']} / mm, N, MPa</p><div class="metrics">{''.join('<div><span>'+_safe(k)+'</span><strong>'+_safe(v)+'</strong></div>' for k,v in metrics)}</div>{svg}<p class="notice">This is a linear-elastic engineering estimate. Peak stress is unaveraged; the image uses smoothed nodal colors. A single mesh does not establish convergence or physical acceptance.</p><h2>Model and simulation definition</h2><table>{''.join('<tr><td>'+_safe(k)+'</td><td>'+_safe(v)+'</td></tr>' for k,v in rows)}</table><h2>Application notes</h2><p>{_safe(result['setup']['notes']) or 'No application notes supplied.'}</p><h2>Assumptions and interpretation</h2><ul>{''.join('<li>'+_safe(w)+'</li>' for w in result['warnings'])}</ul>{reference}<h2>Reproducibility</h2><p>CAD revision: {model['id']}. Solver versions: {_safe(result['versions'])}. Runtime: {result['seconds']:.3g} seconds. No mesh-convergence study was performed for this run.</p><div class="hash">CAD SHA-256: {model['sha256']}<br/>Mesh SHA-256: {model['mesh_sha256']}</div><p>The archive contains the original mesh, CAD, complete inputs and results, quadratic solution arrays, nodal CSV, solver source, and dependency lock file. Material values are user inputs, not certified data.</p></main></body></html>'''
 
 def _pdf(path,result,model,drawing):
     styles=getSampleStyleSheet()
@@ -115,8 +115,8 @@ def _pdf(path,result,model,drawing):
     styles['BodyText'].fontSize=9;styles['BodyText'].leading=14;styles['BodyText'].textColor=colors.HexColor('#607250');styles['BodyText'].spaceAfter=8
     styles.add(ParagraphStyle('Tiny',parent=styles['BodyText'],fontSize=7,leading=10,wordWrap='CJK'))
     P=lambda s,style='BodyText':Paragraph(_safe(s),styles[style])
-    doc=SimpleDocTemplate(str(path),pagesize=A4,rightMargin=43,leftMargin=43,topMargin=40,bottomMargin=40,title='FEA-R: '+model['spec']['name'],author='FEA-R local solver')
-    story=[P('FEA-R / STRUCTURAL ANALYSIS','Eyebrow'),P(model['spec']['name'],'Title'),P(f"Run {result['id']} | {result['created_at']}",'Tiny'),Spacer(1,10)]
+    doc=SimpleDocTemplate(str(path),pagesize=A4,rightMargin=43,leftMargin=43,topMargin=40,bottomMargin=40,title='OpenFEA: '+model['spec']['name'],author='OpenFEA local solver')
+    story=[P('OpenFEA / STRUCTURAL ANALYSIS','Eyebrow'),P(model['spec']['name'],'Title'),P(f"Run {result['id']} | {result['created_at']}",'Tiny'),Spacer(1,10)]
     metrics=[['PEAK VON MISES','MAX DISPLACEMENT','YIELD RATIO'],[f"{result['peak_von_mises_mpa']:.4g} MPa",f"{result['max_displacement_mm']:.4g} mm",f"{result['yield_ratio']:.4g}"]]
     table=Table(metrics,colWidths=[170,170,169]);table.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,-1),colors.HexColor('#f0f5e7')),('TEXTCOLOR',(0,0),(-1,-1),colors.HexColor('#567240')),('FONTSIZE',(0,0),(-1,0),7),('FONTSIZE',(0,1),(-1,1),20),('TOPPADDING',(0,0),(-1,0),12),('BOTTOMPADDING',(0,1),(-1,1),15),('LEFTPADDING',(0,0),(-1,-1),12)]));story += [table,Spacer(1,14),drawing,Spacer(1,12),P('Interpretation','Heading2'),P('This is a linear-elastic engineering estimate. Peak stress is the maximum unaveraged quadrature-point von Mises stress. The diagram uses volume-weighted nodal averages on undeformed geometry.'),P('A single mesh does not establish convergence or physical acceptance. Yield ratio uses the supplied material strength and is not a safety certification.'),P(f"Force equilibrium error: {result['force_balance_error_n']:.3e} N. Free-DOF relative residual: {result['relative_residual']:.3e}."),PageBreak(),P('Simulation definition','Title')]
     rows=[[P(k,'Tiny'),P(v,'Tiny')] for k,v in _rows(result,model)]
@@ -136,7 +136,7 @@ def _pdf(path,result,model,drawing):
             story.append(P(f"Annotation {i+1} ({m['tool']}): {m['text'] or '(no text)'}"))
             story.append(P(f"Normalized image coordinates: {m['start']} to {m['end']}",'Tiny'))
     def footer(canvas,doc):
-        canvas.saveState();canvas.setStrokeColor(colors.HexColor('#dfe7d4'));canvas.line(43,29,A4[0]-43,29);canvas.setFont('Helvetica',7);canvas.setFillColor(colors.HexColor('#8c9e7a'));canvas.drawString(43,18,'FEA-R | Linear-elastic estimate | mm / N / MPa');canvas.drawRightString(A4[0]-43,18,f'{doc.page}');canvas.restoreState()
+        canvas.saveState();canvas.setStrokeColor(colors.HexColor('#dfe7d4'));canvas.line(43,29,A4[0]-43,29);canvas.setFont('Helvetica',7);canvas.setFillColor(colors.HexColor('#8c9e7a'));canvas.drawString(43,18,'OpenFEA | Linear-elastic estimate | mm / N / MPa');canvas.drawRightString(A4[0]-43,18,f'{doc.page}');canvas.restoreState()
     doc.build(story,onFirstPage=footer,onLaterPages=footer)
 
 def export_report(rid,format):
@@ -169,7 +169,7 @@ def export_report(rid,format):
         with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED) as z:
             for name,path in files.items():z.write(path,name)
             z.writestr('manifest.json',json.dumps(manifest,indent=2))
-            z.writestr('README.md',f'''# FEA-R run {rid}
+            z.writestr('README.md',f'''# OpenFEA run {rid}
 
 This archive is a simulation snapshot, not certification. Read report.pdf or report.html.
 All lengths are mm, forces N, stresses MPa. The JSON setup is the authoritative input.
@@ -183,7 +183,7 @@ Use Python 3.12 and a virtual environment; install source/requirements.txt.
 From the archive root run: python reproduce.py
 This reuses the original tetrahedra, material and face definitions; it does not remesh.
 Compare numeric values with the supplied result.json using floating-point tolerances.
-The new run ID and runtime will differ. Source is GPL-3.0-or-later; see the FEA-R repository.
+The new run ID and runtime will differ. Source is GPL-3.0-or-later; see the OpenFEA repository.
 ''')
             z.writestr('reproduce.py',f'''from pathlib import Path
 import os, shutil, sys, json

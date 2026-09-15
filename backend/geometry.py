@@ -117,7 +117,7 @@ def build_model(spec: Geometry, destination: Path | None = None):
             gmsh.option.setNumber('General.Terminal',0)
             gmsh.option.setNumber('General.NumThreads',2)
             gmsh.option.setString('Geometry.OCCTargetUnit','MM')
-            gmsh.model.add('FEA-R')
+            gmsh.model.add('OpenFEA')
             _make_solid(spec)
             volumes = gmsh.model.getEntities(3)
             if len(volumes) != 1:
@@ -170,7 +170,7 @@ def build_model(spec: Geometry, destination: Path | None = None):
             try:
                 gmsh.write(str(out/'model.step'))
             except Exception:
-                (out/'model.step').write_text('ISO-10303-21;\nHEADER;\nFILE_NAME(\'FEA-R STL import\',\'\',(\'\'),(\'\'),\'\',\'\',\'\');\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n')
+                (out/'model.step').write_text('ISO-10303-21;\nHEADER;\nFILE_NAME(\'OpenFEA STL import\',\'\',(\'\'),(\'\'),\'\',\'\',\'\');\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n')
             gmsh.write(str(out/'model.stl'))
             gmsh.write(str(out/'mesh.msh'))
             np.savez_compressed(out/'mesh.npz',points=points,tets=tets)
