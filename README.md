@@ -27,10 +27,11 @@ The development UI is at http://127.0.0.1:5173. API documentation is at http://1
 
 1. **Reference.** Upload PNG/JPEG/WebP, use the synthetic example, or capture a camera image. Draw arrows, rectangles, dimensions, and notes. Use Select to move an annotation; undo/redo and reload preserve the saved marks. Dimensions in a note are explicit specifications, not automatic metrology.
 2. **Astra.** Ask the assistant to inspect the image. It sees the reference, normalized annotation coordinates and notes, current geometry, face definitions, material, loads, fixtures, and current result summary. Supply missing dimensions, then review and apply its structured CAD proposal. No model-generated Python or shell code is executed to build CAD.
-3. **Model.** Build a bracket, plate/beam, shaft/tube, a custom constructive-solid-geometry recipe, or import a single-solid STEP. Geometry and meshing are performed by Gmsh's OpenCASCADE kernel. Download STEP, STL, and the original mesh. Rebuilding clears old face selections and results.
-4. **Simulation.** Use **Discuss loading** to describe the material, attachment and operating loads. Astra asks for missing inputs, then proposes a complete material/support/force setup on the actual CAD faces. **Preview on model** displays those conditions without changing the draft; **Apply to simulation** fills the controls and leaves the review checkbox unchecked. Changes to the model, reference or draft invalidate earlier proposals. You can also select faces and edit material/XYZ forces manually. Each force is a total in N, uniformly distributed over its face in global model axes. Review and confirm before solving. Local GPU is the default; select Local CPU explicitly to run the reference solver.
-5. **Results.** Inspect stress, displacement, exaggerated deformation, force equilibrium, and interpretation notes. Export PDF, self-contained HTML, JSON, or the complete ZIP package. The ZIP includes original CAD/mesh, inputs/results, the last 24 interview messages, the applied Astra setup proposal when used, all quadratic solution DOFs, quadrature stresses, nodal CSV, solver source, dependency versions, hashes, and a reproduction script.
-6. **Save study.** The browser automatically preserves the current workspace. Save study creates a server-side snapshot that can be reopened from Studies. Geometry revisions and analysis runs are immutable.
+3. **Model.** Build a bracket, plate/beam, shaft/tube, a custom constructive-solid-geometry recipe, import a single-solid STEP, or import a watertight STL. Geometry and meshing are performed by Gmsh. Download STEP, STL, and the original mesh. Rebuilding clears old face selections and results. STL import checks scale, watertightness, shells and mesh defects, then clusters triangles into selectable surfaces.
+4. **Print.** Optional. Set orientation, infill, walls, line width, layer height and skins. Those settings change a documented homogenized stiffness and estimated filament mass. They are not a sliced toolpath and not a calibration against printed coupons. Pin one result and run another configuration to compare displacement, stress and mass.
+5. **Simulation.** Select faces and edit material/XYZ forces, or use **Discuss loading** when Astra is available. Each force is a total in N, uniformly distributed over its face in global model axes. Review and confirm before solving. Local GPU is the default; select Local CPU explicitly to run the reference solver.
+6. **Results.** Inspect stress, displacement, exaggerated deformation, force equilibrium, and interpretation notes. Export PDF, self-contained HTML, JSON, or the complete ZIP package. The ZIP includes original CAD/mesh, inputs/results, the last 24 interview messages, the applied Astra setup proposal when used, all quadratic solution DOFs, quadrature stresses, nodal CSV, solver source, dependency versions, hashes, and a reproduction script.
+7. **Save study.** The browser automatically preserves the current workspace. Save study creates a server-side snapshot that can be reopened from Studies. Geometry revisions and analysis runs are immutable.
 
 ## Astra connection
 
@@ -46,7 +47,8 @@ Sending a chat message transmits its image, annotations and design context to As
 - Fixed faces restrain all translations. Multiple fixed/loaded faces are supported. No gravity is included automatically.
 - Total face force is integrated as uniform traction over the triangulated surface; mesh refinement does not multiply the applied force.
 - Reported peak stress is the maximum unaveraged quadrature-point von Mises stress. Viewport colors are volume-weighted nodal averages. Displayed deformation is explicitly exaggerated and sampled at vertices; maximum displacement includes the quadratic edge nodes.
-- No assemblies/contact, friction, bolt preload, plasticity, large deformations, buckling, fatigue, dynamics, thermal loading, or 3D-print anisotropy.
+- Optional print model: transversely isotropic equivalent solid from walls, skins, infill density/pattern and a print-axis rotation. Assumptions are written into the result. Not sliced geometry, not coupon-calibrated, not certified printed-part strength.
+- No assemblies/contact, friction, bolt preload, plasticity, large deformations, buckling, fatigue, dynamics, thermal loading, or explicit infill geometry.
 - Material presets are illustrative values. An imported or photograph-inspired geometry, a converged algebraic solve, and a physical strength validation are different kinds of evidence. Sharp fixture edges and unfilleted corners may have non-convergent peak stress.
 - The prototype bounds job time and mesh size (35,000 tetrahedra / 150,000 DOFs) and rejects disconnected solids. Its limits are for local responsiveness, not engineering adequacy.
 
@@ -57,7 +59,7 @@ Sending a chat message transmits its image, annotations and design context to As
 npm run build
 ```
 
-The numerical suite includes the exact uniform 3D tension field (`nu=0`), a Timoshenko cantilever displacement comparison at two mesh sizes, force/moment equilibrium, energy, load/stiffness scaling, STEP round trips, custom boolean geometry, invalid inputs and report hashes. Test output is isolated from user studies. See [docs/VALIDATION.md](docs/VALIDATION.md) for the recorded prototype checks and their limits.
+The numerical suite includes the exact uniform 3D tension field (`nu=0`), a Timoshenko cantilever displacement comparison at two mesh sizes, force/moment equilibrium, energy, load/stiffness scaling, STEP round trips, custom boolean geometry, STL watertightness and print-stiffness comparison, invalid inputs and report hashes. See [CONTRIBUTING.md](CONTRIBUTING.md) and [examples/print-coupon.stl](examples/print-coupon.stl). Test output is isolated from user studies. See [docs/VALIDATION.md](docs/VALIDATION.md) for the recorded prototype checks and their limits.
 
 ## ChatGPT Sites
 

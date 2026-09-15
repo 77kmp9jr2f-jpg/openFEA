@@ -8,11 +8,12 @@ import numpy as np
 import scipy, skfem
 from scipy.sparse.linalg import spsolve, MatrixRankWarning
 import warnings
-from skfem import MeshTet, Basis, FacetBasis, ElementVector, ElementTetP2, LinearForm, asm, condense
+from skfem import MeshTet, Basis, FacetBasis, ElementVector, ElementTetP2, LinearForm, BilinearForm, asm, condense
 from skfem.helpers import dot, sym_grad
 from skfem.models.elasticity import linear_elasticity, lame_parameters
 from .schemas import Analysis, GPUSolution
 from .storage import DATA, resource, identifier, read_json, write_json
+from .print_model import stiffness, apply_usage
 
 def assemble_system(setup: Analysis):
     from .simulation_proposals import verify_applied_setup
@@ -32,8 +33,9 @@ def assemble_system(setup: Analysis):
     face_facets = {fid:np.array([facet_lookup[tuple(sorted(t))] for t in f['triangles']],dtype=int) for fid,f in face_by_id.items()}
     fixed_facets = np.unique(np.concatenate([face_facets[f] for f in setup.fixed_faces]))
     fixed = basis.get_dofs(facets=fixed_facets).all()
+    C, print_state = stiffness(setup.material, setup.print, model['bounds'])
     lam,mu = lame_parameters(setup.material.young_mpa,setup.material.poisson)
-    K = asm(linear_elasticity(lam,mu),basis)
+    K = asm(_elasticity(C) if setup.print.enabled else linear_elasticity(lam,mu),basis)
     F = np.zeros(basis.N)
     applied = np.zeros(3)
     load_details = []
@@ -49,7 +51,23 @@ def assemble_system(setup: Analysis):
         load_details.append({'face_id':load.face_id,'vector_n':list(load.vector),'mesh_area_mm2':area,'traction_mpa':traction.tolist()})
     Kc,Fc,x,free = condense(K,F,D=fixed)
     return dict(model=model,mesh=mesh,basis=basis,K=K,F=F,Kc=Kc,Fc=Fc,x=x,free=free,
-                fixed=fixed,lam=lam,mu=mu,applied=applied,load_details=load_details)
+                fixed=fixed,lam=lam,mu=mu,C=C,print_state=print_state,applied=applied,load_details=load_details)
+
+def _elasticity(C):
+    coeff = [[float(C[i, j]) for j in range(6)] for i in range(6)]
+    @BilinearForm
+    def elastic(u, v, _w):
+        eu, ev = sym_grad(u), sym_grad(v)
+        strain = (eu[0, 0], eu[1, 1], eu[2, 2], 2 * eu[1, 2], 2 * eu[0, 2], 2 * eu[0, 1])
+        test = (ev[0, 0], ev[1, 1], ev[2, 2], 2 * ev[1, 2], 2 * ev[0, 2], 2 * ev[0, 1])
+        acc = 0
+        for i in range(6):
+            sigma_i = 0
+            for j in range(6):
+                sigma_i = sigma_i + coeff[i][j] * strain[j]
+            acc = acc + test[i] * sigma_i
+        return acc
+    return elastic
 
 def prepare_gpu(setup: Analysis):
     state = assemble_system(setup)
@@ -71,8 +89,8 @@ def finish_gpu(solution: GPUSolution):
 def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
     started = time.monotonic()
     state = assemble_system(setup)
-    model,mesh,basis,K,F,Kc,Fc,x,free,fixed,lam,mu,applied,load_details = (state[k] for k in
-        ('model','mesh','basis','K','F','Kc','Fc','x','free','fixed','lam','mu','applied','load_details'))
+    model,mesh,basis,K,F,Kc,Fc,x,free,fixed,lam,mu,C,print_state,applied,load_details = (state[k] for k in
+        ('model','mesh','basis','K','F','Kc','Fc','x','free','fixed','lam','mu','C','print_state','applied','load_details'))
     execution = {'backend':'cpu','device':'Local CPU / SciPy sparse direct', 'precision':'float64',
                  'method':'Sparse direct solve','iterations':0,'refinements':0}
     if gpu_solution is not None:
@@ -109,9 +127,16 @@ def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
         forces2 = np.zeros((len(fi),3)); forces2[:,c] = residual[fi]
         reaction_moment += np.cross(basis.doflocs[:,fi].T,forces2).sum(axis=0)
     strain = sym_grad(basis.interpolate(x))
-    sigma = 2*mu*strain
-    tr = np.einsum('iieq->eq',strain)
-    for i in range(3): sigma[i,i] += lam*tr
+    if setup.print.enabled:
+        eng = np.stack([strain[0,0],strain[1,1],strain[2,2],2*strain[1,2],2*strain[0,2],2*strain[0,1]])
+        sv = np.einsum('ij,j...->i...', C, eng)
+        sigma = np.zeros_like(strain)
+        sigma[0,0],sigma[1,1],sigma[2,2] = sv[0],sv[1],sv[2]
+        sigma[1,2]=sigma[2,1]=sv[3]; sigma[0,2]=sigma[2,0]=sv[4]; sigma[0,1]=sigma[1,0]=sv[5]
+    else:
+        sigma = 2*mu*strain
+        tr = np.einsum('iieq->eq',strain)
+        for i in range(3): sigma[i,i] += lam*tr
     vm_q = np.sqrt(0.5*((sigma[0,0]-sigma[1,1])**2+(sigma[1,1]-sigma[2,2])**2+(sigma[2,2]-sigma[0,0])**2)+3*(sigma[0,1]**2+sigma[1,2]**2+sigma[0,2]**2))
     element_vm = np.sum(vm_q*basis.dx,axis=1)/basis.dx.sum(axis=1)
     # Volume-weighted projection for visualization only. Reported peak is unaveraged quadrature.
@@ -127,9 +152,11 @@ def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
     peak = float(vm_q.max())
     span = float(np.linalg.norm(np.ptp(mesh.p,axis=1)))
     notes = [
-        'Single homogeneous isotropic solid; quadratic tetrahedral small-strain, linear-elastic static analysis.',
+        ('Printed equivalent solid with directional homogenized stiffness; quadratic tetrahedral small-strain static analysis.'
+         if setup.print.enabled else
+         'Single homogeneous isotropic solid; quadratic tetrahedral small-strain, linear-elastic static analysis.'),
         'Fixtures are ideal fully fixed faces. Forces are distributed uniformly across the selected mesh faces in global XYZ.',
-        'No contact, bolt preload, plasticity, buckling, fatigue, thermal effects or manufacturing anisotropy.',
+        'No contact, bolt preload, plasticity, buckling, fatigue or thermal effects. Explicit infill geometry is not meshed.',
         'Material presets are illustrative inputs. Verify properties for the actual alloy, condition and manufacturing process.',
         'Peak stress is the maximum unaveraged quadrature-point von Mises stress; display colors are volume-weighted nodal averages.',
         'Sharp corners and fixture edges can have stress singularities. A single mesh does not establish stress convergence.',
@@ -141,6 +168,11 @@ def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
         notes.append('Displacement exceeds 1% of model span. A geometrically nonlinear analysis may be needed.')
     if model['spec']['provenance'] == 'image_proposal':
         notes.append('Geometry originated from an image proposal. User confirmation does not constitute metrology.')
+    if model['spec']['provenance'] == 'stl_import':
+        notes.append('Geometry is an imported triangle mesh. Selectable surfaces are clustered patches, not CAD faces.')
+    usage = apply_usage(print_state, model['volume_mm3'], setup.material.density_kg_m3)
+    if print_state.get('enabled'):
+        notes.extend(print_state['assumptions'])
     rid = identifier(); out = DATA/'runs'/rid; out.mkdir()
     result = {'id':rid,'model_id':setup.model_id,'setup':setup.model_dump(),'model_sha256':model['sha256'],'mesh_sha256':model['mesh_sha256'],
               'nodes':int(mesh.nvertices),'elements':int(mesh.nelements),'dofs':int(basis.N),'max_displacement_mm':max_u,
@@ -150,7 +182,7 @@ def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
               'force_balance_error_n':float(np.linalg.norm(reactions+applied)),
               'moment_balance_error_nmm':float(np.linalg.norm(applied_moment+reaction_moment)),
               'relative_residual':rel_residual,'strain_energy_nmm':float(0.5*x@(K@x)),
-              'mass_g':model['volume_mm3']*setup.material.density_kg_m3*1e-6,
+              'mass_g':usage['mass_g'],'print':{**print_state,**usage},
               'mesh_volume_mm3':float(tet_volumes.sum()),'displacement':displacement.tolist(),
               'nodal_stress_mpa':nodal_vm.tolist(),'loads':load_details,'warnings':notes+model['spec']['assumptions'],
               'execution':execution,'seconds':round(time.monotonic()-started+(gpu_solution.seconds if gpu_solution else 0),3),'created_at':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),

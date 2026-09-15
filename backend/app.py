@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps, UnidentifiedImageError
 from .storage import ROOT, DATA, identifier, resource, write_json, read_json
-from .schemas import Geometry, Analysis, AssistantRequest, ImageInput, Study, GPUSolution, SimulationContext
+from .schemas import Geometry, Analysis, AssistantRequest, ImageInput, Study, GPUSolution, SimulationContext, PrintPreviewRequest
 from .jobs import start_job
 from .assistant import assistant_status
 
@@ -95,6 +95,34 @@ def upload_image(image: ImageInput):
 @app.get('/api/images/{iid}')
 def image(iid: str):
     return FileResponse(resource('images',iid).with_suffix('.png'),media_type='image/png')
+
+@app.post('/api/stls')
+async def upload_stl(request: Request):
+    from .stl_io import store_stl
+    content = await request.body()
+    if not content or len(content) > 15_000_000:
+        raise ValueError('Upload an STL under 15 MB.')
+    name = request.headers.get('x-filename', 'import.stl')[:160]
+    return store_stl(content, name)
+
+@app.get('/api/stls/{sid}')
+def get_stl(sid: str, scale: float = 1.0):
+    from .stl_io import load_inspection
+    return load_inspection(sid, scale)
+
+@app.post('/api/print-preview')
+def print_preview(body: PrintPreviewRequest):
+    from .print_model import homogenize, apply_usage
+    model = read_json(resource('models', body.model_id) / 'model.json')
+    settings = body.print if body.print.enabled else body.print.model_copy(update={'enabled': True})
+    homogenized = homogenize(model['bounds'], body.material, settings)
+    return {**homogenized, **apply_usage(homogenized, model['volume_mm3'], body.material.density_kg_m3)}
+
+@app.get('/api/runs/{aid}/compare/{bid}')
+def compare_runs(aid: str, bid: str):
+    from .print_model import compare_results
+    return compare_results(read_json(resource('runs', aid) / 'result.json'),
+                           read_json(resource('runs', bid) / 'result.json'))
 
 @app.post('/api/steps')
 async def upload_step(request: Request):

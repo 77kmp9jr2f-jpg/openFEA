@@ -66,8 +66,24 @@ def _rows(result,model):
         ['Geometry source',model['spec']['provenance']],['CAD volume',f"{model['volume_mm3']:.5g} mm3"],
         ['Mesh volume',f"{result['mesh_volume_mm3']:.5g} mm3"],['Estimated mass',f"{result['mass_g']:.5g} g"],
         ['Mesh',f"{result['elements']:,} tetrahedra / {result['dofs']:,} quadratic DOFs"],
+        *(_print_rows(result)),
         ['Nominal mesh size',f"{model['spec']['mesh_size']:g} mm"],['Minimum element quality',f"{model['min_quality']:.5g} (minSICN)"],
         ['Fixed faces',', '.join(str(f) for f in result['setup']['fixed_faces'])+' (XYZ translations = 0)'],
+    ]
+
+def _print_rows(result):
+    info = result.get('print') or {}
+    if not info.get('enabled'):
+        return []
+    settings = info.get('settings') or {}
+    return [
+        ['Print model','Homogenized FDM equivalent solid (not sliced toolpaths)'],
+        ['Infill',f"{settings.get('infill_pattern')} at {100*float(settings.get('infill_density',0)):.4g}%"],
+        ['Walls / skins',f"{settings.get('wall_count')} walls × {settings.get('line_width_mm')} mm; {settings.get('top_layers')}+{settings.get('bottom_layers')} skins × {settings.get('layer_height_mm')} mm"],
+        ['Print rotation',str(settings.get('rotation_deg'))+' deg (print Z = layer normal)'],
+        ['Effective E in-plane / layer',f"{info.get('young_xy_mpa'):g} / {info.get('young_z_mpa'):g} MPa"],
+        ['Filament volume / mass',f"{info.get('filament_volume_mm3'):.5g} mm3 / {info.get('filament_mass_g'):.5g} g"],
+        ['Solid volume fraction',f"{info.get('volume_fraction'):.4g}"],
     ]
 
 def _safe(text):
@@ -145,7 +161,7 @@ def export_report(rid,format):
         write_json(folder/'interview.json',result['setup'].get('conversation',[]))
         files['interview.json']=folder/'interview.json'
         files['source/gpu.ts']=ROOT/'frontend'/'src'/'gpu.ts'
-        for name in ['__init__.py','solver.py','schemas.py','storage.py','simulation_proposals.py']:files['source/backend/'+name]=ROOT/'backend'/name
+        for name in ['__init__.py','solver.py','schemas.py','storage.py','simulation_proposals.py','print_model.py','stl_io.py']:files['source/backend/'+name]=ROOT/'backend'/name
         files['source/requirements.txt']=ROOT/'requirements.txt'
         ref=_reference(result)
         if ref and ref.exists():files['reference.png']=ref

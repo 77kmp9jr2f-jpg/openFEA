@@ -16,9 +16,11 @@ Completion gates:
 
 Currently implemented analysis scope: one connected homogeneous isotropic solid; small-strain static elasticity. No assemblies/contact, plasticity, buckling, fatigue, transient loads or certified material data. Photographic proposals are unmeasured until the user supplies/accepts specifications.
 
-## Outstanding requested scope at the September 13 checkpoint
+## Outstanding requested scope
 
-- Finish browser verification of the conversational proposal through apply, confirmation, GPU solve, saved-study reload and a fresh report/review. Automated proposal and archive-reproduction checks pass; see `VALIDATION.md` for the exact evidence boundary.
-- Add a dedicated 3D-printing section accepting STL input and addressing infill, print orientation, walls and related print settings. STL import and print-specific mechanical modelling are not implemented in this checkpoint. Their effect on results must be supported by an explicit model and verification, rather than presented as certified printed-part strength.
-- Evaluate current image-generation/image-to-3D tools for the sketch-to-mesh step in the separately requested research task. Creation of that task was rejected by automatic approval review because of an account usage limit; it was not created and this research remains pending.
+- STL import, selectable surface patches, and a homogenized print model are implemented on `print-stl-workspace`. They are not coupon-calibrated and not a sliced toolpath.
+- Finish browser verification of the conversational proposal through apply, confirmation, GPU solve, saved-study reload and a fresh report/review when Astra is available again.
+- Evaluate current image-generation/image-to-3D tools for sketch-to-mesh against known CAD examples (separate research task; still pending).
+- Broader reliability: additional GPUs, camera hardware, cancellation of in-flight jobs, and larger industrial STLs.
 - Keep ChatGPT Sites publishing at the planning stage. Push and deployment require explicit user authorization.
+- Contributor basics (CI workflow, CONTRIBUTING, example STL) are in this branch; branding alignment of openFEA vs FEA-R is still open.

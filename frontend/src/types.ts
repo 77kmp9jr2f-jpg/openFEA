@@ -7,9 +7,57 @@ export type Feature = {
   axis: Vec3;
   radius: number;
 };
+export type PrintSettings = {
+  enabled: boolean;
+  rotation_deg: Vec3;
+  infill_pattern: "rectilinear" | "grid" | "triangles" | "gyroid";
+  infill_density: number;
+  wall_count: number;
+  line_width_mm: number;
+  layer_height_mm: number;
+  top_layers: number;
+  bottom_layers: number;
+};
+export const defaultPrint: PrintSettings = {
+  enabled: false,
+  rotation_deg: [0, 0, 0],
+  infill_pattern: "gyroid",
+  infill_density: 0.2,
+  wall_count: 3,
+  line_width_mm: 0.4,
+  layer_height_mm: 0.2,
+  top_layers: 4,
+  bottom_layers: 4,
+};
+export type PrintPreview = {
+  enabled: boolean;
+  volume_fraction: number;
+  young_xy_mpa: number;
+  young_z_mpa: number;
+  filament_volume_mm3: number;
+  filament_mass_g: number;
+  assumptions: string[];
+  settings: PrintSettings;
+};
+export type StlInspect = {
+  id: string;
+  name: string;
+  triangles: number;
+  bounds: [Vec3, Vec3];
+  extent_mm: Vec3;
+  surface_area_mm2: number;
+  signed_volume_mm3: number;
+  watertight: boolean;
+  shells: number;
+  boundary_edges: number;
+  nonmanifold_edges: number;
+  degenerate_triangles: number;
+  suggested_scale: number;
+  warnings: string[];
+};
 export type Geometry = {
   name: string;
-  kind: "bracket" | "plate" | "shaft" | "custom" | "step";
+  kind: "bracket" | "plate" | "shaft" | "custom" | "step" | "stl";
   length: number;
   width: number;
   height: number;
@@ -18,6 +66,9 @@ export type Geometry = {
   mesh_size: number;
   features: Feature[];
   step_id: string | null;
+  stl_id: string | null;
+  unit_scale: number;
+  feature_angle_deg: number;
   provenance: string;
   assumptions: string[];
 };
@@ -77,7 +128,32 @@ export type Result = {
   warnings: string[];
   displacement: Vec3[];
   nodal_stress_mpa: number[];
-  setup: { material: Material };
+  setup: { material: Material; print?: PrintSettings };
+  print?: PrintPreview & { mass_g?: number };
+};
+export type RunCompare = {
+  same_model: boolean;
+  a: {
+    id: string;
+    max_displacement_mm: number;
+    peak_von_mises_mpa: number;
+    mass_g: number;
+    filament_mass_g: number;
+    print?: PrintSettings;
+  };
+  b: {
+    id: string;
+    max_displacement_mm: number;
+    peak_von_mises_mpa: number;
+    mass_g: number;
+    filament_mass_g: number;
+    print?: PrintSettings;
+  };
+  delta: {
+    max_displacement_mm: number;
+    peak_von_mises_mpa: number;
+    mass_g: number;
+  };
 };
 export type Mark = {
   id: string;
@@ -154,6 +230,9 @@ export const demoGeometry: Geometry = {
   mesh_size: 7,
   features: [],
   step_id: null,
+  stl_id: null,
+  unit_scale: 1,
+  feature_angle_deg: 40,
   provenance: "demo",
   assumptions: [
     "Demonstration dimensions; not derived from a photograph.",
@@ -181,6 +260,20 @@ export const materials: Material[] = [
     poisson: 0.35,
     yield_mpa: 40,
     density_kg_m3: 1250,
+  },
+  {
+    name: "PLA · illustrative filament",
+    young_mpa: 3500,
+    poisson: 0.35,
+    yield_mpa: 40,
+    density_kg_m3: 1240,
+  },
+  {
+    name: "PETG · illustrative filament",
+    young_mpa: 2100,
+    poisson: 0.38,
+    yield_mpa: 50,
+    density_kg_m3: 1270,
   },
 ];
 export async function api<T>(path: string, body?: unknown): Promise<T> {
