@@ -50,6 +50,12 @@ def result_guidance(result: dict) -> dict:
             "The print model is a homogenized equivalent solid, not a sliced "
             "toolpath and not a calibration against printed coupons."
         )
+    if result.get('element_order') == 1:
+        caution.append(
+            "This run used linear tetrahedra because a quadratic system would "
+            "exceed the local size limit. Displacement trends are still useful; "
+            "stress is less accurate than a P2 mesh of the same part."
+        )
     nxt = (
         "Pin this run, change infill, walls or orientation, and solve again. "
         "Trust the displacement and mass trend, not the peak stress."

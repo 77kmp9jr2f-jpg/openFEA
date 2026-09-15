@@ -65,7 +65,7 @@ def _rows(result,model):
         ['Supplied yield strength',f"{mat['yield_mpa']:g} MPa"],['Density',f"{mat['density_kg_m3']:g} kg/m3"],
         ['Geometry source',model['spec']['provenance']],['CAD volume',f"{model['volume_mm3']:.5g} mm3"],
         ['Mesh volume',f"{result['mesh_volume_mm3']:.5g} mm3"],['Estimated mass',f"{result['mass_g']:.5g} g"],
-        ['Mesh',f"{result['elements']:,} tetrahedra / {result['dofs']:,} quadratic DOFs"],
+        ['Mesh',f"{result['elements']:,} tetrahedra / {result['dofs']:,} {'linear' if result.get('element_order')==1 else 'quadratic'} DOFs"],
         *(_print_rows(result)),
         ['Nominal mesh size',f"{model['spec']['mesh_size']:g} mm"],['Minimum element quality',f"{model['min_quality']:.5g} (minSICN)"],
         ['Fixed faces',', '.join(str(f) for f in result['setup']['fixed_faces'])+' (XYZ translations = 0)'],

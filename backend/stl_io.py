@@ -5,6 +5,10 @@ from pathlib import Path
 import numpy as np
 from .storage import identifier, resource, write_json
 
+MAX_UPLOAD_BYTES = 80_000_000
+MAX_WORK_TRIANGLES = 80_000
+_RECORD = np.dtype([('n', '<f4', 3), ('v', '<f4', 9), ('attr', '<u2')])
+
 
 def _as_triangles(vertices: np.ndarray) -> np.ndarray:
     pts = np.asarray(vertices, dtype=np.float64).reshape(-1, 3, 3)
@@ -31,12 +35,59 @@ def _parse_binary(data: bytes) -> np.ndarray:
     expected = 84 + count * 50
     if count == 0 or expected > len(data) + 1 or count > 2_000_000:
         raise ValueError('The binary STL triangle count is missing or too large (2,000,000 maximum).')
-    tris = []
-    for i in range(count):
-        off = 84 + i * 50
-        vals = struct.unpack_from('<' + 'f' * 12, data, off)
-        tris.append(vals[3:12])
-    return _as_triangles(np.array(tris, dtype=np.float64))
+    recs = np.frombuffer(data, dtype=_RECORD, count=count, offset=84)
+    return _as_triangles(np.asarray(recs['v'], dtype=np.float64).reshape(-1, 3, 3))
+
+
+def weld_triangles(triangles: np.ndarray, tol: float) -> np.ndarray:
+    tris = _as_triangles(triangles)
+    verts = tris.reshape(-1, 3)
+    _, inverse = np.unique(np.round(verts / max(tol, 1e-9)), axis=0, return_inverse=True)
+    faces = inverse.reshape(-1, 3)
+    keep = (faces[:, 0] != faces[:, 1]) & (faces[:, 1] != faces[:, 2]) & (faces[:, 0] != faces[:, 2])
+    welded = np.zeros((int(inverse.max()) + 1, 3), dtype=np.float64)
+    np.add.at(welded, inverse, verts)
+    welded /= np.maximum(np.bincount(inverse), 1)[:, None]
+    return welded[faces[keep]]
+
+
+def _closed_manifold(triangles: np.ndarray) -> bool:
+    verts = np.round(_as_triangles(triangles).reshape(-1, 3), 6)
+    _, inverse = np.unique(verts, axis=0, return_inverse=True)
+    faces = inverse.reshape(-1, 3)
+    edges = np.sort(np.concatenate([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]]), axis=1)
+    _, counts = np.unique(edges, axis=0, return_counts=True)
+    return bool((counts >= 3).sum() == 0 and (counts == 1).sum() == 0)
+
+
+def simplify_triangles(triangles: np.ndarray) -> tuple[np.ndarray, str | None]:
+    tris = _as_triangles(triangles)
+    if len(tris) <= MAX_WORK_TRIANGLES:
+        return tris, None
+    extent = float(np.ptp(tris.reshape(-1, 3), axis=0).max())
+    steps = np.unique(np.round(np.concatenate([
+        np.array([1.5]),
+        extent * np.linspace(0.0038, 0.0055, 14),
+        extent * np.geomspace(0.0025, 0.01, 8),
+    ]), 4))
+    for step in steps:
+        candidate = weld_triangles(tris, float(step))
+        if not (2_000 <= len(candidate) <= MAX_WORK_TRIANGLES):
+            continue
+        if _closed_manifold(candidate):
+            return candidate, _simplify_note(len(tris), float(step), len(candidate))
+    raise ValueError(
+        'This STL is too densely tessellated to simplify into a local mesh. '
+        'Export a coarser CAD STL.'
+    )
+
+
+def _simplify_note(source: int, used: float, result: int) -> str:
+    return (
+        f'CAD export had {source:,} triangles. OpenFEA welded vertices at {used:.3g} mm '
+        f'to {result:,} triangles so this computer can mesh it. Fillets smaller than '
+        'that spacing are lost.'
+    )
 
 
 def _parse_ascii(text: str) -> np.ndarray:
@@ -55,18 +106,20 @@ def _parse_ascii(text: str) -> np.ndarray:
 
 def write_binary_stl(path: Path, triangles: np.ndarray) -> None:
     tris = _as_triangles(triangles)
-    path.write_bytes(b'OpenFEA scaled STL'.ljust(80, b' ') + struct.pack('<I', len(tris)))
-    with path.open('ab') as handle:
-        for tri in tris:
-            n = np.cross(tri[1] - tri[0], tri[2] - tri[0])
-            norm = np.linalg.norm(n)
-            n = n / norm if norm > 0 else np.zeros(3)
-            handle.write(struct.pack('<' + 'f' * 12, *n, *tri.ravel()))
-            handle.write(b'\x00\x00')
+    header = bytearray(b'OpenFEA scaled STL'.ljust(80, b' '))
+    normals = np.cross(tris[:, 1] - tris[:, 0], tris[:, 2] - tris[:, 0])
+    length = np.linalg.norm(normals, axis=1, keepdims=True)
+    normals = np.divide(normals, length, out=np.zeros_like(normals), where=length > 0)
+    records = np.zeros(len(tris), dtype=_RECORD)
+    records['n'] = normals
+    records['v'] = tris.reshape(-1, 9)
+    path.write_bytes(bytes(header) + struct.pack('<I', len(tris)) + records.tobytes())
 
 
 def inspect_triangles(triangles: np.ndarray, unit_scale: float = 1.0) -> dict:
     tris = _as_triangles(triangles) * float(unit_scale)
+    if len(tris) > MAX_WORK_TRIANGLES:
+        return _inspect_fast(tris)
     verts = tris.reshape(-1, 3)
     edges: dict[tuple, list[int]] = {}
     areas = []
@@ -141,15 +194,77 @@ def inspect_triangles(triangles: np.ndarray, unit_scale: float = 1.0) -> dict:
     }
 
 
+def _inspect_fast(tris: np.ndarray) -> dict:
+    verts = tris.reshape(-1, 3)
+    lo, hi = verts.min(axis=0), verts.max(axis=0)
+    extent = hi - lo
+    a, b, c = tris[:, 0], tris[:, 1], tris[:, 2]
+    volume = float(np.einsum('ij,ij->i', a, np.cross(b - a, c - a)).sum() / 6.0)
+    rounded = np.round(verts, 6)
+    _, inverse = np.unique(rounded, axis=0, return_inverse=True)
+    faces = inverse.reshape(-1, 3)
+    edges = np.sort(np.concatenate([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]]), axis=1)
+    _, counts = np.unique(edges, axis=0, return_counts=True)
+    boundary = int((counts == 1).sum())
+    nonmanifold = int((counts >= 3).sum())
+    watertight = boundary == 0 and nonmanifold == 0
+    warnings = []
+    max_extent = float(extent.max()) if len(verts) else 0
+    suggested = 1.0
+    if max_extent < 2:
+        suggested = 1000.0 if max_extent < 0.05 else 25.4
+        warnings.append('The extents look like metres or inches. Confirm the unit scale before meshing.')
+    elif max_extent > 800:
+        warnings.append('The imported extents are large. Confirm the model is in millimetres.')
+    if not watertight:
+        warnings.append('The triangle mesh is not a single watertight shell. Volume meshing requires a closed manifold.')
+        if nonmanifold:
+            warnings.append(f'{nonmanifold} non-manifold edges were found.')
+        if boundary:
+            warnings.append(f'{boundary} boundary edges are open (holes).')
+    else:
+        warnings.append(
+            f'CAD export has {len(tris):,} triangles. The mesher will coarsen to the requested mesh size; '
+            'this is still the same solid.'
+        )
+    return {
+        'triangles': int(len(tris)),
+        'bounds': [lo.tolist(), hi.tolist()],
+        'extent_mm': extent.tolist(),
+        'surface_area_mm2': float(0.5 * np.linalg.norm(np.cross(b - a, c - a), axis=1).sum()),
+        'signed_volume_mm3': volume,
+        'watertight': bool(watertight),
+        'shells': 1 if watertight else 0,
+        'boundary_edges': boundary,
+        'manifold_edges': int((counts == 2).sum()),
+        'nonmanifold_edges': nonmanifold,
+        'degenerate_triangles': 0,
+        'suggested_scale': suggested,
+        'warnings': warnings,
+    }
+
+
 def store_stl(data: bytes, name: str) -> dict:
+    if not data or len(data) > MAX_UPLOAD_BYTES:
+        raise ValueError('Upload an STL under 80 MB.')
     triangles = parse_stl(data)
+    source_count = int(len(triangles))
+    note = None
+    if source_count > MAX_WORK_TRIANGLES:
+        triangles, note = simplify_triangles(triangles)
     report = inspect_triangles(triangles, 1.0)
+    if note:
+        report['warnings'] = [note, *report['warnings']]
+    report['source_triangles'] = source_count
     sid = identifier()
     folder = resource('stls', sid)
     folder.mkdir(parents=True, exist_ok=True)
     raw = folder / 'source.stl'
     raw.write_bytes(data)
-    write_binary_stl(folder / 'unit.stl', triangles)
+    if note is None:
+        (folder / 'unit.stl').write_bytes(data)
+    else:
+        write_binary_stl(folder / 'unit.stl', triangles)
     meta = {'id': sid, 'name': name, 'bytes': len(data), **report}
     write_json(folder / 'inspect.json', meta)
     return meta
@@ -170,9 +285,12 @@ def scaled_stl_path(stl_id: str, unit_scale: float) -> Path:
         raise ValueError('Repair the STL so it is a single watertight shell before meshing. ' + ' '.join(report['warnings']))
     if abs(report['signed_volume_mm3']) < 1e-6:
         raise ValueError('The STL has zero enclosed volume after scaling.')
+    dest = folder / f'scaled-{unit_scale:g}.stl'
+    if unit_scale == 1 and report['signed_volume_mm3'] > 0:
+        dest.write_bytes((folder / 'unit.stl').read_bytes())
+        return dest
     if report['signed_volume_mm3'] < 0:
         triangles = triangles[:, [0, 2, 1], :]
-    dest = folder / f'scaled-{unit_scale:g}.stl'
     write_binary_stl(dest, triangles)
     return dest
 

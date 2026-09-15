@@ -60,7 +60,7 @@ def analysis_readiness(model: dict, draft: dict | None = None) -> dict:
         return item
 
     mesh_ok = (
-        1 <= int(model.get('tetrahedra') or 0) <= 35000
+        1 <= int(model.get('tetrahedra') or 0) <= 200000
         and float(model.get('volume_mm3') or 0) > 0
         and float(model.get('min_quality') or 0) > 0
     )

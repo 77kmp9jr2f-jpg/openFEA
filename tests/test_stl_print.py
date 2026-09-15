@@ -27,6 +27,37 @@ def test_stl_inspect_flags_open_and_closed_meshes(tmp_path):
     assert bad['boundary_edges'] == 4
 
 
+def _fine_box_triangles(divisions=90):
+    corners = np.array([[0, 0, 0], [40, 0, 0], [40, 10, 0], [0, 10, 0],
+                        [0, 0, 8], [40, 0, 8], [40, 10, 8], [0, 10, 8]], float)
+    quads = ((0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7))
+    tris = []
+    for a, b, c, d in quads:
+        for i in range(divisions):
+            s0, s1 = i / divisions, (i + 1) / divisions
+            for j in range(divisions):
+                t0, t1 = j / divisions, (j + 1) / divisions
+                p = lambda s, t: (1 - s) * (1 - t) * corners[a] + s * (1 - t) * corners[b] + s * t * corners[c] + (1 - s) * t * corners[d]
+                tris.append([p(s0, t0), p(s1, t0), p(s1, t1)])
+                tris.append([p(s0, t0), p(s1, t1), p(s0, t1)])
+    return np.array(tris, float)
+
+
+def test_dense_cad_export_is_welded_to_a_workable_mesh(tmp_path):
+    from backend.stl_io import simplify_triangles, MAX_WORK_TRIANGLES
+    dense = _fine_box_triangles(90)
+    assert len(dense) > MAX_WORK_TRIANGLES
+    simple, note = simplify_triangles(dense)
+    assert note and 'CAD export' in note
+    assert len(simple) <= MAX_WORK_TRIANGLES
+    dest = tmp_path / 'dense.stl'
+    write_binary_stl(dest, dense)
+    meta = store_stl(dest.read_bytes(), 'dense.stl')
+    assert meta['source_triangles'] == len(dense)
+    assert meta['triangles'] <= MAX_WORK_TRIANGLES
+    assert meta['watertight']
+
+
 def test_stl_store_rejects_non_stl_and_accepts_box():
     path = DATA / 'stls'
     path.mkdir(parents=True, exist_ok=True)
@@ -96,6 +127,7 @@ def test_stl_import_builds_selectable_faces_and_print_solve(tmp_path):
     assert sparse['mass_g'] < solid['mass_g'] * 0.7
     assert sparse['print']['enabled']
     assert sparse['relative_residual'] < 1e-7
+    assert sparse['element_order'] == 2
     guide = sparse['guidance']
     assert 'displacement' in guide['trust'][0].lower()
     assert any('residual' in item.lower() for item in guide['trust'])

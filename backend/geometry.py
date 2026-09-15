@@ -7,7 +7,7 @@ import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 from .schemas import Geometry
-from .storage import DATA, identifier, write_json, resource
+from .storage import DATA, identifier, write_json, read_json, resource
 
 GMSH_LOCK = Lock()
 
@@ -61,8 +61,19 @@ def _make_stl_solid(spec: Geometry):
     gmsh.merge(str(path))
     angle = spec.feature_angle_deg * math.pi / 180
     gmsh.option.setNumber('Mesh.AngleToleranceFacetOverlap', 0.2)
-    gmsh.model.mesh.classifySurfaces(angle, True, True, True)
-    gmsh.model.mesh.createGeometry()
+    gmsh.model.mesh.classifySurfaces(angle, True, True, math.pi)
+    inspect = {}
+    if spec.stl_id:
+        inspect = read_json(resource('stls', spec.stl_id) / 'inspect.json')
+    dense = inspect.get('source_triangles', inspect.get('triangles', 0)) > 50000
+    if dense:
+        # Parametrizing a dense CAD tessellation fails or remeshes with overlapping facets.
+        gmsh.model.mesh.createTopology()
+    else:
+        try:
+            gmsh.model.mesh.createGeometry()
+        except Exception:
+            gmsh.model.mesh.createTopology()
     surfaces = gmsh.model.getEntities(2)
     if len(surfaces) < 1:
         raise ValueError('No surfaces could be classified from the STL. Repair the mesh or change the feature angle.')
@@ -137,7 +148,12 @@ def build_model(spec: Geometry, destination: Path | None = None):
                 raise ValueError('Requested mesh is too dense for the local prototype. Increase the mesh size.')
             gmsh.option.setNumber('Mesh.MeshSizeMin',spec.mesh_size*0.35)
             gmsh.option.setNumber('Mesh.MeshSizeMax',spec.mesh_size)
-            gmsh.option.setNumber('Mesh.MeshSizeFromCurvature',12)
+            dense_stl = False
+            if spec.kind == 'stl' and spec.stl_id:
+                from .storage import read_json
+                inspect = read_json(resource('stls', spec.stl_id) / 'inspect.json')
+                dense_stl = inspect.get('triangles', 0) > 50000
+            gmsh.option.setNumber('Mesh.MeshSizeFromCurvature', 0 if dense_stl else 12)
             gmsh.option.setNumber('Mesh.ElementOrder',1)
             gmsh.option.setNumber('Mesh.Algorithm3D',1)
             gmsh.model.mesh.generate(3)
@@ -146,8 +162,8 @@ def build_model(spec: Geometry, destination: Path | None = None):
             all_points = np.asarray(coords).reshape(-1,3)
             _,raw_tets = gmsh.model.mesh.getElementsByType(4)
             raw_tets = np.asarray(raw_tets).reshape(-1,4)
-            if not len(raw_tets) or len(raw_tets)>35000:
-                raise ValueError('Mesh must contain 1–35,000 tetrahedra. Increase mesh size if too dense.')
+            if not len(raw_tets) or len(raw_tets)>200000:
+                raise ValueError('Mesh must contain 1–200,000 tetrahedra. Increase mesh size if too dense.')
             used = np.unique(raw_tets)
             index = {int(tag):i for i,tag in enumerate(used)}
             raw_index = {int(tag):i for i,tag in enumerate(tags)}

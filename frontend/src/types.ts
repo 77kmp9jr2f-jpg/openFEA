@@ -54,6 +54,7 @@ export type StlInspect = {
   degenerate_triangles: number;
   suggested_scale: number;
   warnings: string[];
+  source_triangles?: number;
 };
 export type Geometry = {
   name: string;
@@ -136,6 +137,7 @@ export type Result = {
   nodes: number;
   elements: number;
   dofs: number;
+  element_order?: number;
   peak_von_mises_mpa: number;
   max_displacement_mm: number;
   max_display_stress_mpa: number;

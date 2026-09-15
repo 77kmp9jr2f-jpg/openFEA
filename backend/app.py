@@ -22,8 +22,8 @@ async def local_boundary(request: Request, call_next):
         return JSONResponse({'detail':'Foreign origin rejected.'},status_code=403)
     if request.method in ('POST','PUT'):
         body = await request.body()
-        if len(body)>20_000_000:
-            return JSONResponse({'detail':'Request is too large (20 MB maximum).'},status_code=413)
+        if len(body)>80_000_000:
+            return JSONResponse({'detail':'Request is too large (80 MB maximum).'},status_code=413)
     return await call_next(request)
 
 @app.exception_handler(ValueError)
@@ -124,8 +124,8 @@ def image(iid: str):
 async def upload_stl(request: Request):
     from .stl_io import store_stl
     content = await request.body()
-    if not content or len(content) > 15_000_000:
-        raise ValueError('Upload an STL under 15 MB.')
+    if not content or len(content) > 80_000_000:
+        raise ValueError('Upload an STL under 80 MB.')
     name = request.headers.get('x-filename', 'import.stl')[:160]
     return store_stl(content, name)
 
@@ -151,8 +151,8 @@ def compare_runs(aid: str, bid: str):
 @app.post('/api/steps')
 async def upload_step(request: Request):
     content = await request.body()
-    if not content or len(content)>15_000_000 or b'ISO-10303-21' not in content[:1000]:
-        raise ValueError('Upload a STEP (.step/.stp) file under 15 MB.')
+    if not content or len(content)>80_000_000 or b'ISO-10303-21' not in content[:1000]:
+        raise ValueError('Upload a STEP (.step/.stp) file under 80 MB.')
     sid = identifier(); resource('steps',sid).with_suffix('.step').write_bytes(content)
     return {'id':sid,'units':'Imported and converted to millimetres by OpenCASCADE; verify displayed bounds.'}
 

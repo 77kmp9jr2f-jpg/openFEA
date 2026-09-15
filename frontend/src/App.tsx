@@ -448,6 +448,9 @@ export default function App() {
     setBusy("Importing STEP");
     setError("");
     try {
+      if (file.size > 80_000_000) {
+        throw new Error("This STEP file is over 80 MB. Export a simpler solid.");
+      }
       const res = await fetch("/api/steps", {
         method: "POST",
         headers: { "Content-Type": "application/octet-stream" },
@@ -494,6 +497,11 @@ export default function App() {
     setBusy("Inspecting STL");
     setError("");
     try {
+      if (file.size > 80_000_000) {
+        throw new Error(
+          "This STL is over 80 MB. Export a binary STL from CAD, or a coarser tessellation.",
+        );
+      }
       const res = await fetch("/api/stls", {
         method: "POST",
         headers: {
@@ -505,12 +513,18 @@ export default function App() {
       const body = await res.json();
       if (!res.ok) throw new Error(body.detail);
       setStlInspect(body);
+      const extent = Math.max(...(body.extent_mm || [0]));
+      const meshSize = Math.min(
+        40,
+        Math.max(spec.mesh_size, Math.round(extent / 25) || spec.mesh_size),
+      );
       const s: Geometry = {
         ...spec,
         kind: "stl",
         name: file.name.replace(/\.stl$/i, ""),
         stl_id: body.id,
         unit_scale: body.suggested_scale === 1 ? 1 : body.suggested_scale,
+        mesh_size: meshSize,
         provenance: "stl_import",
         assumptions: body.warnings,
       };
@@ -1356,7 +1370,9 @@ export default function App() {
                 <ChevronDown size={15} />
               </summary>
               <p>
-                {result.elements.toLocaleString()} quadratic tetrahedra ·{" "}
+                {result.elements.toLocaleString()}{" "}
+                {result.element_order === 1 ? "linear" : "quadratic"} tetrahedra
+                ·{" "}
                 {result.dofs.toLocaleString()} degrees of freedom ·{" "}
                 {format(result.seconds)} s solve · {format(result.mass_g)} g
               </p>

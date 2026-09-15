@@ -50,7 +50,7 @@ Sending a chat message transmits its image, annotations and design context to As
 - Optional print model: transversely isotropic equivalent solid from walls, skins, infill density/pattern and a print-axis rotation. Assumptions are written into the result. Not sliced geometry, not coupon-calibrated, not certified printed-part strength.
 - No assemblies/contact, friction, bolt preload, plasticity, large deformations, buckling, fatigue, dynamics, thermal loading, or explicit infill geometry.
 - Material presets are illustrative values. An imported or photograph-inspired geometry, a converged algebraic solve, and a physical strength validation are different kinds of evidence. Sharp fixture edges and unfilleted corners may have non-convergent peak stress.
-- The prototype bounds job time and mesh size (35,000 tetrahedra / 150,000 DOFs) and rejects disconnected solids. Its limits are for local responsiveness, not engineering adequacy.
+- The prototype bounds job time and mesh size (200,000 tetrahedra / 500,000 DOFs) and rejects disconnected solids. Dense CAD STL exports are accepted up to 80 MB and coarsened when needed. If a locked surface still exceeds the quadratic budget, the solve uses linear tetrahedra and says so.
 
 ## Verify
 

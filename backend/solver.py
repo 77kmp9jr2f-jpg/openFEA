@@ -8,13 +8,21 @@ import numpy as np
 import scipy, skfem
 from scipy.sparse.linalg import spsolve, MatrixRankWarning
 import warnings
-from skfem import MeshTet, Basis, FacetBasis, ElementVector, ElementTetP2, LinearForm, BilinearForm, asm, condense
+from skfem import MeshTet, Basis, FacetBasis, ElementVector, ElementTetP1, ElementTetP2, LinearForm, BilinearForm, asm, condense
 from skfem.helpers import dot, sym_grad
 from skfem.models.elasticity import linear_elasticity, lame_parameters
 from .schemas import Analysis, GPUSolution
 from .storage import DATA, resource, identifier, read_json, write_json
 from .print_model import stiffness, apply_usage
 from .guidance import result_guidance
+
+def choose_element(mesh: MeshTet):
+    """Prefer P2. Dense CAD dumps can lock a surface too fine for local P2."""
+    p2_dofs = 3 * (mesh.nvertices + mesh.edges.shape[1])
+    if p2_dofs <= 500000:
+        return ElementVector(ElementTetP2()), 4, 2
+    return ElementVector(ElementTetP1()), 2, 1
+
 
 def assemble_system(setup: Analysis):
     from .simulation_proposals import verify_applied_setup
@@ -23,10 +31,10 @@ def assemble_system(setup: Analysis):
     model = read_json(folder/'model.json')
     arrays = np.load(folder/'mesh.npz')
     mesh = MeshTet(arrays['points'].T,arrays['tets'].T)
-    element = ElementVector(ElementTetP2())
-    basis = Basis(mesh,element,intorder=4)
-    if basis.N>150000:
-        raise ValueError('Model exceeds 150,000 quadratic degrees of freedom. Increase mesh size.')
+    element, intorder, order = choose_element(mesh)
+    basis = Basis(mesh,element,intorder=intorder)
+    if basis.N>500000:
+        raise ValueError('Model exceeds 500,000 degrees of freedom. Increase mesh size.')
     face_by_id = {f['id']:f for f in model['faces']}
     if not set(setup.fixed_faces + [l.face_id for l in setup.loads]) <= face_by_id.keys():
         raise ValueError('A selected face does not belong to this model revision. Re-select its faces.')
@@ -41,7 +49,7 @@ def assemble_system(setup: Analysis):
     applied = np.zeros(3)
     load_details = []
     for load in setup.loads:
-        fb = FacetBasis(mesh,element,facets=face_facets[load.face_id],intorder=4)
+        fb = FacetBasis(mesh,element,facets=face_facets[load.face_id],intorder=intorder)
         area = float(fb.dx.sum())
         traction = np.asarray(load.vector)/area
         @LinearForm
@@ -52,7 +60,8 @@ def assemble_system(setup: Analysis):
         load_details.append({'face_id':load.face_id,'vector_n':list(load.vector),'mesh_area_mm2':area,'traction_mpa':traction.tolist()})
     Kc,Fc,x,free = condense(K,F,D=fixed)
     return dict(model=model,mesh=mesh,basis=basis,K=K,F=F,Kc=Kc,Fc=Fc,x=x,free=free,
-                fixed=fixed,lam=lam,mu=mu,C=C,print_state=print_state,applied=applied,load_details=load_details)
+                fixed=fixed,lam=lam,mu=mu,C=C,print_state=print_state,applied=applied,load_details=load_details,
+                element_order=order)
 
 def _elasticity(C):
     coeff = [[float(C[i, j]) for j in range(6)] for i in range(6)]
@@ -90,8 +99,8 @@ def finish_gpu(solution: GPUSolution):
 def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
     started = time.monotonic()
     state = assemble_system(setup)
-    model,mesh,basis,K,F,Kc,Fc,x,free,fixed,lam,mu,C,print_state,applied,load_details = (state[k] for k in
-        ('model','mesh','basis','K','F','Kc','Fc','x','free','fixed','lam','mu','C','print_state','applied','load_details'))
+    model,mesh,basis,K,F,Kc,Fc,x,free,fixed,lam,mu,C,print_state,applied,load_details,element_order = (state[k] for k in
+        ('model','mesh','basis','K','F','Kc','Fc','x','free','fixed','lam','mu','C','print_state','applied','load_details','element_order'))
     execution = {'backend':'cpu','device':'Local CPU / SciPy sparse direct', 'precision':'float64',
                  'method':'Sparse direct solve','iterations':0,'refinements':0}
     if gpu_solution is not None:
@@ -153,9 +162,9 @@ def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
     peak = float(vm_q.max())
     span = float(np.linalg.norm(np.ptp(mesh.p,axis=1)))
     notes = [
-        ('Printed equivalent solid with directional homogenized stiffness; quadratic tetrahedral small-strain static analysis.'
+        ('Printed equivalent solid with directional homogenized stiffness; tetrahedral small-strain static analysis.'
          if setup.print.enabled else
-         'Single homogeneous isotropic solid; quadratic tetrahedral small-strain, linear-elastic static analysis.'),
+         'Single homogeneous isotropic solid; tetrahedral small-strain, linear-elastic static analysis.'),
         'Fixtures are ideal fully fixed faces. Forces are distributed uniformly across the selected mesh faces in global XYZ.',
         'No contact, bolt preload, plasticity, buckling, fatigue or thermal effects. Explicit infill geometry is not meshed.',
         'Material presets are illustrative inputs. Verify properties for the actual alloy, condition and manufacturing process.',
@@ -171,12 +180,20 @@ def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
         notes.append('Geometry originated from an image proposal. User confirmation does not constitute metrology.')
     if model['spec']['provenance'] == 'stl_import':
         notes.append('Geometry is an imported triangle mesh. Selectable surfaces are clustered patches, not CAD faces.')
+    if element_order == 2:
+        notes.append('Displacement interpolation is quadratic (P2).')
+    else:
+        notes.append(
+            'Displacement interpolation is linear (P1). The surface mesh was too dense for a local quadratic system; '
+            'export a coarser CAD STL if you need P2 on this computer.'
+        )
     usage = apply_usage(print_state, model['volume_mm3'], setup.material.density_kg_m3)
     if print_state.get('enabled'):
         notes.extend(print_state['assumptions'])
     rid = identifier(); out = DATA/'runs'/rid; out.mkdir()
     result = {'id':rid,'model_id':setup.model_id,'setup':setup.model_dump(),'model_sha256':model['sha256'],'mesh_sha256':model['mesh_sha256'],
-              'nodes':int(mesh.nvertices),'elements':int(mesh.nelements),'dofs':int(basis.N),'max_displacement_mm':max_u,
+              'nodes':int(mesh.nvertices),'elements':int(mesh.nelements),'dofs':int(basis.N),'element_order':element_order,
+              'max_displacement_mm':max_u,
               'peak_von_mises_mpa':peak,'max_display_stress_mpa':float(nodal_vm.max()),
               'yield_ratio':setup.material.yield_mpa/peak if peak>0 else None,
               'reaction_n':reactions.tolist(),'applied_n':applied.tolist(),
