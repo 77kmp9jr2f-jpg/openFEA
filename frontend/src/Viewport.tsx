@@ -357,7 +357,7 @@ export default function Viewport(p: Props) {
     const r = sceneRef.current?.renderer;
     if (!r) return;
     const a = document.createElement("a");
-    a.download = "FEA-R-viewport.png";
+    a.download = "openFEA-viewport.png";
     a.href = r.domElement.toDataURL("image/png");
     a.click();
   }

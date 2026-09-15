@@ -23,4 +23,4 @@ Currently implemented analysis scope: one connected homogeneous isotropic solid;
 - Evaluate current image-generation/image-to-3D tools for sketch-to-mesh against known CAD examples (separate research task; still pending).
 - Broader reliability: additional GPUs, camera hardware, cancellation of in-flight jobs, and larger industrial STLs.
 - Keep ChatGPT Sites publishing at the planning stage. Push and deployment require explicit user authorization.
-- Contributor basics (CI workflow, CONTRIBUTING, example STL) are in this branch; branding alignment of openFEA vs FEA-R is still open.
+- Contributor basics: CI workflow, CONTRIBUTING, example STL, and openFEA branding on the local workspace.

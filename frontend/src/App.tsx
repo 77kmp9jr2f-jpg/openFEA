@@ -38,7 +38,8 @@ import {
 import ImageReview from "./ImageReview";
 import SetupProposalCard from "./SetupProposalCard";
 import PrintWorkspace from "./PrintWorkspace";
-import { api, job, demoGeometry, materials, format, contextKey, defaultPrint } from "./types";
+import CompareTable from "./CompareTable";
+import { api, job, cancelJob, demoGeometry, materials, format, contextKey, defaultPrint } from "./types";
 import type {
   Geometry,
   Model,
@@ -230,7 +231,12 @@ export default function App() {
       if (r.model_id === s.modelId) setResult(r);
     }
   }
-  async function build(next = spec, isDemo = false) {
+  async function build(
+    next = spec,
+    options: { demo?: boolean; applyRecommended?: boolean } | boolean = false,
+  ) {
+    const flags =
+      typeof options === "boolean" ? { demo: options } : options;
     setBusy("Building solid & mesh");
     setError("");
     invalidate();
@@ -238,14 +244,20 @@ export default function App() {
       const m = await job<Model>("/models", next);
       setModel(m);
       setSpec(m.spec);
-      setFixed(isDemo ? [m.recommended.fixed_face] : []);
+      const preset = flags.demo || flags.applyRecommended;
+      setFixed(preset ? [m.recommended.fixed_face] : []);
       setLoads(
-        isDemo
-          ? [{ face_id: m.recommended.load_face, vector: [0, 0, -100] }]
+        preset
+          ? [
+              {
+                face_id: m.recommended.load_face,
+                vector: [0, 0, flags.demo ? -100 : -40],
+              },
+            ]
           : [],
       );
       setSelected(null);
-      setTab("model");
+      setTab(flags.applyRecommended ? "print" : "model");
       setMessages((messages) =>
         messages.some((message) => message.interviewFor === m.id)
           ? messages
@@ -443,9 +455,10 @@ export default function App() {
         flash("STL inspected. Repair watertightness before meshing.");
         return;
       }
-      await build(s);
-      setTab("print");
-      flash("STL meshed. Review print settings, then assign supports and loads.");
+      await build(s, { applyRecommended: true });
+      flash(
+        "STL meshed. Print settings and end-face supports/loads are ready for review.",
+      );
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -625,13 +638,11 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <a className="brand" href="/" aria-label="FEA-R home">
+        <a className="brand" href="/" aria-label="openFEA home">
           <span className="brand-mark">
             <Box size={24} strokeWidth={1.6} />
           </span>
-          <b>
-            FEA<span>—</span>R
-          </b>
+          <b>openFEA</b>
           <span className="beta">WORKSPACE</span>
         </a>
         <div className="top-center">
@@ -1103,6 +1114,14 @@ export default function App() {
               <Loader2 size={17} className="spin" />
               {busy}
               <span>Local worker</span>
+              <button
+                className="outline-button"
+                onClick={() =>
+                  cancelJob().catch((e) => setError((e as Error).message))
+                }
+              >
+                Cancel
+              </button>
             </div>
           )}
         </div>
@@ -1209,24 +1228,24 @@ export default function App() {
                 className="outline-button"
                 onClick={() => setPinned(result)}
               >
-                Pin for compare
+                Pin this run
               </button>
-              {pinned && pinned.id !== result.id && (
-                <span>
-                  Comparing {pinned.id.slice(0, 8)} → {result.id.slice(0, 8)}
-                  {!compare?.same_model
-                    ? " · different models"
-                    : compare
-                      ? ` · Δu ${format(compare.delta.max_displacement_mm)} mm · Δσ ${format(compare.delta.peak_von_mises_mpa)} MPa · Δm ${format(compare.delta.mass_g)} g`
-                      : ""}
-                </span>
-              )}
               {pinned && (
                 <button className="text-button" onClick={() => setPinned(null)}>
                   Clear pin
                 </button>
               )}
+              <span>
+                {pinned && pinned.id === result.id
+                  ? "Pinned. Change print settings and run again to compare."
+                  : pinned
+                    ? "Current run is compared with the pinned configuration."
+                    : "Pin a run, change orientation/walls/infill, then solve again."}
+              </span>
             </div>
+            {compare && pinned && pinned.id !== result.id && (
+              <CompareTable compare={compare} />
+            )}
             <details className="assumptions" open>
               <summary>
                 <ShieldCheck size={16} /> Interpretation & assumptions{" "}
@@ -1486,7 +1505,7 @@ export default function App() {
             </button>
           </div>
         )}
-        {(tab === "model" || tab === "setup") && (
+        {(tab === "model" || tab === "print" || tab === "setup") && (
           <div className="compute-choice">
             <label>
               Simulation device{" "}
@@ -1508,7 +1527,7 @@ export default function App() {
             {busy && <strong role="status">{busy}</strong>}
           </div>
         )}
-        {(tab === "model" || tab === "setup") && (
+        {(tab === "model" || tab === "print" || tab === "setup") && (
           <div className="run-bar">
             <div>
               <label className="inline-check">
@@ -1545,7 +1564,7 @@ export default function App() {
           </div>
         )}
         <footer className="workspace-footer">
-          <span>FEA-R / EARLY ACCESS</span>
+          <span>openFEA / LOCAL</span>
           <span>Engineering insight starts with explicit assumptions.</span>
           <span>mm · N · MPa</span>
         </footer>
@@ -1802,7 +1821,8 @@ export default function App() {
               </button>
             </div>
             <p>
-              FEA-R is a local prototype for one connected 3D mechanical solid.
+              openFEA is a local prototype for one connected 3D mechanical
+              solid. Astra is optional.
             </p>
             <ol>
               <li>
@@ -1810,12 +1830,16 @@ export default function App() {
                 measured dimensions.
               </li>
               <li>
-                Ask Astra to inspect it. Supply missing specs and review its
-                editable CAD proposal, or import a single-solid STEP.
+                Import a watertight STL or single-solid STEP, or build a
+                parametric solid. Ask Astra only when it is available.
               </li>
               <li>
-                Build the model. Click faces to set fixed supports and global
-                XYZ forces. Enter verified material properties.
+                Use Print to set orientation, walls and infill. Those settings
+                change a homogenized stiffness, not a sliced toolpath.
+              </li>
+              <li>
+                Click faces to set fixed supports and global XYZ forces. Enter
+                verified material properties.
               </li>
               <li>
                 Confirm the setup and run. Inspect stress, displacement,
@@ -1837,7 +1861,8 @@ export default function App() {
               Geometry, solving and exports run locally without AI. A single
               photo cannot determine unseen geometry or real-world scale. This
               version does not model contact, assemblies, plasticity, buckling,
-              fatigue or print anisotropy. Results require engineering review
+              fatigue or explicit infill geometry. Print settings use a
+              homogenized equivalent solid. Results require engineering review
               and physical validation.
             </p>
             <p>

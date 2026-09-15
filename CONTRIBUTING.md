@@ -1,4 +1,4 @@
-# Contributing to openFEA / FEA-R
+# Contributing to openFEA
 
 This is a local engineering workspace. Changes should keep the solver honest: no silent fallbacks, no model-generated CAD execution, and no claim of physical certification.
 

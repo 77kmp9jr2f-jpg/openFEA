@@ -1,8 +1,8 @@
-# FEA-R
+# openFEA
 
-A local engineering workspace for designing a 3D part from image references, reviewing its dimensions and loading, running real finite-element analysis, and exporting a traceable report.
+A local engineering workspace for designing a 3D part from image references, reviewing its dimensions and loading, running real finite-element analysis, and exporting a traceable report. The repository and product name is **openFEA**; older notes may still say FEA-R.
 
-FEA-R uses open-source geometry, meshing, simulation, and UI components. **Astra is GPT-6 Astra, a separately authenticated proprietary AI service**, accessed through the installed Codex CLI. The modeller, solver, study storage, and exports work without AI.
+openFEA uses open-source geometry, meshing, simulation, and UI components. **Astra is GPT-6 Astra, a separately authenticated proprietary AI service**, accessed through the installed Codex CLI. The modeller, solver, study storage, and exports work without AI.
 
 ## Run locally
 

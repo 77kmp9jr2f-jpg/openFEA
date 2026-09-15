@@ -131,28 +131,27 @@ export type Result = {
   setup: { material: Material; print?: PrintSettings };
   print?: PrintPreview & { mass_g?: number };
 };
+export type CompareSide = {
+  id: string;
+  model_id: string;
+  max_displacement_mm: number;
+  peak_von_mises_mpa: number;
+  mass_g: number;
+  filament_mass_g: number;
+  volume_fraction: number | null;
+  young_xy_mpa: number | null;
+  young_z_mpa: number | null;
+  print?: PrintSettings | null;
+};
 export type RunCompare = {
   same_model: boolean;
-  a: {
-    id: string;
-    max_displacement_mm: number;
-    peak_von_mises_mpa: number;
-    mass_g: number;
-    filament_mass_g: number;
-    print?: PrintSettings;
-  };
-  b: {
-    id: string;
-    max_displacement_mm: number;
-    peak_von_mises_mpa: number;
-    mass_g: number;
-    filament_mass_g: number;
-    print?: PrintSettings;
-  };
+  a: CompareSide;
+  b: CompareSide;
   delta: {
     max_displacement_mm: number;
     peak_von_mises_mpa: number;
     mass_g: number;
+    filament_mass_g: number;
   };
 };
 export type Mark = {
@@ -301,24 +300,38 @@ export async function api<T>(path: string, body?: unknown): Promise<T> {
   }
   return res.json();
 }
+let activeJob: string | null = null;
 export async function job<T>(
   path: string,
   body: unknown,
   onStatus?: (status: string) => void,
 ): Promise<T> {
   const { id } = await api<{ id: string }>(path, body);
-  for (let i = 0; i < 300; i++) {
-    await new Promise((r) => setTimeout(r, 900));
-    const j = await api<{ status: string; error?: string; result: T }>(
-      "/jobs/" + id,
+  activeJob = id;
+  try {
+    for (let i = 0; i < 300; i++) {
+      await new Promise((r) => setTimeout(r, 900));
+      const j = await api<{
+        status: string;
+        error?: string;
+        result: T;
+      }>("/jobs/" + id);
+      onStatus?.(j.status);
+      if (j.status === "cancelled")
+        throw new Error(j.error || "The job was cancelled.");
+      if (j.status === "failed") throw new Error(j.error);
+      if (j.status === "complete") return j.result;
+    }
+    throw new Error(
+      "The job is taking longer than expected. Reload to reconnect.",
     );
-    onStatus?.(j.status);
-    if (j.status === "failed") throw new Error(j.error);
-    if (j.status === "complete") return j.result;
+  } finally {
+    if (activeJob === id) activeJob = null;
   }
-  throw new Error(
-    "The job is taking longer than expected. Reload to reconnect.",
-  );
+}
+export async function cancelJob() {
+  if (!activeJob) return;
+  await api("/jobs/" + activeJob + "/cancel", {});
 }
 export const format = (value: number, digits = 3) =>
   Number.isFinite(value)

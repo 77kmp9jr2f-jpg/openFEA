@@ -117,3 +117,6 @@ def test_compare_endpoint_reports_print_deltas(tmp_path):
     assert compared['same_model']
     assert compared['delta']['max_displacement_mm'] > 0
     assert compared['delta']['mass_g'] < 0
+    assert compared['a']['print']['infill_density'] == 0.4
+    assert compared['b']['print']['wall_count'] == 2
+    assert compared['a']['young_xy_mpa'] > compared['b']['young_xy_mpa']

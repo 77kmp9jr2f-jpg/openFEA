@@ -2262,6 +2262,33 @@ h1 {
   font-size: 13px;
   color: var(--muted);
 }
+.compare-table-wrap {
+  margin: 8px 0 18px;
+  overflow: auto;
+}
+.compare-table-wrap h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.compare-table th,
+.compare-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.compare-table th {
+  color: var(--muted);
+  font-weight: 600;
+}
+.busy-overlay button {
+  margin-top: 8px;
+}
 @media (max-width: 800px) {
   .print-workspace {
     padding: 16px;

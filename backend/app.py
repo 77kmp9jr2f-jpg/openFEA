@@ -9,7 +9,7 @@ from .schemas import Geometry, Analysis, AssistantRequest, ImageInput, Study, GP
 from .jobs import start_job
 from .assistant import assistant_status
 
-app = FastAPI(title='FEA-R',version='0.1.0')
+app = FastAPI(title='openFEA',version='0.1.0')
 Image.MAX_IMAGE_PIXELS = 25_000_000
 
 @app.middleware('http')
@@ -74,6 +74,11 @@ def apply_simulation_proposal(pid: str, context: SimulationContext):
 @app.get('/api/jobs/{jid}')
 def job(jid: str):
     return read_json(resource('jobs',jid)/'status.json')
+
+@app.post('/api/jobs/{jid}/cancel')
+def cancel(jid: str):
+    from .jobs import cancel_job
+    return cancel_job(jid)
 
 @app.post('/api/images')
 def upload_image(image: ImageInput):
@@ -158,7 +163,7 @@ def report(rid: str,format: str):
     if format not in ('html','pdf','zip','json'):
         raise HTTPException(404)
     path = export_report(rid,format)
-    return FileResponse(path,filename=f'FEA-R-{rid[:8]}.{format}')
+    return FileResponse(path,filename=f'openFEA-{rid[:8]}.{format}')
 
 if (ROOT/'dist').exists():
     app.mount('/',StaticFiles(directory=ROOT/'dist',html=True),name='frontend')

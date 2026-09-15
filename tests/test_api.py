@@ -34,6 +34,22 @@ def test_setup_requires_review_and_step_rejects_bad_input():
     uploaded=client.post('/api/stls',content=coupon.read_bytes(),headers={'X-Filename':'coupon.stl'})
     assert uploaded.status_code==200 and uploaded.json()['watertight'] is True
 
+def test_unknown_job_cancel_is_not_found():
+    assert client.post('/api/jobs/'+'a'*32+'/cancel').status_code==404
+
+def test_running_job_can_be_cancelled():
+    from backend.jobs import start_job
+    from backend.schemas import Geometry
+    from backend.storage import read_json, resource
+    started=start_job('model',Geometry(kind='plate',length=80,width=20,thickness=12,hole_diameter=0,mesh_size=3).model_dump())
+    cancelled=client.post('/api/jobs/'+started['id']+'/cancel')
+    status=read_json(resource('jobs',started['id'])/'status.json')
+    assert cancelled.status_code==200
+    assert cancelled.json()['status'] in ('cancelled','complete')
+    assert status['status'] in ('cancelled','complete')
+    if status['status']=='cancelled':
+        assert 'cancelled' in status['error']
+
 def test_artifact_path_and_missing_ids():
     assert client.get('/api/models/not-an-id').status_code==400
     assert client.get('/api/models/'+'f'*32).status_code==404
