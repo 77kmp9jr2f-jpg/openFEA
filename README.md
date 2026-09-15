@@ -59,7 +59,7 @@ Sending a chat message transmits its image, annotations and design context to As
 npm run build
 ```
 
-The numerical suite includes the exact uniform 3D tension field (`nu=0`), a Timoshenko cantilever displacement comparison at two mesh sizes, force/moment equilibrium, energy, load/stiffness scaling, STEP round trips, custom boolean geometry, STL watertightness and print-stiffness comparison, invalid inputs and report hashes. See [CONTRIBUTING.md](CONTRIBUTING.md) and [examples/print-coupon.stl](examples/print-coupon.stl). Test output is isolated from user studies. See [docs/VALIDATION.md](docs/VALIDATION.md) for the recorded prototype checks and their limits.
+The numerical suite includes the exact uniform 3D tension field (`nu=0`), a Timoshenko cantilever displacement comparison at two mesh sizes, force/moment equilibrium, energy, load/stiffness scaling, STEP round trips, custom boolean geometry, STL watertightness and print-stiffness comparison, invalid inputs and report hashes. See [CONTRIBUTING.md](CONTRIBUTING.md), [docs/PRINT-STL.md](docs/PRINT-STL.md), and [examples/print-coupon.stl](examples/print-coupon.stl). Test output is isolated from user studies. See [docs/VALIDATION.md](docs/VALIDATION.md) for the recorded prototype checks and their limits.
 
 ## ChatGPT Sites
 

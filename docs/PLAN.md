@@ -14,13 +14,18 @@ Completion gates:
 - Export a reproducible report and documentation bundle; preserve immutable geometry and simulation IDs.
 - Verify numerical results against analytic tension and bending cases, test failure gates and browser interaction, inspect current evidence in a saved visual review, commit locally.
 
-Currently implemented analysis scope: one connected homogeneous isotropic solid; small-strain static elasticity. No assemblies/contact, plasticity, buckling, fatigue, transient loads or certified material data. Photographic proposals are unmeasured until the user supplies/accepts specifications.
+Currently implemented analysis scope: one connected solid; small-strain static elasticity; optional transversely isotropic print equivalent. No assemblies/contact, plasticity, buckling, fatigue, transient loads, certified material data, or printed-coupon calibration. Photographic proposals are unmeasured until the user supplies/accepts specifications.
+
+## Shipped on print-stl-workspace
+
+- STL import with scale, watertightness, shell and defect checks; selectable surface patches via `classifySurfaces`.
+- Homogenized print model (orientation, walls, skins, infill) that changes stiffness, mass, results and reports. Not a slicer. Not coupon-calibrated. See [PRINT-STL.md](PRINT-STL.md).
+- Pin-and-compare table for two print configs; job cancel; CI, CONTRIBUTING, example coupon; product name OpenFEA.
 
 ## Outstanding requested scope
 
-- STL import, selectable surface patches, and a homogenized print model are implemented on `print-stl-workspace`. They are not coupon-calibrated and not a sliced toolpath.
+- Make the first local analysis succeed without an FEA specialist: guided coupon study, CPU-reachable solve, and result language that says what to trust. Research: [MAKING-FEA-COMMON.md](MAKING-FEA-COMMON.md).
 - Finish browser verification of the conversational proposal through apply, confirmation, GPU solve, saved-study reload and a fresh report/review when Astra is available again.
 - Evaluate current image-generation/image-to-3D tools for sketch-to-mesh against known CAD examples (separate research task; still pending).
-- Broader reliability: additional GPUs, camera hardware, cancellation of in-flight jobs, and larger industrial STLs.
+- Broader reliability: additional GPUs, camera hardware, and larger industrial STLs.
 - Keep ChatGPT Sites publishing at the planning stage. Push and deployment require explicit user authorization.
-- Contributor basics: CI workflow, CONTRIBUTING, example STL, and OpenFEA branding on the local workspace.

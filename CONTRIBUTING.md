@@ -23,7 +23,7 @@ Add tests for numerical or import behavior. A new analysis assumption belongs in
 
 - One connected solid, small-strain linear elasticity.
 - STL import must stay watertight and single-shell.
-- Print settings use the documented homogenized model in `backend/print_model.py`. Do not present that as sliced-toolpath or coupon-calibrated strength unless you add that evidence.
+- Print settings use the documented homogenized model in `backend/print_model.py` and [docs/PRINT-STL.md](docs/PRINT-STL.md). Do not present that as sliced-toolpath or coupon-calibrated strength unless you add that evidence.
 - Astra is optional. Modelling, meshing, solving and exports must work without it.
 
 ## Pull requests

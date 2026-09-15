@@ -7,18 +7,20 @@ flowchart LR
   I[Image / camera + annotations] --> A[Astra structured proposal]
   A --> R[User reviews dimensions]
   STEP[Single-solid STEP] --> G[Gmsh / OpenCASCADE]
+  STL[Watertight STL + surface patches] --> G
   R --> G
-  G --> M[CAD revision + tetrahedral mesh]
+  G --> M[CAD or mesh revision + tetrahedral mesh]
   M --> L[Astra loading interview / actual face context]
   L --> R2[Preview proposal / apply / confirm]
   R2 --> U[Material / supports / global XYZ forces]
   M --> U
+  PRINT[Optional homogenized print settings] --> U
   U --> P[Quadratic scikit-fem matrix assembly]
   P --> GPU[Browser WebGPU sparse CG]
   P --> CPU[Explicit SciPy CPU reference]
   GPU --> S[Independent residual check / stress recovery]
   CPU --> S
-  S --> V[Stress / displacement / equilibrium]
+  S --> V[Stress / displacement / equilibrium / print compare]
   V --> D[PDF + HTML + reproducibility ZIP]
 ```
 
@@ -30,11 +32,11 @@ flowchart LR
 
 `solver.py` maps CAD triangles to mesh facets. For each force it computes the discrete face area and integrates a constant traction, ensuring the requested total force is preserved. Dirichlet constraints include vertex and quadratic edge DOFs. The solution checks free-DOF residuals and computes all fixed-DOF reactions and moment balance. It writes full solution arrays and separately produces vertex samples for the viewer.
 
-`jobs.py` keeps a bounded worker queue and runs meshing, solving, and Astra in child processes. The server remains responsive; job timeout terminates its process group. Completed job/result JSON is written atomically. The frontend polls one job ID. Interrupted server restarts do not yet reconnect an in-flight browser request; completed immutable artifacts remain on disk.
+`jobs.py` keeps a bounded worker queue and runs meshing, solving, and Astra in child processes. The server remains responsive; job timeout or **Cancel** terminates the process group. Completed job/result JSON is written atomically. The frontend polls one job ID. Interrupted server restarts do not yet reconnect an in-flight browser request; completed immutable artifacts remain on disk.
 
 `report.py` reads only the stored result and its corresponding model, never the current UI draft. It produces an independent vector stress view, records force definition, constraints, material, dimensions, solver versions and hashes, and builds a self-contained archive. The snapshot can be re-solved with `reproduce.py` using the same mesh.
 
-STL imports are inspected for watertightness, shells, open/non-manifold edges and implausible scale, then meshed after `classifySurfaces` so triangle clusters become selectable load/support patches. Optional print settings (`backend/print_model.py`) replace isotropic Lamé constants with a transversely isotropic stiffness about the print-Z axis and scale reported mass by the estimated filament fraction. That model is an AABB-based homogenization, not an explicit infill mesh.
+STL imports are inspected for watertightness, shells, open/non-manifold edges and implausible scale, then meshed after `classifySurfaces` so triangle clusters become selectable load/support patches. Optional print settings (`backend/print_model.py`) replace isotropic Lamé constants with a transversely isotropic stiffness about the print-Z axis and scale reported mass by the estimated filament fraction. That model is an AABB-based homogenization, not an explicit infill mesh. See [PRINT-STL.md](PRINT-STL.md).
 
 Current limits include one connected body, predefined or box/cylinder CSG proposals, STEP or watertight STL, one active reference per study, fixed supports only, no CAD fillet UI, no general photogrammetry, and no physical-material or printed-coupon calibration. Camera access depends on the browser and hardware. The optional Astra service is not open source. Gmsh is serialized with a process file lock plus the in-process thread lock.
 

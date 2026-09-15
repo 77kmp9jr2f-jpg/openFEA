@@ -1,10 +1,10 @@
-# Validation record — updated 2026-09-13
+# Validation record — updated 2026-09-14
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
 
 ## Automated checks
 
-52 pytest checks passed on macOS arm64 / Python 3.12 on September 14 (print-stl-workspace). The suite covers exact 3D uniform tension, bending at two mesh sizes versus a Timoshenko beam, force and moment balance, strain energy, force/stiffness scaling, STEP round trip, connected custom CSG, STL watertightness and print-stiffness comparison, invalid input/foreign-origin rejection, study persistence, archive hashes, independently accepted/rejected solution submissions, and the proposal checks described below. The mocked numerical submission test is not GPU execution evidence. Two dependency deprecation warnings remain (Starlette HTTPX / AnyIO aliases).
+54 pytest checks passed on macOS arm64 / Python 3.12 on September 14 after the OpenFEA rename (`d088ce0` on `print-stl-workspace`). The suite covers exact 3D uniform tension, bending at two mesh sizes versus a Timoshenko beam, force and moment balance, strain energy, force/stiffness scaling, STEP round trip, connected custom CSG, STL watertightness and print-stiffness comparison, job cancel, invalid input/foreign-origin rejection, study persistence, archive hashes, independently accepted/rejected solution submissions, and the proposal checks described below. The mocked numerical submission test is not GPU execution evidence. Two dependency deprecation warnings remain (Starlette HTTPX / AnyIO aliases).
 
 The measured cantilever has approximately 0.98% coarse-mesh and 0.78% fine-mesh tip displacement error against the analytic beam model, and 0.20% mesh-to-mesh change. Predetermined gates are below 5% analytic error and below 2% mesh change. These are displacement checks; they do not validate peak stress convergence at the bracket's sharp corner. Exact values: `evidence/numerical-benchmark.json`.
 
@@ -27,6 +27,18 @@ The first GPU attempt exposed a WGSL reserved-name compilation error; this was c
 A real `gpt-6-astra` image request identified the synthetic L bracket and its two bores, declined to infer scale, and asked for overall dimensions, hole locations and hidden details. After exact example dimensions were supplied, a second real request returned a valid structured bracket proposal with explicit synthetic provenance assumptions. These are actual authenticated calls, not canned assistant responses. Evidence: `evidence/astra-image-inspection.json` and `evidence/astra-dimensioned-proposal.json`.
 
 The test reference is a deliberately labelled synthetic CAD render. It is not a customer photograph and does not establish performance on arbitrary real images. General geometry support consists of brackets, plates, shafts, ordered box/cylinder CSG and imported single-solid STEP; arbitrary feature reconstruction is outside this version.
+
+## STL and print path
+
+Automated: open vs closed STL, reject non-STL, refuse to mesh an open shell, 100% vs sparse homogenization, rotation of the soft axis, selectable faces on an imported box, print solve residual `< 1e-7`, compare deltas, HTTP job cancel. See `tests/test_stl_print.py` and [PRINT-STL.md](PRINT-STL.md).
+
+Browser (built app at `http://127.0.0.1:8000/`, CPU reference solver, example print coupon, 807 quadratic tetrahedra / 4,455 DOFs):
+
+- Gyroid 20%, 3 walls: 54.3% solid equivalent, 2.15 g, 1.11 mm max displacement, residual 1.8e-11.
+- Gyroid 60%, 3 walls, same mesh: 77.1%, 3.06 g, 0.821 mm. Compare table showed those deltas plus in-plane / layer moduli.
+- Cancel on a finer bracket remesh surfaced `The job was cancelled.`
+
+This is software evidence that print settings change the equivalent solid. It is not printed-coupon calibration and not peak-stress convergence.
 
 ## Interactive and document checks
 
