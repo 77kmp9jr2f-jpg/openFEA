@@ -36,3 +36,5 @@ Vendor surveys (wait times, license queues, forced simplification) matter less h
 Make the **first successful local analysis** the product, not another solver feature.
 
 A new user should be able to open OpenFEA, run the example coupon on CPU without hunting for settings, see displacement and mass respond to infill, and read three sentences that say what to trust (trend, residual, mass) and what not to trust (peak stress, printed strength). Astra, hosted Sites, and sketch-to-mesh stay deferred until that path is boringly reliable.
+
+Shipped on `print-stl-workspace` (`56f0faa`). The follow-on problem is the same for a person’s own STL/STEP and for an agent: a machine-readable readiness verdict, recommended faces, and a schema-constrained job API that cannot skip confirm or residual `< 1e-7`. See [AGENT.md](AGENT.md).

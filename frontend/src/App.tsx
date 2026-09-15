@@ -40,6 +40,7 @@ import SetupProposalCard from "./SetupProposalCard";
 import PrintWorkspace from "./PrintWorkspace";
 import CompareTable from "./CompareTable";
 import ResultGuidance from "./ResultGuidance";
+import ReadinessPanel from "./ReadinessPanel";
 import { api, job, cancelJob, demoGeometry, materials, format, contextKey, defaultPrint } from "./types";
 import type {
   Geometry,
@@ -58,6 +59,7 @@ import type {
   PrintPreview,
   StlInspect,
   RunCompare,
+  Readiness,
 } from "./types";
 
 type Tab = "reference" | "model" | "print" | "setup" | "results";
@@ -127,6 +129,7 @@ export default function App() {
     [featureText, setFeatureText] = useState(""),
     [featureError, setFeatureError] = useState("");
   const [compute, setCompute] = useState<"webgpu" | "cpu">("cpu");
+  const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [setupPreview, setSetupPreview] = useState<SimulationProposal | null>(
     null,
   );
@@ -265,7 +268,10 @@ export default function App() {
           : [],
       );
       setSelected(null);
-      setTab(flags.applyRecommended ? "print" : "model");
+      if (flags.firstAnalysis) setTab("print");
+      else if (flags.applyRecommended)
+        setTab(next.kind === "stl" ? "print" : "setup");
+      else setTab("model");
       if (flags.applyRecommended) setConfirmed(true);
       if (flags.firstAnalysis) {
         setCompute("cpu");
@@ -386,6 +392,30 @@ export default function App() {
       .then(setCompare)
       .catch(() => setCompare(null));
   }, [pinned, result]);
+  useEffect(() => {
+    if (!model || dirty) {
+      setReadiness(null);
+      return;
+    }
+    let cancelled = false;
+    api<Readiness>("/readiness", {
+      model_id: model.id,
+      material,
+      fixed_faces: fixed,
+      loads,
+      confirmed,
+      print,
+    })
+      .then((value) => {
+        if (!cancelled) setReadiness(value);
+      })
+      .catch(() => {
+        if (!cancelled) setReadiness(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [model, dirty, material, fixed, loads, confirmed, print]);
   async function upload(file: File) {
     if (busy) return;
     setBusy("Importing reference");
@@ -434,7 +464,7 @@ export default function App() {
         assumptions: ["STEP units converted to mm; verify model bounds."],
       };
       setSpec(s);
-      await build(s);
+      await build(s, { applyRecommended: true });
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -681,6 +711,24 @@ export default function App() {
   function changeSetup(fn: () => void) {
     fn();
     invalidate();
+  }
+  function applyRecommendedSetup() {
+    if (!model) return;
+    const suggested = readiness?.recommended.loads[0]?.vector || vector;
+    setFixed(
+      readiness?.recommended.fixed_faces.length
+        ? readiness.recommended.fixed_faces
+        : [model.recommended.fixed_face],
+    );
+    setLoads([
+      {
+        face_id:
+          readiness?.recommended.loads[0]?.face_id ||
+          model.recommended.load_face,
+        vector: suggested,
+      },
+    ]);
+    setSelected(null);
   }
   return (
     <div className="app-shell">
@@ -1312,6 +1360,12 @@ export default function App() {
                 {result.dofs.toLocaleString()} degrees of freedom ·{" "}
                 {format(result.seconds)} s solve · {format(result.mass_g)} g
               </p>
+              {(result.model_sha256 || result.mesh_sha256) && (
+                <p className="hash-line">
+                  CAD {result.model_sha256?.slice(0, 12)} · mesh{" "}
+                  {result.mesh_sha256?.slice(0, 12)}
+                </p>
+              )}
               <p className="execution-evidence">
                 {result.execution?.backend === "webgpu"
                   ? "Solved on local GPU"
@@ -1496,7 +1550,9 @@ export default function App() {
                     ? "Image-based proposal · verify dimensions"
                     : spec.provenance === "step_import"
                       ? "STEP import · verify units"
-                      : "User-specified geometry"}
+                      : spec.provenance === "stl_import"
+                        ? "STL import · selectable patches, not CAD faces"
+                        : "User-specified geometry"}
               </span>
             </div>
             <div className="model-exports">
@@ -1583,6 +1639,14 @@ export default function App() {
             {busy && <strong role="status">{busy}</strong>}
           </div>
         )}
+        {(tab === "model" || tab === "print" || tab === "setup") &&
+          readiness &&
+          !dirty && (
+            <ReadinessPanel
+              readiness={readiness}
+              onApplyRecommended={applyRecommendedSetup}
+            />
+          )}
         {(tab === "model" || tab === "print" || tab === "setup") && (
           <div className="run-bar">
             <div>
@@ -1896,13 +1960,13 @@ export default function App() {
                 compare.
               </li>
               <li>
-                For your own part, import a watertight STL or STEP, or build a
-                parametric solid. Print settings change a homogenized
-                stiffness, not a sliced toolpath.
+                For your own part, import a watertight STL or STEP. Readiness
+                lists what is missing. Use recommended fixture and load, then
+                confirm.
               </li>
               <li>
-                Ask Astra only when it is available. Export the report when you
-                want a snapshot.
+                Agents use GET /api/agent — the same readiness, confirm gate,
+                residual &lt; 1e-7, and report hashes. No UI scraping.
               </li>
             </ol>
             <div className="stack-grid">

@@ -2262,6 +2262,57 @@ h1 {
   font-size: 13px;
   color: var(--muted);
 }
+.readiness {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+.readiness-head h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+.readiness-head p {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.readiness-ready {
+  border-color: #c5d6bf;
+}
+.readiness-blocked {
+  border-color: #e4c4b4;
+}
+.readiness-checks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+.readiness-checks li {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 10px;
+  font-size: 13px;
+}
+.readiness-checks b {
+  font-weight: 600;
+}
+.readiness-checks li[data-ok="true"] b {
+  color: var(--green);
+}
+.readiness-checks li[data-ok="false"] b {
+  color: var(--orange);
+}
+.readiness .outline-button {
+  margin-top: 12px;
+}
+.hash-line {
+  font: 11px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--muted);
+  word-break: break-all;
+}
 .result-guidance {
   display: grid;
   grid-template-columns: 1fr 1fr;

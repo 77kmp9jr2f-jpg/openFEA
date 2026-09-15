@@ -21,7 +21,7 @@ For development, run the backend and frontend in separate terminals:
 npm run dev
 ```
 
-The development UI is at http://127.0.0.1:5173. API documentation is at http://127.0.0.1:8000/docs.
+The development UI is at http://127.0.0.1:5173. API documentation is at http://127.0.0.1:8000/docs. Agents start at [docs/AGENT.md](docs/AGENT.md) and `GET /api/agent`.
 
 ## Use the workspace
 
@@ -29,7 +29,7 @@ The development UI is at http://127.0.0.1:5173. API documentation is at http://1
 2. **Astra.** Ask the assistant to inspect the image. It sees the reference, normalized annotation coordinates and notes, current geometry, face definitions, material, loads, fixtures, and current result summary. Supply missing dimensions, then review and apply its structured CAD proposal. No model-generated Python or shell code is executed to build CAD.
 3. **Model.** Build a bracket, plate/beam, shaft/tube, a custom constructive-solid-geometry recipe, import a single-solid STEP, or import a watertight STL. Geometry and meshing are performed by Gmsh. Download STEP, STL, and the original mesh. Rebuilding clears old face selections and results. STL import checks scale, watertightness, shells and mesh defects, then clusters triangles into selectable surfaces.
 4. **Print.** Optional. Set orientation, infill, walls, line width, layer height and skins. Those settings change a documented homogenized stiffness and estimated filament mass. They are not a sliced toolpath and not a calibration against printed coupons. Pin one result and run another configuration to compare displacement, stress and mass.
-5. **Simulation.** Select faces and edit material/XYZ forces, or use **Discuss loading** when Astra is available. Each force is a total in N, uniformly distributed over its face in global model axes. Review and confirm before solving. Local GPU is the default; select Local CPU explicitly to run the reference solver.
+5. **Simulation.** Readiness lists missing fixtures, loads, material and confirm. Use recommended faces or click them. Each force is a total in N, uniformly distributed over its face in global model axes. Confirm before solving. Local CPU is the default; GPU is an explicit WebGPU choice.
 6. **Results.** Inspect stress, displacement, exaggerated deformation, force equilibrium, and interpretation notes. Export PDF, self-contained HTML, JSON, or the complete ZIP package. The ZIP includes original CAD/mesh, inputs/results, the last 24 interview messages, the applied Astra setup proposal when used, all quadratic solution DOFs, quadrature stresses, nodal CSV, solver source, dependency versions, hashes, and a reproduction script.
 7. **Save study.** The browser automatically preserves the current workspace. Save study creates a server-side snapshot that can be reopened from Studies. Geometry revisions and analysis runs are immutable.
 

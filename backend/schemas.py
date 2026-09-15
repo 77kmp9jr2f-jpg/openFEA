@@ -155,6 +155,14 @@ class PrintPreviewRequest(StrictModel):
     material: Material = Field(default_factory=Material)
     print: PrintSettings = Field(default_factory=PrintSettings)
 
+class ReadinessRequest(StrictModel):
+    model_id: str = Field(pattern=r'^[a-f0-9]{32}$')
+    material: Material | None = None
+    fixed_faces: list[int] = Field(default_factory=list, max_length=50)
+    loads: list[Force] = Field(default_factory=list, max_length=20)
+    confirmed: bool = False
+    print: PrintSettings = Field(default_factory=PrintSettings)
+
 class GPUSolution(StrictModel):
     system_id: str = Field(pattern=r'^[a-f0-9]{32}$')
     displacement: list[Number] = Field(min_length=1,max_length=150000)

@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps, UnidentifiedImageError
 from .storage import ROOT, DATA, identifier, resource, write_json, read_json
-from .schemas import Geometry, Analysis, AssistantRequest, ImageInput, Study, GPUSolution, SimulationContext, PrintPreviewRequest
+from .schemas import Geometry, Analysis, AssistantRequest, ImageInput, Study, GPUSolution, SimulationContext, PrintPreviewRequest, ReadinessRequest
 from .jobs import start_job
 from .assistant import assistant_status
 
@@ -36,7 +36,26 @@ async def missing(request,exc):
 
 @app.get('/api/health')
 def health():
-    return {'ok':True,'version':'0.1.0','assistant':assistant_status(),'solver':'scikit-fem · quadratic tetrahedra'}
+    return {'ok':True,'version':'0.1.0','assistant':assistant_status(),
+            'solver':'scikit-fem · quadratic tetrahedra','agent':'/api/agent'}
+
+@app.get('/api/agent')
+def agent():
+    from .readiness import agent_contract
+    return agent_contract()
+
+@app.get('/api/models/{mid}/readiness')
+def model_readiness(mid: str):
+    from .readiness import analysis_readiness
+    return analysis_readiness(read_json(resource('models', mid) / 'model.json'))
+
+@app.post('/api/readiness')
+def readiness(body: ReadinessRequest):
+    from .readiness import analysis_readiness
+    return analysis_readiness(
+        read_json(resource('models', body.model_id) / 'model.json'),
+        body.model_dump(),
+    )
 
 @app.post('/api/models')
 def model(spec: Geometry):

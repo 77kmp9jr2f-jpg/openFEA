@@ -24,7 +24,8 @@ Currently implemented analysis scope: one connected solid; small-strain static e
 
 ## Outstanding requested scope
 
-- Make the first local analysis succeed without an FEA specialist: guided coupon study, CPU-reachable solve, and result language that says what to trust. Research: [MAKING-FEA-COMMON.md](MAKING-FEA-COMMON.md).
+- First coupon analysis on CPU with trust guidance: shipped on `print-stl-workspace` (`56f0faa`). See [MAKING-FEA-COMMON.md](MAKING-FEA-COMMON.md).
+- Own-part + agent path: machine-readable readiness, documented `/api/agent` contract, residual/confirm gates, same guidance and hashes. See [AGENT.md](AGENT.md).
 - Finish browser verification of the conversational proposal through apply, confirmation, GPU solve, saved-study reload and a fresh report/review when Astra is available again.
 - Evaluate current image-generation/image-to-3D tools for sketch-to-mesh against known CAD examples (separate research task; still pending).
 - Broader reliability: additional GPUs, camera hardware, and larger industrial STLs.

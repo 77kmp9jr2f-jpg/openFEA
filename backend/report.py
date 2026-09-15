@@ -185,7 +185,7 @@ def export_report(rid,format):
         write_json(folder/'interview.json',result['setup'].get('conversation',[]))
         files['interview.json']=folder/'interview.json'
         files['source/gpu.ts']=ROOT/'frontend'/'src'/'gpu.ts'
-        for name in ['__init__.py','solver.py','schemas.py','storage.py','simulation_proposals.py','print_model.py','stl_io.py','guidance.py']:files['source/backend/'+name]=ROOT/'backend'/name
+        for name in ['__init__.py','solver.py','schemas.py','storage.py','simulation_proposals.py','print_model.py','stl_io.py','guidance.py','readiness.py']:files['source/backend/'+name]=ROOT/'backend'/name
         files['source/requirements.txt']=ROOT/'requirements.txt'
         ref=_reference(result)
         if ref and ref.exists():files['reference.png']=ref

@@ -91,6 +91,7 @@ export type Model = {
   min_quality: number;
   recommended: { fixed_face: number; load_face: number };
   sha256: string;
+  mesh_sha256?: string;
   seconds: number;
 };
 export type Material = {
@@ -101,6 +102,27 @@ export type Material = {
   density_kg_m3: number;
 };
 export type Load = { face_id: number; vector: Vec3 };
+export type ReadinessCheckId =
+  | "mesh_usable"
+  | "faces_selectable"
+  | "fixture"
+  | "load"
+  | "material"
+  | "confirm"
+  | "scope";
+export type Readiness = {
+  status: "blocked" | "incomplete" | "ready";
+  ready: boolean;
+  can_solve: boolean;
+  missing: ReadinessCheckId[];
+  next: string;
+  agent_next?: string;
+  recommended: {
+    fixed_faces: number[];
+    loads: Load[];
+  };
+  checks: { id: ReadinessCheckId; ok: boolean; detail: string; fix?: string }[];
+};
 export type Result = {
   execution?: {
     backend: "cpu" | "webgpu";
@@ -131,6 +153,8 @@ export type Result = {
   setup: { material: Material; print?: PrintSettings };
   print?: PrintPreview & { mass_g?: number };
   guidance?: { trust: string[]; caution: string[]; next: string };
+  model_sha256?: string;
+  mesh_sha256?: string;
 };
 export type CompareSide = {
   id: string;
