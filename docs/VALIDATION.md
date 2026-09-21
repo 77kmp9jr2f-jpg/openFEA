@@ -17,7 +17,7 @@ A fresh browser journey uploaded the synthetic 40 × 10 × 8 mm coupon through *
 
 The four-page GPU PDF was rendered and inspected page by page. Section flow avoids overflow-only pages. Attached reference imagery is labelled as study context; it is not proof of geometry reconstruction. Historical print-warning boilerplate is clarified in presentation without rewriting the immutable result JSON.
 
-Evidence: `evidence/integration-2026-09-20/`. This is software verification on a known synthetic coupon, not dimensional reconstruction or printed-part strength validation. Historical evidence below remains scoped to its stated revision/date; this pass completes the formerly pending conversational print application/GPU/save/report path.
+Evidence: `evidence/integration-2026-09-20/`. Current [saved visual review](http://127.0.0.1:8850/reviews/?id=514b555beb024e83b7955783e44a31dc), ID `514b555beb024e83b7955783e44a31dc`, binds source `1a6e8d7`; its three rendered frames and revision were inspected. [All reviews](http://127.0.0.1:8850/reviews/). Human review remains open. This is software verification on a known synthetic coupon, not dimensional reconstruction or printed-part strength validation. Historical evidence below remains scoped to its stated revision/date; this pass completes the formerly pending conversational print application/GPU/save/report path.
 
 ## Automated checks
 
