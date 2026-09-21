@@ -52,13 +52,13 @@ def result_guidance(result: dict) -> dict:
         )
     if result.get('element_order') == 1:
         caution.append(
-            "This run used linear tetrahedra because a quadratic system would "
-            "exceed the local size limit. Displacement trends are still useful; "
-            "stress is less accurate than a P2 mesh of the same part."
+            "This saved run used linear tetrahedra. Thin-part bending and nearly "
+            "incompressible materials can be excessively stiff. Compare against "
+            "a converged quadratic mesh before interpreting displacement or stress."
         )
     nxt = (
         "Pin this run, change infill, walls or orientation, and solve again. "
-        "Trust the displacement and mass trend, not the peak stress."
+        "Keep other conditions fixed and check mesh convergence before interpreting trends."
         if print_on
         else "If you change geometry or material, rebuild, confirm, and compare a second run."
     )

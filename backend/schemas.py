@@ -4,6 +4,7 @@ import math
 
 Number = Annotated[float, Field(allow_inf_nan=False)]
 Vec3 = tuple[Number, Number, Number]
+MAX_SOLVER_DOFS = 500000
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -165,7 +166,7 @@ class ReadinessRequest(StrictModel):
 
 class GPUSolution(StrictModel):
     system_id: str = Field(pattern=r'^[a-f0-9]{32}$')
-    displacement: list[Number] = Field(min_length=1,max_length=150000)
+    displacement: list[Number] = Field(min_length=1,max_length=MAX_SOLVER_DOFS)
     device: str = Field(min_length=1,max_length=200)
     iterations: int = Field(ge=1,le=20000)
     refinements: int = Field(ge=1,le=10)

@@ -11,11 +11,17 @@ PROCESS_LOCK = threading.Lock()
 def _stop(process):
     if process.poll() is not None:
         return
-    os.killpg(process.pid, signal.SIGTERM)
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        return
     try:
         process.wait(timeout=3)
     except subprocess.TimeoutExpired:
-        os.killpg(process.pid, signal.SIGKILL)
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
         process.wait()
 
 def start_job(kind, payload):
@@ -26,12 +32,16 @@ def start_job(kind, payload):
     write_json(folder/'status.json',{'id':jid,'status':'queued','kind':kind})
     def work():
         try:
-            write_json(folder/'status.json',{'id':jid,'status':'running','kind':kind})
             env = dict(os.environ,OPENBLAS_NUM_THREADS='2',OMP_NUM_THREADS='2',VECLIB_MAXIMUM_THREADS='2')
             with (folder/'worker.log').open('w') as log:
-                process = subprocess.Popen([sys.executable,'-m','backend.worker',kind,jid],cwd=ROOT,env=env,stdout=log,stderr=log,start_new_session=True)
+                # Cancellation and launch share a transition lock: a queued job
+                # cannot start after cancellation, including the Popen/register gap.
                 with PROCESS_LOCK:
+                    if read_json(folder/'status.json')['status'] == 'cancelled':
+                        return
+                    process = subprocess.Popen([sys.executable,'-m','backend.worker',kind,jid],cwd=ROOT,env=env,stdout=log,stderr=log,start_new_session=True)
                     PROCESSES[jid] = process
+                    write_json(folder/'status.json',{'id':jid,'status':'running','kind':kind})
                 try:
                     process.wait(timeout=210)
                 except subprocess.TimeoutExpired:
@@ -40,29 +50,34 @@ def start_job(kind, payload):
                 finally:
                     with PROCESS_LOCK:
                         PROCESSES.pop(jid, None)
-            if read_json(folder/'status.json').get('status') == 'cancelled':
-                return
-            if process.returncode and not (folder/'failure.json').exists():
-                raise ValueError('The geometry/solver worker stopped unexpectedly. Simplify the model or increase mesh size.')
-            if (folder/'failure.json').exists():
-                raise ValueError(read_json(folder/'failure.json')['error'])
-            result = read_json(folder/'output.json')
-            write_json(folder/'status.json',{'id':jid,'status':'complete','kind':kind,'result':result})
+            with PROCESS_LOCK:
+                if read_json(folder/'status.json').get('status') == 'cancelled':
+                    return
+                if process.returncode and not (folder/'failure.json').exists():
+                    raise ValueError('The geometry/solver worker stopped unexpectedly. Simplify the model or increase mesh size.')
+                if (folder/'failure.json').exists():
+                    raise ValueError(read_json(folder/'failure.json')['error'])
+                result = read_json(folder/'output.json')
+                write_json(folder/'status.json',{'id':jid,'status':'complete','kind':kind,'result':result})
         except Exception as exc:
-            if read_json(folder/'status.json').get('status') == 'cancelled':
-                return
-            write_json(folder/'status.json',{'id':jid,'status':'failed','kind':kind,'error':str(exc)})
+            with PROCESS_LOCK:
+                if read_json(folder/'status.json').get('status') != 'cancelled':
+                    write_json(folder/'status.json',{'id':jid,'status':'failed','kind':kind,'error':str(exc)})
         finally: SLOTS.release()
-    POOL.submit(work)
+    try:
+        POOL.submit(work)
+    except Exception:
+        SLOTS.release()
+        raise
     return {'id':jid,'status':'queued'}
 
 def cancel_job(jid):
     folder = resource('jobs', jid)
-    status = read_json(folder/'status.json')
-    if status['status'] in ('complete','failed','cancelled'):
-        return status
-    write_json(folder/'status.json',{'id':jid,'status':'cancelled','kind':status.get('kind'),'error':'The job was cancelled.'})
     with PROCESS_LOCK:
+        status = read_json(folder/'status.json')
+        if status['status'] in ('complete','failed','cancelled'):
+            return status
+        write_json(folder/'status.json',{'id':jid,'status':'cancelled','kind':status.get('kind'),'error':'The job was cancelled.'})
         process = PROCESSES.get(jid)
     if process is not None:
         _stop(process)

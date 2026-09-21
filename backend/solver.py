@@ -11,17 +11,17 @@ import warnings
 from skfem import MeshTet, Basis, FacetBasis, ElementVector, ElementTetP1, ElementTetP2, LinearForm, BilinearForm, asm, condense
 from skfem.helpers import dot, sym_grad
 from skfem.models.elasticity import linear_elasticity, lame_parameters
-from .schemas import Analysis, GPUSolution
+from .schemas import Analysis, GPUSolution, MAX_SOLVER_DOFS
 from .storage import DATA, resource, identifier, read_json, write_json
 from .print_model import stiffness, apply_usage
 from .guidance import result_guidance
 
 def choose_element(mesh: MeshTet):
-    """Prefer P2. Dense CAD dumps can lock a surface too fine for local P2."""
+    """Keep the reviewed quadratic formulation; never silently downgrade it."""
     p2_dofs = 3 * (mesh.nvertices + mesh.edges.shape[1])
-    if p2_dofs <= 500000:
+    if p2_dofs <= MAX_SOLVER_DOFS:
         return ElementVector(ElementTetP2()), 4, 2
-    return ElementVector(ElementTetP1()), 2, 1
+    raise ValueError('The quadratic system exceeds 500,000 degrees of freedom. Increase mesh size or export a coarser CAD STL; interpolation is never silently reduced.')
 
 
 def assemble_system(setup: Analysis):
@@ -33,7 +33,7 @@ def assemble_system(setup: Analysis):
     mesh = MeshTet(arrays['points'].T,arrays['tets'].T)
     element, intorder, order = choose_element(mesh)
     basis = Basis(mesh,element,intorder=intorder)
-    if basis.N>500000:
+    if basis.N>MAX_SOLVER_DOFS:
         raise ValueError('Model exceeds 500,000 degrees of freedom. Increase mesh size.')
     face_by_id = {f['id']:f for f in model['faces']}
     if not set(setup.fixed_faces + [l.face_id for l in setup.loads]) <= face_by_id.keys():

@@ -24,6 +24,17 @@ Currently implemented analysis scope: one connected solid; small-strain static e
 
 ## Outstanding requested scope
 
+### Integration repair and next workflow pass (2026-09-20)
+
+- [x] Correct arbitrary-angle stiffness rotation; synchronize job cancellation; align the 500,000-DOF GPU contract; disclose comparison context changes. Regression tests reproduce the reviewed defects.
+- [x] Remove automatic P1 downgrade. Oversized quadratic systems request a coarser mesh until a separately reviewed interpolation option has numerical evidence.
+- [x] Install Linux Gmsh GLU dependency in CI. A fresh remote run remains pending an authorized push.
+- [ ] Preserve original/working STL provenance, reject empty STEP downloads, retain preprocessing warnings and require review of altered geometry.
+- [ ] Require real-part setup confirmation; add operation-specific cancellation through the WebGPU loop.
+- [ ] Bind print settings to Astra interview/proposals and restore pinned comparisons; show print axes alongside the model.
+- [ ] Run numerical/API/build checks and the real browser conversation/GPU/save/report path, review the integration, commit and merge into local main.
+- [ ] Continue image-to-mesh research and geometry/convergence/calibration work. Physical specimen validation and hosted Sites release remain outside current software acceptance.
+
 - First coupon analysis on CPU with trust guidance: shipped on `print-stl-workspace` (`56f0faa`). See [MAKING-FEA-COMMON.md](MAKING-FEA-COMMON.md).
 - Own-part + agent path: machine-readable readiness, documented `/api/agent` contract, residual/confirm gates, same guidance and hashes. See [AGENT.md](AGENT.md).
 - Finish browser verification of the conversational proposal through apply, confirmation, GPU solve, saved-study reload and a fresh report/review when Astra is available again.

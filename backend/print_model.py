@@ -141,7 +141,7 @@ def _transverse(ep, et, nu, gp, gt) -> np.ndarray:
 
 def _rotate_voigt(C, R) -> np.ndarray:
     """R maps print-frame vectors to global: v_g = R @ v_p."""
-    q = R.T
+    q = R
     t = np.zeros((6, 6))
     for a, (i, j) in enumerate(((0, 0), (1, 1), (2, 2), (1, 2), (0, 2), (0, 1))):
         for b, (k, l) in enumerate(((0, 0), (1, 1), (2, 2), (1, 2), (0, 2), (0, 1))):
@@ -174,7 +174,18 @@ def compare_results(a: dict, b: dict) -> dict:
             'print': print_info.get('settings'),
             'relative_residual': result['relative_residual'],
             'force_balance_error_n': result['force_balance_error_n'],
+            'setup': result.get('setup'),
         }
     left, right = pack(a), pack(b)
     delta = {k: right[k] - left[k] for k in keys if left.get(k) is not None and right.get(k) is not None}
-    return {'same_model': a['model_id'] == b['model_id'], 'a': left, 'b': right, 'delta': delta}
+    differences = []
+    for key in ('model_id', 'mesh_sha256', 'element_order'):
+        if a.get(key) != b.get(key):
+            differences.append(key)
+    for key in ('material', 'fixed_faces', 'loads'):
+        av, bv = (r.get('setup', {}).get(key) for r in (a, b))
+        if av is None or bv is None or av != bv:
+            differences.append(key)
+    return {'same_model': a['model_id'] == b['model_id'],
+            'same_analysis_context': not differences, 'context_differences': differences,
+            'a': left, 'b': right, 'delta': delta}
