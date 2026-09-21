@@ -16,10 +16,10 @@ Deferred: contact, plasticity, printed-part strength, hosted Sites, sketch-to-me
 
 ## Workflow
 
-1. `POST /api/stls` (raw bytes, `X-Filename`) or `POST /api/steps`. Mesh only a watertight STL.
+1. `POST /api/stls` (raw bytes, `X-Filename`) or `POST /api/steps`. Review units and preprocessing first; explicitly set `accept_stl_preprocessing=true` only after reviewing a simplified STL. Mesh only a watertight STL.
 2. `POST /api/models` with a `Geometry` body. Poll `GET /api/jobs/{id}` until `status` is `complete`.
-3. `POST /api/readiness` with the model id and the intended material, `fixed_faces`, `loads`, and `confirmed`.
-4. If `status` is not `ready`, apply `recommended` or the `fix` on each failed check. Do not invent extra physics.
+3. `POST /api/readiness` with the model id and the intended material, `fixed_faces`, `loads`, `print`, and `confirmed`.
+4. If `status` is not `ready`, ask for missing physical inputs or follow the `fix` on each failed check. `recommended` contains demonstration suggestions, not user evidence or permission to invent loading. Review and explicitly adopt appropriate conditions.
 5. Review the verdict. Then `POST /api/solve` with the same setup and `confirmed: true`.
 6. Poll the job. Read `guidance`, `relative_residual`, `max_displacement_mm`, mass, `model_sha256`, `mesh_sha256`, and `warnings`.
 7. `GET /api/runs/{id}/report/json` (or html/pdf/zip) is the same snapshot a human exports.
@@ -27,3 +27,7 @@ Deferred: contact, plasticity, printed-part strength, hosted Sites, sketch-to-me
 ## What to trust
 
 `guidance.trust` names displacement, residual, and mass. `guidance.caution` names peak stress, yield ratio, and homogenized print stiffness. Those sentences are stored on the result so the workspace and the report cannot drift.
+
+## Print-aware Astra setup
+
+`POST /api/assistant` accepts the complete `print` object alongside geometry, material, supports and loads. Astra asks for missing or unapproved manufacturing inputs. A complete simulation proposal supplies every print setting explicitly. `/api/setup-proposals/{id}/apply` binds that object to the source context and returns `confirmed:false`. The solver rejects a submitted setup whose print settings differ from its applied proposal. Manual edits must clear `setup_proposal_id` and require fresh review. Model and proposal comparison normalizes older optional geometry defaults without rewriting immutable stored records.

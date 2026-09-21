@@ -7,12 +7,14 @@ export default function PrintWorkspace({
   model,
   material,
   preview,
+  disabled = false,
 }: {
   print: PrintSettings;
   onChange: (next: PrintSettings) => void;
   model: Model | null;
   material: Material;
   preview: PrintPreview | null;
+  disabled?: boolean;
 }) {
   function patch(partial: Partial<PrintSettings>) {
     onChange({ ...print, ...partial });
@@ -24,6 +26,7 @@ export default function PrintWorkspace({
           <input
             type="checkbox"
             checked={print.enabled}
+            disabled={disabled}
             onChange={(e) => patch({ enabled: e.target.checked })}
           />{" "}
           Use homogenized print stiffness
@@ -34,7 +37,7 @@ export default function PrintWorkspace({
           calibration. Filament properties stay the selected material.
         </p>
       </div>
-      <fieldset disabled={!print.enabled} className="print-grid">
+      <fieldset disabled={disabled || !print.enabled} className="print-grid">
         <label>
           Infill pattern
           <select
@@ -97,7 +100,9 @@ export default function PrintWorkspace({
           unit="deg"
           value={print.rotation_deg[0]}
           onChange={(v) =>
-            patch({ rotation_deg: [v, print.rotation_deg[1], print.rotation_deg[2]] })
+            patch({
+              rotation_deg: [v, print.rotation_deg[1], print.rotation_deg[2]],
+            })
           }
         />
         <Field
@@ -105,7 +110,9 @@ export default function PrintWorkspace({
           unit="deg"
           value={print.rotation_deg[1]}
           onChange={(v) =>
-            patch({ rotation_deg: [print.rotation_deg[0], v, print.rotation_deg[2]] })
+            patch({
+              rotation_deg: [print.rotation_deg[0], v, print.rotation_deg[2]],
+            })
           }
         />
         <Field
@@ -113,7 +120,9 @@ export default function PrintWorkspace({
           unit="deg"
           value={print.rotation_deg[2]}
           onChange={(v) =>
-            patch({ rotation_deg: [print.rotation_deg[0], print.rotation_deg[1], v] })
+            patch({
+              rotation_deg: [print.rotation_deg[0], print.rotation_deg[1], v],
+            })
           }
         />
       </fieldset>

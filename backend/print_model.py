@@ -65,7 +65,7 @@ def homogenize(bounds, material: Material, settings: PrintSettings) -> dict:
         'Layering is transversely isotropic: print Z is the weak/layer direction after the supplied rotation.',
         pattern_note,
         'Filament modulus, strength and density remain user inputs. No printed-specimen calibration is claimed.',
-        'Anisotropy, voids, bonding defects and moisture are not modelled.',
+        'Additional raster-scale anisotropy, local voids, bonding defects and moisture are not modelled.',
     ]
     return {
         'enabled': True,

@@ -64,6 +64,13 @@ def test_dense_cad_export_is_welded_to_a_workable_mesh(tmp_path):
     assert any('welded' in warning for warning in restored['warnings'])
     with pytest.raises(ValueError, match='review'):
         scaled_stl_path(meta['id'], 1)
+    from backend.storage import read_json, write_json
+    metadata_path = DATA / 'stls' / meta['id'] / 'inspect.json'
+    legacy = read_json(metadata_path); legacy.pop('preprocessing')
+    write_json(metadata_path, legacy)
+    restored_legacy = load_inspection(meta['id'])
+    assert restored_legacy['preprocessing']['changed']
+    assert restored_legacy['preprocessing']['vertex_distance_bound_mm'] >= 0
 
 
 def test_stl_store_rejects_non_stl_and_accepts_box():

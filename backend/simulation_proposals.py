@@ -1,6 +1,6 @@
 """Revision-bound simulation proposals, independent of any model transport."""
 import hashlib,json
-from .schemas import Analysis, Geometry, SimulationContext, SimulationDraft
+from .schemas import Analysis, Geometry, SimulationContext, SimulationDraft, PrintSettings
 from .storage import DATA,identifier,resource,read_json,write_json
 
 
@@ -24,6 +24,8 @@ def _check_model(context,draft):
 
 def propose_setup(draft,context):
     context=_context(context)
+    if context['print']['enabled'] and 'print' not in draft:
+        raise ValueError('A printed-part proposal must include explicit print settings.')
     draft=SimulationDraft.model_validate(draft).model_dump(mode='json')
     _check_model(context,draft)
     pid=identifier()
@@ -37,6 +39,7 @@ def _applied(record):
     if record['assumptions']:
         notes+='\n\nAstra setup assumptions:\n'+'\n'.join('- '+a for a in record['assumptions'])
     return {**{k:record[k] for k in ('model_id','material','fixed_faces','loads')},
+            'print':record.get('print', PrintSettings().model_dump(mode='json')),
             'notes':notes,'setup_proposal_id':record['id'],'confirmed':False}
 
 
@@ -56,7 +59,7 @@ def verify_applied_setup(setup: Analysis):
     record=read_json(resource('setup_proposals',setup.setup_proposal_id).with_suffix('.json'))
     applied=_applied(record)
     submitted=setup.model_dump(mode='json')
-    if any(submitted[k]!=applied[k] for k in ('model_id','material','fixed_faces','loads','notes')):
+    if any(submitted[k]!=applied[k] for k in ('model_id','material','fixed_faces','loads','notes','print')):
         raise ValueError('The analysis differs from its applied Astra setup. Review a new proposal or clear its provenance for manual edits.')
     if any(submitted[k]!=record['source_context'][k] for k in ('reference_id','annotations')):
         raise ValueError('The reference differs from the applied Astra setup. Review a new proposal or clear its provenance for manual edits.')

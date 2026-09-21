@@ -41,7 +41,16 @@ import PrintWorkspace from "./PrintWorkspace";
 import CompareTable from "./CompareTable";
 import ResultGuidance from "./ResultGuidance";
 import ReadinessPanel from "./ReadinessPanel";
-import { api, job, demoGeometry, materials, format, contextKey, defaultPrint } from "./types";
+import {
+  api,
+  job,
+  demoGeometry,
+  materials,
+  format,
+  contextKey,
+  normalizeGeometry,
+  defaultPrint,
+} from "./types";
 import type {
   Geometry,
   Model,
@@ -89,7 +98,7 @@ const intro: Message = {
 };
 const firstAnalysisIntro: Message = {
   role: "assistant",
-  text: "This example coupon is ready to solve on this computer. Run the simulation, then change infill and run again. Trust displacement, residual and mass — not peak stress or printed strength.",
+  text: "This example coupon has labelled demonstration conditions. Run the simulation, then change infill, review and confirm the setup, and run again. Check mesh convergence before interpreting displacement; the print model is not calibrated strength.",
   live: false,
 };
 export default function App() {
@@ -148,11 +157,15 @@ export default function App() {
     stlFile = useRef<HTMLInputElement>(null),
     stageElement = useRef<HTMLDivElement>(null),
     chatEnd = useRef<HTMLDivElement>(null);
-  const dirty = !!model && JSON.stringify(spec) !== JSON.stringify(model.spec);
+  const dirty =
+    !!model &&
+    contextKey(normalizeGeometry(spec)) !==
+      contextKey(normalizeGeometry(model.spec));
   const simulationContext: SimulationContext | null = model
     ? {
         model_id: model.id,
-        geometry: spec,
+        geometry: normalizeGeometry(spec),
+        print,
         material,
         fixed_faces: fixed,
         loads,
@@ -173,7 +186,7 @@ export default function App() {
   useEffect(() => {
     if (previewing)
       stageElement.current?.scrollIntoView({
-        behavior: "smooth",
+        behavior: "instant",
         block: "start",
       });
   }, [previewing]);
@@ -215,7 +228,7 @@ export default function App() {
     };
   }
   async function restore(s: Saved) {
-    setSpec(s.spec);
+    setSpec(normalizeGeometry(s.spec));
     setMaterial(s.material);
     setFixed(s.fixed || []);
     setLoads(s.loads || []);
@@ -234,7 +247,12 @@ export default function App() {
     setCompare(null);
     setStlInspect(null);
     setField("solid");
-    if (s.spec.kind === "stl" && s.spec.stl_id) setStlInspect(await api<StlInspect>(`/stls/${s.spec.stl_id}?scale=${s.spec.unit_scale}`));
+    if (s.spec.kind === "stl" && s.spec.stl_id)
+      setStlInspect(
+        await api<StlInspect>(
+          `/stls/${s.spec.stl_id}?scale=${s.spec.unit_scale}`,
+        ),
+      );
     if (s.pinnedId) setPinned(await api<Result>("/runs/" + s.pinnedId));
     if (s.modelId) {
       const m = await api<Model>("/models/" + s.modelId);
@@ -251,8 +269,7 @@ export default function App() {
       | { demo?: boolean; applyRecommended?: boolean; firstAnalysis?: boolean }
       | boolean = false,
   ) {
-    const flags =
-      typeof options === "boolean" ? { demo: options } : options;
+    const flags = typeof options === "boolean" ? { demo: options } : options;
     const controller = new AbortController();
     operation.current = controller;
     setBusy("Building solid & mesh");
@@ -459,7 +476,9 @@ export default function App() {
     setError("");
     try {
       if (file.size > 80_000_000) {
-        throw new Error("This STEP file is over 80 MB. Export a simpler solid.");
+        throw new Error(
+          "This STEP file is over 80 MB. Export a simpler solid.",
+        );
       }
       const res = await fetch("/api/steps", {
         method: "POST",
@@ -546,7 +565,8 @@ export default function App() {
       setModel(null);
       setFixed([]);
       setLoads([]);
-      if (options.firstAnalysis && materials[3]) setMaterial({ ...materials[3] });
+      if (options.firstAnalysis && materials[3])
+        setMaterial({ ...materials[3] });
       if (!body.watertight) {
         setTab("model");
         flash("STL inspected. Repair watertightness before meshing.");
@@ -554,7 +574,9 @@ export default function App() {
       }
       if (!options.firstAnalysis) {
         setTab("model");
-        flash("Review STL dimensions, units and preprocessing, then build the model and define its real supports and loads.");
+        flash(
+          "Review STL dimensions, units and preprocessing, then build the model and define its real supports and loads.",
+        );
         return;
       }
       await build(s, {
@@ -600,6 +622,7 @@ export default function App() {
         history,
         model_id: model?.id || null,
         material,
+        print,
         fixed_faces: fixed,
         loads,
         application_notes: notes,
@@ -607,7 +630,7 @@ export default function App() {
         selected_face: selected,
         stage:
           stage ||
-          (tab === "setup"
+          (tab === "setup" || tab === "print"
             ? "loading"
             : tab === "results"
               ? "results"
@@ -653,6 +676,7 @@ export default function App() {
       );
       invalidate();
       setMaterial(applied.material);
+      setPrint(applied.print);
       setFixed(applied.fixed_faces);
       setLoads(applied.loads);
       setNotes(applied.notes);
@@ -693,12 +717,23 @@ export default function App() {
       let r: Result;
       if (compute === "webgpu") {
         setBusy("Assembling finite-element system");
-        const system = await job<GPUSystem>("/gpu/prepare", setup, undefined, controller.signal);
+        const system = await job<GPUSystem>(
+          "/gpu/prepare",
+          setup,
+          undefined,
+          controller.signal,
+        );
         setBusy("Starting local GPU solver");
         const solution = await solveGPU(system, setBusy, controller.signal);
         setBusy("Verifying residual & calculating stress");
-        r = await job<Result>("/gpu/finish", solution, undefined, controller.signal);
-      } else r = await job<Result>("/solve", setup, undefined, controller.signal);
+        r = await job<Result>(
+          "/gpu/finish",
+          solution,
+          undefined,
+          controller.signal,
+        );
+      } else
+        r = await job<Result>("/solve", setup, undefined, controller.signal);
       setResult(r);
       setTab("results");
       setField(r.print?.enabled ? "displacement" : "stress");
@@ -754,6 +789,7 @@ export default function App() {
   }
   function applyRecommendedSetup() {
     if (!model) return;
+    invalidate();
     const suggested = readiness?.recommended.loads[0]?.vector || vector;
     setFixed(
       readiness?.recommended.fixed_faces.length
@@ -825,8 +861,7 @@ export default function App() {
                 : spec.kind === "stl"
                   ? "Imported mesh"
                   : "Parametric part"}{" "}
-              ·
-              rev {model?.id.slice(0, 4) || "—"}
+              · rev {model?.id.slice(0, 4) || "—"}
             </small>
           </span>
           <MoreHorizontal size={16} />
@@ -968,44 +1003,46 @@ export default function App() {
                   <option value="stl">Import STL…</option>
                 </select>
               </label>
-              {spec.kind !== "step" && spec.kind !== "custom" && spec.kind !== "stl" && (
-                <>
-                  <NumberInput
-                    label="Length"
-                    unit="mm"
-                    value={spec.length}
-                    onChange={(v) => updateSpec({ length: v })}
-                  />
-                  <NumberInput
-                    label={spec.kind === "shaft" ? "Diameter" : "Width"}
-                    unit="mm"
-                    value={spec.width}
-                    onChange={(v) => updateSpec({ width: v })}
-                  />
-                  {spec.kind === "bracket" && (
+              {spec.kind !== "step" &&
+                spec.kind !== "custom" &&
+                spec.kind !== "stl" && (
+                  <>
                     <NumberInput
-                      label="Height"
+                      label="Length"
                       unit="mm"
-                      value={spec.height}
-                      onChange={(v) => updateSpec({ height: v })}
+                      value={spec.length}
+                      onChange={(v) => updateSpec({ length: v })}
                     />
-                  )}{" "}
-                  {spec.kind !== "shaft" && (
                     <NumberInput
-                      label="Thickness"
+                      label={spec.kind === "shaft" ? "Diameter" : "Width"}
                       unit="mm"
-                      value={spec.thickness}
-                      onChange={(v) => updateSpec({ thickness: v })}
+                      value={spec.width}
+                      onChange={(v) => updateSpec({ width: v })}
                     />
-                  )}
-                  <NumberInput
-                    label="Bore diameter"
-                    unit="mm"
-                    value={spec.hole_diameter}
-                    onChange={(v) => updateSpec({ hole_diameter: v })}
-                  />
-                </>
-              )}
+                    {spec.kind === "bracket" && (
+                      <NumberInput
+                        label="Height"
+                        unit="mm"
+                        value={spec.height}
+                        onChange={(v) => updateSpec({ height: v })}
+                      />
+                    )}{" "}
+                    {spec.kind !== "shaft" && (
+                      <NumberInput
+                        label="Thickness"
+                        unit="mm"
+                        value={spec.thickness}
+                        onChange={(v) => updateSpec({ thickness: v })}
+                      />
+                    )}
+                    <NumberInput
+                      label="Bore diameter"
+                      unit="mm"
+                      value={spec.hole_diameter}
+                      onChange={(v) => updateSpec({ hole_diameter: v })}
+                    />
+                  </>
+                )}
               {spec.kind === "custom" && (
                 <label>
                   Solid recipe
@@ -1052,7 +1089,12 @@ export default function App() {
                     unit="×"
                     value={spec.unit_scale}
                     step={0.1}
-                    onChange={(v) => updateSpec({ unit_scale: v, accept_stl_preprocessing: false })}
+                    onChange={(v) =>
+                      updateSpec({
+                        unit_scale: v,
+                        accept_stl_preprocessing: false,
+                      })
+                    }
                   />
                   <NumberInput
                     label="Feature angle"
@@ -1060,8 +1102,45 @@ export default function App() {
                     value={spec.feature_angle_deg}
                     onChange={(v) => updateSpec({ feature_angle_deg: v })}
                   />
-                  {stlInspect && <p>Dimensions at this scale: {stlInspect.extent_mm.map(v => format(v * spec.unit_scale / (stlInspect.scale || 1))).join(" × ")} mm. Suggested scale {stlInspect.suggested_scale}×; verify against a known dimension.</p>}
-                  {stlInspect?.preprocessing?.changed && <label className="inline-check"><input type="checkbox" checked={!!spec.accept_stl_preprocessing} onChange={e => updateSpec({ accept_stl_preprocessing: e.target.checked })} />I reviewed the simplified geometry: maximum original vertex distance to a working vertex {format(stlInspect.preprocessing.vertex_distance_bound_mm * spec.unit_scale / (stlInspect.scale || 1))} mm; volume change {format(100 * stlInspect.preprocessing.relative_volume_change)}%. Small features still require inspection.</label>}
+                  {stlInspect && (
+                    <p>
+                      Dimensions at this scale:{" "}
+                      {stlInspect.extent_mm
+                        .map((v) =>
+                          format(
+                            (v * spec.unit_scale) / (stlInspect.scale || 1),
+                          ),
+                        )
+                        .join(" × ")}{" "}
+                      mm. Suggested scale {stlInspect.suggested_scale}×; verify
+                      against a known dimension.
+                    </p>
+                  )}
+                  {stlInspect?.preprocessing?.changed && (
+                    <label className="inline-check">
+                      <input
+                        type="checkbox"
+                        checked={!!spec.accept_stl_preprocessing}
+                        onChange={(e) =>
+                          updateSpec({
+                            accept_stl_preprocessing: e.target.checked,
+                          })
+                        }
+                      />
+                      I reviewed the simplified geometry: maximum original
+                      vertex distance to a working vertex{" "}
+                      {format(
+                        (stlInspect.preprocessing.vertex_distance_bound_mm *
+                          spec.unit_scale) /
+                          (stlInspect.scale || 1),
+                      )}{" "}
+                      mm; volume change{" "}
+                      {format(
+                        100 * stlInspect.preprocessing.relative_volume_change,
+                      )}
+                      %. Small features still require inspection.
+                    </label>
+                  )}
                   {stlInspect && (
                     <p className="stl-report">
                       {stlInspect.triangles.toLocaleString()} triangles ·{" "}
@@ -1212,16 +1291,34 @@ export default function App() {
         )}
         <div className="main-stage" ref={stageElement}>
           {tab === "print" ? (
-            <PrintWorkspace
-              print={print}
-              onChange={(next) => {
-                setPrint(next);
-                invalidate();
-              }}
-              model={model}
-              material={material}
-              preview={printPreview}
-            />
+            <div className="print-review-layout">
+              <div className="print-orientation-view">
+                <Viewport
+                  model={model}
+                  result={null}
+                  fixed={fixed}
+                  loads={loads}
+                  selected={selected}
+                  onSelect={setSelected}
+                  field="solid"
+                  deform={false}
+                  wireframe={wireframe}
+                  setWireframe={setWireframe}
+                  printRotation={print.enabled ? print.rotation_deg : undefined}
+                />
+              </div>
+              <PrintWorkspace
+                print={print}
+                onChange={(next) => {
+                  setPrint(next);
+                  invalidate();
+                }}
+                model={model}
+                material={material}
+                preview={printPreview}
+                disabled={!!busy}
+              />
+            </div>
           ) : tab === "reference" ? (
             <ImageReview
               key={image?.id || "empty"}
@@ -1237,6 +1334,11 @@ export default function App() {
           ) : (
             <Viewport
               model={model}
+              printRotation={
+                previewing && setupPreview!.print?.enabled
+                  ? setupPreview!.print.rotation_deg
+                  : undefined
+              }
               result={previewing ? null : result}
               fixed={previewing ? setupPreview!.fixed_faces : fixed}
               loads={previewing ? setupPreview!.loads : loads}
@@ -1257,10 +1359,14 @@ export default function App() {
               <Loader2 size={17} className="spin" />
               {busy}
               <span>Local worker</span>
-              {operation.current && <button
-                className="outline-button"
-                onClick={() => operation.current?.abort()}
-              >Cancel</button>}
+              {operation.current && (
+                <button
+                  className="outline-button"
+                  onClick={() => operation.current?.abort()}
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -1289,7 +1395,10 @@ export default function App() {
             </button>
           </div>
         )}
-        {tab === "results" && result && model && result.model_id === model.id ? (
+        {tab === "results" &&
+        result &&
+        model &&
+        result.model_id === model.id ? (
           <>
             <div className="result-toolbar">
               <div className="segmented">
@@ -1394,13 +1503,12 @@ export default function App() {
               <p>
                 {result.elements.toLocaleString()}{" "}
                 {result.element_order === 1 ? "linear" : "quadratic"} tetrahedra
-                ·{" "}
-                {result.dofs.toLocaleString()} degrees of freedom ·{" "}
+                · {result.dofs.toLocaleString()} degrees of freedom ·{" "}
                 {format(result.seconds)} s solve · {format(result.mass_g)} g
               </p>
               {(result.model_sha256 || result.mesh_sha256) && (
                 <p className="hash-line">
-                  CAD {result.model_sha256?.slice(0, 12)} · mesh{" "}
+                  Geometry {result.model_sha256?.slice(0, 12)} · mesh{" "}
                   {result.mesh_sha256?.slice(0, 12)}
                 </p>
               )}
@@ -1596,9 +1704,11 @@ export default function App() {
             <div className="model-exports">
               {model && (
                 <>
-                  {model.spec.kind !== "stl" && <a href={`/api/models/${model.id}/files/model.step`}>
-                    STEP <ArrowDownToLine size={13} />
-                  </a>}
+                  {model.spec.kind !== "stl" && (
+                    <a href={`/api/models/${model.id}/files/model.step`}>
+                      STEP <ArrowDownToLine size={13} />
+                    </a>
+                  )}
                   <a href={`/api/models/${model.id}/files/model.stl`}>
                     STL <ArrowDownToLine size={13} />
                   </a>
@@ -1696,7 +1806,8 @@ export default function App() {
                   onChange={(e) => setConfirmed(e.target.checked)}
                 />
                 <span>
-                  I’ve reviewed dimensions, material, fixtures and loads.
+                  I’ve reviewed dimensions, material,{" "}
+                  {print.enabled ? "print settings, " : ""}fixtures and loads.
                 </span>
               </label>
               <small>
@@ -1705,7 +1816,7 @@ export default function App() {
                   : !fixed.length || !loads.length
                     ? "Select at least one fixture and one loaded face."
                     : print.enabled
-                      ? "CPU is the default. Run, then change infill and run again. Trust displacement and mass, not peak stress."
+                      ? "Review print settings and conditions before every run; check mesh convergence before interpreting trends."
                       : "Static · 3D elasticity · quadratic tetrahedra"}
               </small>
             </div>

@@ -1,10 +1,10 @@
 {
   "analytical_tip_mm": 0.19196190476190475,
-  "coarse_tip_mm": 0.19007216455965567,
-  "fine_tip_mm": 0.19046379616418935,
-  "coarse_error_percent": 0.9844350130787549,
-  "fine_error_percent": 0.7804197398299184,
-  "mesh_change_percent": 0.20561997210014615,
-  "coarse_elements": 571,
-  "fine_elements": 1594
+  "coarse_tip_mm": 0.19008298779580635,
+  "fine_tip_mm": 0.19046159910971175,
+  "coarse_error_percent": 0.9787967922223251,
+  "fine_error_percent": 0.7815642661255451,
+  "mesh_change_percent": 0.1987861677499203,
+  "coarse_elements": 520,
+  "fine_elements": 1584
 }

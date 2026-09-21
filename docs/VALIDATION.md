@@ -1,6 +1,23 @@
-# Validation record — updated 2026-09-14
+# Validation record — updated 2026-09-20
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
+
+## Integration acceptance — 2026-09-20
+
+The print-branch review defects were reproduced with independent tests and repaired. Added checks cover arbitrary-angle strain/stress tensor covariance, the 500,000-DOF submission boundary, no implicit P1 downgrade, queued and running-child cancellation, comparison context differences, preserved STL originals, reloadable preprocessing review, P1/P2 archive reproduction, and complete print-proposal revision/provenance binding. Frontend checks cover independent Astra/solve cancellation, cancellation before a job ID arrives, GPU readback resource cleanup and legacy geometry defaults. All 76 backend tests and five frontend regressions pass. TypeScript/Vite build passes; dependency deprecation and bundle-size advisories remain. CI now installs Gmsh's GLU dependency, but the updated Linux workflow has not run remotely because no new push is authorized.
+
+A fresh browser journey uploaded the synthetic 40 × 10 × 8 mm coupon through **Import STL file**, verified empty supports/loads and unchecked confirmation, built model `9737ceeb435f40c6855ecef6bacf518a`, and asked live Astra for missing inputs. Astra returned questions and no proposal. Explicit demonstration PLA, gyroid/20%, three walls, 0.4 mm line width, 0.2 mm layers, four top/bottom layers, rotation [30,45,20]°, face 9 fixed and total [0,0,-4] N on face 7 produced proposal `ded6df2125624dfb85e07f66aea996e7`. Preview showed support/force markers and rotated print axes before application. Apply left confirmation unchecked. The confirmed real WebGPU run is `4d162ab8d809467ea43bf764c5c8479a`.
+
+- Device: browser-reported `apple · metal-3`; 807 P2 tetrahedra / 4,455 DOFs; 2,320 dispatched iterations / three refinements.
+- Server-recomputed relative residual: 5.864917129e-10.
+- Maximum displacement: GPU 0.1548826113116278 mm; CPU 0.15488261131261874 mm; relative difference 6.39794e-12.
+- Exported ZIP contains original/working STL, transformation metadata, live interview, applied print proposal and solver source. Its reproduction script actually executed in a fresh directory and matched the CPU value.
+- Changing only infill to 35% cleared result, confirmation and proposal provenance. A second confirmed GPU run `0eefa5259a6a4a82b01ed3ec4b34b417` yielded 0.1272 mm displacement, 2.075 g and residual 1.57e-9. The comparison identified equal geometry, mesh, material, supports, loads and interpolation. Explicitly saving, reloading the browser, and reopening the saved study restored both comparison runs and conversation.
+- The current narrow in-app browser viewport was inspected; labels scale with part dimensions and preview scroll shows the model immediately. Camera hardware, other GPUs, full dense-mesh GPU performance and physical coupon calibration remain unverified.
+
+The four-page GPU PDF was rendered and inspected page by page. Section flow avoids overflow-only pages. Attached reference imagery is labelled as study context; it is not proof of geometry reconstruction. Historical print-warning boilerplate is clarified in presentation without rewriting the immutable result JSON.
+
+Evidence: `evidence/integration-2026-09-20/`. This is software verification on a known synthetic coupon, not dimensional reconstruction or printed-part strength validation. Historical evidence below remains scoped to its stated revision/date; this pass completes the formerly pending conversational print application/GPU/save/report path.
 
 ## Automated checks
 
@@ -69,4 +86,4 @@ The 19 additional automated checks cover complete proposal application without a
 
 Two live Astra calls were exercised in the browser on September 9. An ambiguous heavy-load request returned three questions with no setup proposal. Explicit illustrative material, rear X=0 restraint and total [0,0,-150] N on the selected X=80 face returned proposal `cebc9a619837423188d290b01629635d`, bound to CAD revision `f5f0cb3a22034e0f8b67f1b4733b5573`. Inputs and replies are preserved in `evidence/conversational/`. Changing Young's modulus disabled the proposal; restoring the original value allowed preview, with Run simulation disabled during preview.
 
-The latest preview-scroll correction builds successfully but has not yet received a fresh visual check. Browser application of this new proposal, a new GPU solve carrying its provenance, saved-study reload, and a fresh PDF/visual-review handoff remain to be exercised. The earlier verified GPU runs and report artifacts above remain separate evidence; they do not establish completion of that new journey.
+This September 9 checkpoint was pending at the time. The September 20 integration acceptance above completes a fresh conversational print proposal, preview, application, GPU solve, saved comparison reload and report handoff. It uses new run IDs and does not retroactively broaden the older evidence.

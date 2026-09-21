@@ -96,6 +96,33 @@ def test_missing_inputs_remain_questions_without_a_setup(context):
     assert answer['live'] is True
     assert answer['questions']==['Which direction?']
 
+def test_print_proposal_is_complete_revision_bound_and_verified(context, draft):
+    from backend.schemas import PrintSettings, Analysis
+    from backend.simulation_proposals import propose_setup, apply_setup, verify_applied_setup
+    context['print'] = PrintSettings(enabled=True, rotation_deg=(30, 45, 20)).model_dump(mode='json')
+    with pytest.raises(ValueError, match='print'):
+        propose_setup(draft, context)
+    draft['print'] = {**context['print'], 'infill_density': .35}
+    proposal = propose_setup(draft, context)
+    changed = copy.deepcopy(context); changed['print']['wall_count'] += 1
+    with pytest.raises(ValueError, match='changed'):
+        apply_setup(proposal['id'], changed)
+    applied = apply_setup(proposal['id'], context)
+    assert applied['print'] == draft['print']
+    setup = Analysis.model_validate({**applied, 'confirmed': True})
+    verify_applied_setup(setup)
+    setup.print.infill_density = .9
+    with pytest.raises(ValueError, match='differs'):
+        verify_applied_setup(setup)
+
+def test_print_proposal_cannot_default_missing_manufacturing_inputs(context, draft):
+    from backend.schemas import PrintSettings
+    from backend.simulation_proposals import propose_setup
+    context['print'] = PrintSettings(enabled=True).model_dump(mode='json')
+    draft['print'] = {'enabled': True}
+    with pytest.raises(ValueError, match='explicit'):
+        propose_setup(draft, context)
+
 def test_live_answer_becomes_revision_bound_complete_proposal(context,draft):
     from backend.assistant import normalize_answer
     answer=normalize_answer({'message':'Review these conditions.', 'questions':[],
@@ -127,7 +154,8 @@ def test_apply_endpoint_and_provenance_reject_tampering(context,draft):
     changed=copy.deepcopy(context);changed['notes']='Different intent'
     assert client.post(f"/api/setup-proposals/{proposal['id']}/apply",json=changed).status_code==400
 
-def test_archive_preserves_interview_proposal_and_reproduces(context,draft,tmp_path):
+@pytest.mark.parametrize('order', [1, 2])
+def test_archive_preserves_interview_proposal_and_reproduces(context,draft,tmp_path,order):
     import json,subprocess,sys,zipfile,os
     from backend.simulation_proposals import propose_setup,apply_setup
     from backend.schemas import Analysis
@@ -137,7 +165,7 @@ def test_archive_preserves_interview_proposal_and_reproduces(context,draft,tmp_p
     transcript=[{'role':'user','text':'Use 100 N downward.','live':False},
         {'role':'assistant','text':'Review rear restraint and end force.','live':True}]
     setup=Analysis.model_validate({**apply_setup(proposal['id'],context),'confirmed':True,'conversation':transcript})
-    result=solve_model(setup)
+    result=solve_model(setup, reproduction_element_order=order)
     with zipfile.ZipFile(export_report(result['id'],'zip')) as archive:
         assert json.loads(archive.read('interview.json'))==transcript
         assert json.loads(archive.read('setup-proposal.json'))['id']==proposal['id']
@@ -148,4 +176,12 @@ def test_archive_preserves_interview_proposal_and_reproduces(context,draft,tmp_p
     original=result['max_displacement_mm']
     actual=json.loads(next((tmp_path/'reproduced'/'runs').glob('*/result.json')).read_text())
     assert actual['max_displacement_mm']==pytest.approx(original,rel=1e-10)
+    assert actual['element_order'] == order
     assert actual['setup']['setup_proposal_id']==proposal['id']
+
+def test_live_print_answer_cannot_default_entire_print_setup(context, draft):
+    from backend.schemas import PrintSettings
+    from backend.assistant import normalize_answer
+    request = request_for(context).model_copy(update={'print': PrintSettings(enabled=True)})
+    with pytest.raises(ValueError, match='explicit print'):
+        normalize_answer({'message': 'Review', 'questions': [], 'proposal': None, 'simulation_proposal': draft}, request)

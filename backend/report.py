@@ -6,7 +6,7 @@ import numpy as np
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Image as PDFImage
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, CondPageBreak, Image as PDFImage
 from reportlab.graphics.shapes import Drawing, Polygon, Line, String, Rect
 from reportlab.graphics import renderSVG
 from .storage import ROOT, resource, read_json, write_json
@@ -63,7 +63,7 @@ def _rows(result,model):
         ['Setup proposal',result['setup'].get('setup_proposal_id') or 'Manually assigned'],
         ['Material',mat['name']],['Young modulus',f"{mat['young_mpa']:g} MPa"],['Poisson ratio',f"{mat['poisson']:g}"],
         ['Supplied yield strength',f"{mat['yield_mpa']:g} MPa"],['Density',f"{mat['density_kg_m3']:g} kg/m3"],
-        ['Geometry source',model['spec']['provenance']],['CAD volume',f"{model['volume_mm3']:.5g} mm3"],
+        ['Geometry source',model['spec']['provenance']],['Solid volume',f"{model['volume_mm3']:.5g} mm3"],
         ['Mesh volume',f"{result['mesh_volume_mm3']:.5g} mm3"],['Estimated mass',f"{result['mass_g']:.5g} g"],
         ['Mesh',f"{result['elements']:,} tetrahedra / {result['dofs']:,} {'linear' if result.get('element_order')==1 else 'quadratic'} DOFs"],
         *(_print_rows(result)),
@@ -106,6 +106,13 @@ def _reference(result):
     iid=result['setup'].get('reference_id')
     return resource('images',iid).with_suffix('.png') if iid else None
 
+def _report_warnings(result):
+    # Clarify historical boilerplate without changing immutable result files.
+    for warning in result['warnings']:
+        if (result.get('print') or {}).get('enabled') and warning == 'Anisotropy, voids, bonding defects and moisture are not modelled.':
+            warning = 'Additional raster-scale anisotropy, local voids, bonding defects and moisture are not modelled.'
+        yield warning
+
 def _html(result,model,drawing):
     svg=renderSVG.drawToString(drawing)
     metrics=[('Peak von Mises',f"{result['peak_von_mises_mpa']:.5g} MPa"),('Max displacement',f"{result['max_displacement_mm']:.5g} mm"),('Yield ratio',f"{result['yield_ratio']:.4g}"),('Force balance error',f"{result['force_balance_error_n']:.3e} N")]
@@ -114,11 +121,11 @@ def _html(result,model,drawing):
     rows += [['Support reaction XYZ',str(result['reaction_n'])+' N'],['Moment balance error',f"{result['moment_balance_error_nmm']:.3e} N mm"],['Free-DOF relative residual',f"{result['relative_residual']:.3e}"],['Strain energy',f"{result['strain_energy_nmm']:.5g} N mm"]]
     ref=_reference(result);reference=''
     if ref and ref.exists():
-        reference='<h2>Reference evidence</h2><img class="reference" alt="Reference supplied with this analysis" src="data:image/png;base64,'+base64.b64encode(ref.read_bytes()).decode()+'"/>'
+        reference='<h2>Attached reference context</h2><p>Preserved with this study; not proof that the simulated geometry was reconstructed from this image. Check the application notes and interview for its relevance.</p><img class="reference" alt="Reference attached to this study" src="data:image/png;base64,'+base64.b64encode(ref.read_bytes()).decode()+'"/>'
         reference+='<ol>'+''.join('<li>'+_safe(m['tool'])+': '+_safe(m['text'])+'<small>Normalized coordinates: '+_safe(m['start'])+' to '+_safe(m['end'])+'</small></li>' for m in result['setup'].get('annotations',[]))+'</ol>'
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OpenFEA report - {_safe(model['spec']['name'])}</title><style>
     body{{font:14px/1.7 Arial,sans-serif;color:#344638;background:#f1f4eb;margin:0}}main{{max-width:880px;padding:48px;margin:25px auto;background:#fff}}h1{{font-size:32px;letter-spacing:-1px;margin:10px 0}}h2{{font-size:17px;margin-top:30px}}.tag{{font-size:10px;letter-spacing:2px;color:#819574}}.sub{{color:#87977d;font-size:12px}}.metrics{{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#e3ead9;border:1px solid #e3ead9;margin:22px 0}}.metrics>div{{background:#f6f9ef;padding:15px}}.metrics strong{{font-size:22px;display:block;color:#436336}}.metrics span{{font-size:11px;color:#8a9f78}}svg{{width:100%;height:auto}}table{{border-collapse:collapse;width:100%;font-size:12px}}td{{padding:9px 10px;border-bottom:1px solid #e6ecdf;vertical-align:top}}td:first-child{{width:32%;color:#839775}}li{{margin:8px 0}}small{{display:block;font-size:10px;color:#91a380}}.hash{{word-break:break-all;font:10px/1.8 monospace;background:#f4f7ef;padding:12px}}.reference{{max-width:100%;max-height:480px;object-fit:contain}}.notice{{background:#f5f7ef;border-left:3px solid #90a66f;padding:14px 18px;font-size:12px}}@media print{{body{{background:white}}main{{margin:0;padding:10mm}}h2{{break-after:avoid}}tr,.metrics{{break-inside:avoid}}}}
-    </style></head><body><main><div class="tag">OpenFEA / STRUCTURAL ANALYSIS</div><h1>{_safe(model['spec']['name'])}</h1><p class="sub">Run {result['id']}<br/>{result['created_at']} / mm, N, MPa</p><div class="metrics">{''.join('<div><span>'+_safe(k)+'</span><strong>'+_safe(v)+'</strong></div>' for k,v in metrics)}</div>{svg}<p class="notice">This is a linear-elastic engineering estimate. Peak stress is unaveraged; the image uses smoothed nodal colors. A single mesh does not establish convergence or physical acceptance.</p>{_guidance_html(result)}<h2>Model and simulation definition</h2><table>{''.join('<tr><td>'+_safe(k)+'</td><td>'+_safe(v)+'</td></tr>' for k,v in rows)}</table><h2>Application notes</h2><p>{_safe(result['setup']['notes']) or 'No application notes supplied.'}</p><h2>Assumptions and interpretation</h2><ul>{''.join('<li>'+_safe(w)+'</li>' for w in result['warnings'])}</ul>{reference}<h2>Reproducibility</h2><p>CAD revision: {model['id']}. Solver versions: {_safe(result['versions'])}. Runtime: {result['seconds']:.3g} seconds. No mesh-convergence study was performed for this run.</p><div class="hash">CAD SHA-256: {model['sha256']}<br/>Mesh SHA-256: {model['mesh_sha256']}</div><p>The archive contains the original mesh, CAD, complete inputs and results, quadratic solution arrays, nodal CSV, solver source, and dependency lock file. Material values are user inputs, not certified data.</p></main></body></html>'''
+    </style></head><body><main><div class="tag">OpenFEA / STRUCTURAL ANALYSIS</div><h1>{_safe(model['spec']['name'])}</h1><p class="sub">Run {result['id']}<br/>{result['created_at']} / mm, N, MPa</p><div class="metrics">{''.join('<div><span>'+_safe(k)+'</span><strong>'+_safe(v)+'</strong></div>' for k,v in metrics)}</div>{svg}<p class="notice">This is a linear-elastic engineering estimate. Peak stress is unaveraged; the image uses smoothed nodal colors. A single mesh does not establish convergence or physical acceptance.</p>{_guidance_html(result)}<h2>Model and simulation definition</h2><table>{''.join('<tr><td>'+_safe(k)+'</td><td>'+_safe(v)+'</td></tr>' for k,v in rows)}</table><h2>Application notes</h2><p>{_safe(result['setup']['notes']) or 'No application notes supplied.'}</p><h2>Assumptions and interpretation</h2><ul>{''.join('<li>'+_safe(w)+'</li>' for w in _report_warnings(result))}</ul>{reference}<h2>Reproducibility</h2><p>Geometry revision: {model['id']}. Solver versions: {_safe(result['versions'])}. Runtime: {result['seconds']:.3g} seconds. No mesh-convergence study was performed for this run.</p><div class="hash">Geometry SHA-256: {model['sha256']}<br/>Mesh SHA-256: {model['mesh_sha256']}</div><p>The archive contains the original mesh, available geometry files, complete inputs and results, complete solution arrays, nodal CSV, solver source, and dependency lock file. Material values are user inputs, not certified data.</p></main></body></html>'''
 
 def _pdf(path,result,model,drawing):
     styles=getSampleStyleSheet()
@@ -142,20 +149,20 @@ def _pdf(path,result,model,drawing):
             story.append(P('- '+item))
         if guide.get('next'):
             story.append(P(guide['next']))
-    story += [P('A single mesh does not establish convergence or physical acceptance. Yield ratio uses the supplied material strength and is not a safety certification.'),P(f"Force equilibrium error: {result['force_balance_error_n']:.3e} N. Free-DOF relative residual: {result['relative_residual']:.3e}."),PageBreak(),P('Simulation definition','Title')]
+    story += [P('A single mesh does not establish convergence or physical acceptance. Yield ratio uses the supplied material strength and is not a safety certification.'),P(f"Force equilibrium error: {result['force_balance_error_n']:.3e} N. Free-DOF relative residual: {result['relative_residual']:.3e}."),CondPageBreak(200),P('Simulation definition','Heading2')]
     rows=[[P(k,'Tiny'),P(v,'Tiny')] for k,v in _rows(result,model)]
     tab=Table(rows,colWidths=[160,349],hAlign='LEFT');tab.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LINEBELOW',(0,0),(-1,-1),.4,colors.HexColor('#e4ebd9')),('TOPPADDING',(0,0),(-1,-1),5),('BOTTOMPADDING',(0,0),(-1,-1),3)]));story.append(tab)
     story.append(P('Boundary conditions and verification','Heading2'))
     for i,l in enumerate(result['loads']):story.append(P(f"L{i+1}: face {l['face_id']}, total XYZ force {l['vector_n']} N, distributed uniformly over {l['mesh_area_mm2']:.5g} mm2."))
-    story += [P(f"Support reaction XYZ: {result['reaction_n']} N. Moment equilibrium error: {result['moment_balance_error_nmm']:.3e} N mm."),P(f"Strain energy: {result['strain_energy_nmm']:.5g} N mm."),P('Application notes','Heading2'),P(result['setup']['notes'] or 'No application notes supplied.'),PageBreak(),P('Assumptions and provenance','Title')]
-    for w in result['warnings']:story.append(P('- '+w))
-    story += [P('Reproducibility','Heading2'),P(f"CAD revision: {model['id']}. Solver versions: {result['versions']}. Runtime: {result['seconds']:.3g} s. No mesh-convergence study was performed for this run."),P('CAD SHA-256: '+model['sha256'],'Tiny'),P('Mesh SHA-256: '+model['mesh_sha256'],'Tiny'),P('The exported package includes the CAD, mesh, inputs, results, quadratic solution arrays, nodal CSV, solver source and pinned dependencies. Material values are supplied inputs, not certified data.')]
+    story += [P(f"Support reaction XYZ: {result['reaction_n']} N. Moment equilibrium error: {result['moment_balance_error_nmm']:.3e} N mm."),P(f"Strain energy: {result['strain_energy_nmm']:.5g} N mm."),CondPageBreak(100),P('Application notes','Heading2'),P(result['setup']['notes'] or 'No application notes supplied.'),CondPageBreak(140),P('Assumptions and provenance','Heading2')]
+    for w in _report_warnings(result):story.append(P('- '+w))
+    story += [P('Reproducibility','Heading2'),P(f"Geometry revision: {model['id']}. Solver versions: {result['versions']}. Runtime: {result['seconds']:.3g} s. No mesh-convergence study was performed for this run."),P('Geometry SHA-256: '+model['sha256'],'Tiny'),P('Mesh SHA-256: '+model['mesh_sha256'],'Tiny'),P('The exported package includes available geometry files, mesh, inputs, results, complete solution arrays, nodal CSV, solver source and pinned dependencies. Material values are supplied inputs, not certified data.')]
     ref=_reference(result)
     if ref and ref.exists():
         from PIL import Image
         with Image.open(ref) as im:w,h=im.size
         scale=min(490/w,330/h)
-        story += [PageBreak(),P('Reference evidence','Title'),PDFImage(str(ref),width=w*scale,height=h*scale),Spacer(1,10)]
+        story += [PageBreak(),P('Attached reference context','Title'),P('Preserved with this study; not proof that the simulated geometry was reconstructed from this image. Check the application notes and interview for its relevance.'),PDFImage(str(ref),width=w*scale,height=h*scale),Spacer(1,10)]
         for i,m in enumerate(result['setup'].get('annotations',[])):
             story.append(P(f"Annotation {i+1} ({m['tool']}): {m['text'] or '(no text)'}"))
             story.append(P(f"Normalized image coordinates: {m['start']} to {m['end']}",'Tiny'))
@@ -180,6 +187,21 @@ def export_report(rid,format):
         for name in ['model.step','model.stl','mesh.msh','mesh.npz','model.json','source.stl','working.stl','stl-provenance.json']:
             if name == 'model.step' and model['spec']['kind'] == 'stl':continue
             if (mf/name).is_file():files['model/'+name]=mf/name
+        # Historical models did not snapshot their uploaded STL beside the mesh.
+        # Recover the original and unscaled working file when still available;
+        # preserve their recorded unit transform without remeshing or re-hashing
+        # the immutable model/run IDs.
+        if model['spec']['kind'] == 'stl' and 'model/source.stl' not in files:
+            upload = resource('stls', model['spec']['stl_id'])
+            for name, archived in [('source.stl','source.stl'), ('unit.stl','working-source-units.stl')]:
+                if (upload/name).is_file():files['model/'+archived] = upload/name
+            provenance_path = folder/'stl-provenance.json'
+            write_json(provenance_path, {'historical_model': True,
+                'unit_scale': model['spec'].get('unit_scale', 1),
+                'working_coordinates': 'source units; multiply by unit_scale to obtain millimetres',
+                'source_available': (upload/'source.stl').is_file(),
+                'inspection': read_json(upload/'inspect.json') if (upload/'inspect.json').is_file() else None})
+            files['model/stl-provenance.json'] = provenance_path
         for name in ['report.pdf','report.html','result.json','solution.npz','nodes.csv']:files[name]=folder/name
         files['LICENSE']=ROOT/'LICENSE'
         if result['setup'].get('setup_proposal_id'):
@@ -199,7 +221,7 @@ def export_report(rid,format):
 
 This archive is a simulation snapshot, not certification. Read report.pdf or report.html.
 All lengths are mm, forces N, stresses MPa. The JSON setup is the authoritative input.
-The NPZ retains all quadratic DOFs and quadrature stresses; CSV/viewport values sample mesh vertices.
+The NPZ retains all displacement DOFs and quadrature stresses; CSV/viewport values sample mesh vertices.
 Reference annotations are in result.json > setup > annotations (normalized coordinates).
 The interview transcript is in interview.json; an applied Astra setup is in setup-proposal.json when present.
 
@@ -223,7 +245,7 @@ shutil.copytree(root/'model',target,dirs_exist_ok=True)
 original=json.loads((root/'result.json').read_text())
 if original['setup'].get('setup_proposal_id'):
     shutil.copyfile(root/'setup-proposal.json',root/'reproduced'/'setup_proposals'/(original['setup']['setup_proposal_id']+'.json'))
-result=solve_model(Analysis.model_validate(original['setup']))
+result=solve_model(Analysis.model_validate(original['setup']), reproduction_element_order=original.get('element_order', 2))
 print(json.dumps({{k:result[k] for k in ('id','peak_von_mises_mpa','max_displacement_mm','force_balance_error_n')}},indent=2))
 ''')
         return archive

@@ -48,6 +48,35 @@ def test_gpu_finish_accepts_every_supported_solver_dof():
         GPUSolution(**kwargs, displacement=[0.] * 500001)
 
 
+def test_running_child_cancellation_stops_process_and_preserves_terminal_status(monkeypatch):
+    import time, sys
+    from backend import jobs
+    from backend.storage import resource, read_json
+    original_submit, original_popen = jobs.POOL.submit, jobs.subprocess.Popen
+    futures, children = [], []
+    def submit(work):
+        future = original_submit(work); futures.append(future); return future
+    def popen(_command, **kwargs):
+        process = original_popen([sys.executable, '-c', 'import time; time.sleep(30)'], **kwargs)
+        children.append(process); return process
+    monkeypatch.setattr(jobs.POOL, 'submit', submit)
+    monkeypatch.setattr(jobs.subprocess, 'Popen', popen)
+    job = jobs.start_job('test', {})
+    status_path = resource('jobs', job['id']) / 'status.json'
+    try:
+        deadline = time.monotonic() + 5
+        while read_json(status_path)['status'] == 'queued' and time.monotonic() < deadline:
+            time.sleep(.01)
+        assert read_json(status_path)['status'] == 'running'
+        assert jobs.cancel_job(job['id'])['status'] == 'cancelled'
+        futures[0].result(timeout=5)
+        assert children[0].poll() is not None
+        assert read_json(status_path)['status'] == 'cancelled'
+    finally:
+        for process in children:
+            if process.poll() is None: process.kill(); process.wait()
+
+
 def test_dense_mesh_does_not_silently_downgrade_interpolation():
     from backend.solver import choose_element
     from types import SimpleNamespace

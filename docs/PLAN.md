@@ -16,7 +16,7 @@ Completion gates:
 
 Currently implemented analysis scope: one connected solid; small-strain static elasticity; optional transversely isotropic print equivalent. No assemblies/contact, plasticity, buckling, fatigue, transient loads, certified material data, or printed-coupon calibration. Photographic proposals are unmeasured until the user supplies/accepts specifications.
 
-## Shipped on print-stl-workspace
+## Implemented locally
 
 - STL import with scale, watertightness, shell and defect checks; selectable surface patches via `classifySurfaces`.
 - Homogenized print model (orientation, walls, skins, infill) that changes stiffness, mass, results and reports. Not a slicer. Not coupon-calibrated. See [PRINT-STL.md](PRINT-STL.md).
@@ -29,15 +29,23 @@ Currently implemented analysis scope: one connected solid; small-strain static e
 - [x] Correct arbitrary-angle stiffness rotation; synchronize job cancellation; align the 500,000-DOF GPU contract; disclose comparison context changes. Regression tests reproduce the reviewed defects.
 - [x] Remove automatic P1 downgrade. Oversized quadratic systems request a coarser mesh until a separately reviewed interpolation option has numerical evidence.
 - [x] Install Linux Gmsh GLU dependency in CI. A fresh remote run remains pending an authorized push.
-- [ ] Preserve original/working STL provenance, reject empty STEP downloads, retain preprocessing warnings and require review of altered geometry.
-- [ ] Require real-part setup confirmation; add operation-specific cancellation through the WebGPU loop.
-- [ ] Bind print settings to Astra interview/proposals and restore pinned comparisons; show print axes alongside the model.
+- [x] Preserve original/working STL provenance, reject empty STEP downloads, retain preprocessing warnings and require review of altered geometry.
+- [x] Require real-part setup confirmation; add operation-specific cancellation through the WebGPU loop.
+- [x] Bind print settings to Astra interview/proposals and restore pinned comparisons; show print axes alongside the model.
 - [ ] Run numerical/API/build checks and the real browser conversation/GPU/save/report path, review the integration, commit and merge into local main.
 - [ ] Continue image-to-mesh research and geometry/convergence/calibration work. Physical specimen validation and hosted Sites release remain outside current software acceptance.
 
 - First coupon analysis on CPU with trust guidance: shipped on `print-stl-workspace` (`56f0faa`). See [MAKING-FEA-COMMON.md](MAKING-FEA-COMMON.md).
 - Own-part + agent path: machine-readable readiness, documented `/api/agent` contract, residual/confirm gates, same guidance and hashes. See [AGENT.md](AGENT.md).
-- Finish browser verification of the conversational proposal through apply, confirmation, GPU solve, saved-study reload and a fresh report/review when Astra is available again.
-- Evaluate current image-generation/image-to-3D tools for sketch-to-mesh against known CAD examples (separate research task; still pending).
+- Conversational print workflow verified on September 20: live missing-input interview, complete print proposal, preview/apply/confirm, actual Apple WebGPU, CPU parity, archive reproduction and saved comparison reload. Final automated checks: 76 backend tests and five frontend regressions passed; TypeScript/Vite production build passed. See [VALIDATION.md](VALIDATION.md).
+- Evaluate current image-generation/image-to-3D tools for sketch-to-mesh against known CAD examples. The separate research task completed as commit `50914d8`: optional concept visualization is useful to trial; production image-to-3D integration is deferred pending a known-CAD benchmark. See [IMAGE-TO-3D-RESEARCH.md](IMAGE-TO-3D-RESEARCH.md). Generated geometry still requires dimensions, topology inspection and comparison to ground truth.
 - Broader reliability: additional GPUs, camera hardware, and larger industrial STLs.
 - Keep ChatGPT Sites publishing at the planning stage. Push and deployment require explicit user authorization.
+
+## Next acceptance items
+
+1. Add representative thin-wall, curved and complex STL/STEP fixtures with geometry and displacement convergence evidence. Preserve an explicit accuracy budget when preprocessing alters a surface.
+2. Compare equivalent-solid mass with slicer filament usage, then calibrate stiffness against measured printed coupons in multiple orientations. Keep illustrative pattern factors labelled until that evidence exists.
+3. Exercise another GPU/browser, device loss and larger quadratic systems. The 500,000-DOF request contract is covered; a real solve at that limit is not established.
+4. Execute the proposed image-to-3D benchmark on known CAD after selecting providers and an explicit spending budget. The research report is complete; no assets or paid trials were generated.
+5. Run updated Linux CI after an explicitly authorized push. Keep Sites hosting in planning until service isolation, hosted authentication and persistence are implemented and separately approved for release.

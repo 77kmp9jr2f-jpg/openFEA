@@ -16,22 +16,26 @@ from .storage import DATA, resource, identifier, read_json, write_json
 from .print_model import stiffness, apply_usage
 from .guidance import result_guidance
 
-def choose_element(mesh: MeshTet):
+def choose_element(mesh: MeshTet, order: int = 2):
     """Keep the reviewed quadratic formulation; never silently downgrade it."""
+    if order == 1:
+        return ElementVector(ElementTetP1()), 2, 1
+    if order != 2:
+        raise ValueError('Only P1 or P2 recorded formulations can be reproduced.')
     p2_dofs = 3 * (mesh.nvertices + mesh.edges.shape[1])
     if p2_dofs <= MAX_SOLVER_DOFS:
         return ElementVector(ElementTetP2()), 4, 2
     raise ValueError('The quadratic system exceeds 500,000 degrees of freedom. Increase mesh size or export a coarser CAD STL; interpolation is never silently reduced.')
 
 
-def assemble_system(setup: Analysis):
+def assemble_system(setup: Analysis, *, reproduction_element_order: int = 2):
     from .simulation_proposals import verify_applied_setup
     verify_applied_setup(setup)
     folder = resource('models',setup.model_id)
     model = read_json(folder/'model.json')
     arrays = np.load(folder/'mesh.npz')
     mesh = MeshTet(arrays['points'].T,arrays['tets'].T)
-    element, intorder, order = choose_element(mesh)
+    element, intorder, order = choose_element(mesh, reproduction_element_order)
     basis = Basis(mesh,element,intorder=intorder)
     if basis.N>MAX_SOLVER_DOFS:
         raise ValueError('Model exceeds 500,000 degrees of freedom. Increase mesh size.')
@@ -96,9 +100,9 @@ def finish_gpu(solution: GPUSolution):
     setup = Analysis.model_validate(read_json(resource('systems',solution.system_id)/'setup.json'))
     return solve_model(setup,solution)
 
-def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
+def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None, *, reproduction_element_order: int = 2):
     started = time.monotonic()
-    state = assemble_system(setup)
+    state = assemble_system(setup, reproduction_element_order=reproduction_element_order)
     model,mesh,basis,K,F,Kc,Fc,x,free,fixed,lam,mu,C,print_state,applied,load_details,element_order = (state[k] for k in
         ('model','mesh','basis','K','F','Kc','Fc','x','free','fixed','lam','mu','C','print_state','applied','load_details','element_order'))
     execution = {'backend':'cpu','device':'Local CPU / SciPy sparse direct', 'precision':'float64',

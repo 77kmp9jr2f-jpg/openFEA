@@ -1,6 +1,6 @@
 # STL import and print analysis
 
-OpenFEA can take a watertight triangle mesh, turn its surfaces into selectable patches, and optionally replace the isotropic solid with a documented homogenized print model. This is the path shipped on `print-stl-workspace` (`9397775`, `3fcde0a`, `d088ce0`).
+OpenFEA can take a watertight triangle mesh, turn its surfaces into selectable patches, and optionally replace the isotropic solid with a documented homogenized print model. The integration repairs and conversational print workflow were verified on 2026-09-20; see [VALIDATION.md](VALIDATION.md).
 
 The print model is an equivalent solid. It is not a slicer, not an explicit infill mesh, and not a calibration against printed coupons.
 
@@ -23,7 +23,9 @@ In the workspace:
 
 1. **Import STL** or **Use example print coupon**, or accept the first-visit coupon.
 2. Check the scale, watertightness line, and listed warnings.
-3. The example coupon enables the print model, switches to PLA · illustrative filament, pre-selects the X=0 / X=40 faces, and applies −40 N on +X.
+3. Build the reviewed STL, then specify material, fixtures and forces manually or interview with Astra. Own-part imports leave supports and loads empty and confirmation unchecked. Only the labelled first-visit demonstration adopts illustrative PLA, an X=0 fixed face and total [0,0,-40] N on the X=40 face.
+
+STLs over 80,000 working triangles may be vertex-welded. Inspection retains original and working hashes/counts, a vertex-distance bound and relative volume change. Confirm the unit scale and explicitly accept preprocessing with `accept_stl_preprocessing=true` before meshing a simplified STL. This bound does not establish preservation of small holes, walls or fillets. Original bytes, scaled working geometry and transformation metadata accompany new model exports; no empty STEP is offered for a discrete STL. Older uploads receive computed preprocessing metadata on reload.
 
 `examples/print-coupon.stl` is a 40 × 10 × 8 mm closed box (3,200 mm³). Dimensions are demonstration inputs.
 
@@ -39,7 +41,7 @@ The Print tab writes `PrintSettings` onto the analysis:
 | Wall count × line width | Solid shell estimated from the oriented bounding box. |
 | Top / bottom layers × layer height | Solid skins estimated from the same box. |
 
-`POST /api/print-preview` returns effective moduli, volume fraction, and filament mass without solving. Changing print settings clears the current result but keeps confirmation and fixtures so a second run is one click. The first print solve is pinned automatically. Results lead with displacement, residual and mass, plus stored `guidance` that says what not to treat as printed strength.
+`POST /api/print-preview` returns effective moduli, volume fraction, and filament mass without solving. Changing print settings clears the result, confirmation and applied-proposal provenance while keeping fixture/load drafts. Review and confirm each changed configuration. Print axes and build direction are displayed beside the settings and in Astra proposal previews. Astra requires explicit adoption of all print inputs and binds them to the model/reference/setup revision. The first print solve is pinned automatically. Results lead with displacement, residual and mass, plus stored `guidance` that says what not to treat as printed strength.
 
 ## Homogenized stiffness
 
@@ -60,7 +62,7 @@ Published gyroid homogenization (RVE + periodic boundaries, compared to compress
 
 ## Compare two print configs
 
-Pin a completed run. Change orientation, walls, or infill. Confirm and solve again. Results show a side-by-side table (displacement, peak von Mises, filament mass, solid fraction, effective E, print settings). `GET /api/runs/{a}/compare/{b}` is the same payload. If the mesh IDs differ, the UI says to treat stiffness as a trend only.
+Pin a completed run. Change orientation, walls, or infill. Confirm and solve again. Results show a side-by-side table (displacement, peak von Mises, filament mass, solid fraction, effective E, print settings). `GET /api/runs/{a}/compare/{b}` is the same payload. The API returns `same_analysis_context` and `context_differences` across model, mesh, interpolation, material, supports and loads. Changed conditions are disclosed; their effects cannot be attributed to print settings alone. Pins survive browser and saved-study reload.
 
 Browser check on 2026-09-14, CPU, example coupon, same mesh, −40 N:
 
@@ -73,7 +75,7 @@ Residual on both runs: 1.8e-11. Peak stress stayed near 14.7 MPa (fixture-edge s
 
 ## Cancel a job
 
-While a mesh or solve is running, **Cancel** on the busy overlay calls `POST /api/jobs/{id}/cancel`. The worker process group is stopped. The UI reports `The job was cancelled.` Completed or failed jobs are left as-is.
+While a mesh or solve is running, **Cancel** on the busy overlay calls `POST /api/jobs/{id}/cancel`. Queued work cannot launch after cancellation; running worker process groups are stopped. Each frontend operation owns its cancellation signal, and cancellation during GPU iteration/readback destroys device buffers instead of cancelling a concurrent Astra request. The UI reports `The job was cancelled.` Completed or failed jobs are left as-is.
 
 ## Tests
 
@@ -88,3 +90,7 @@ While a mesh or solve is running, **Cancel** on the busy overlay calls `POST /ap
 - compare deltas
 
 `docs/VALIDATION.md` records the suite and browser evidence.
+
+## Solver and migration limits
+
+New analyses use P2 with at most 500,000 total DOFs; GPU return payloads use the same cap and browser buffer limits are checked before dispatch. Oversized meshes request coarsening instead of silently changing to P1. Historical archives reproduce their recorded P1/P2 order. Re-run old off-axis print studies: the former inverse rotation was corrected on 2026-09-20, so old results are not current evidence of the intended orientation. Stored artifacts and IDs remain unchanged.

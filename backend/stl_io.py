@@ -244,6 +244,21 @@ def _inspect_fast(tris: np.ndarray) -> dict:
     }
 
 
+def _preprocessing(original, triangles, note):
+    from scipy.spatial import cKDTree
+    distance = (float(cKDTree(triangles.reshape(-1, 3)).query(original.reshape(-1, 3))[0].max())
+                if note else 0.)
+    def volume(tris):
+        return float(abs(np.einsum('ij,ij->i', tris[:, 0], np.cross(tris[:, 1], tris[:, 2])).sum() / 6))
+    source_volume, working_volume = volume(original), volume(triangles)
+    return {'changed': bool(note), 'note': note,
+        'vertex_distance_bound_source_units': distance,
+        'vertex_distance_bound_mm': distance,
+        'source_volume_units3': source_volume, 'working_volume_units3': working_volume,
+        'relative_volume_change': abs(working_volume - source_volume) / max(source_volume, 1e-18),
+        'fidelity_scope': 'Maximum original-vertex distance to a working vertex; not a full surface deviation or feature-preservation certificate.'}
+
+
 def store_stl(data: bytes, name: str) -> dict:
     if not data or len(data) > MAX_UPLOAD_BYTES:
         raise ValueError('Upload an STL under 80 MB.')
@@ -266,18 +281,7 @@ def store_stl(data: bytes, name: str) -> dict:
         (folder / 'unit.stl').write_bytes(data)
     else:
         write_binary_stl(folder / 'unit.stl', triangles)
-    from scipy.spatial import cKDTree
-    distance = (float(cKDTree(triangles.reshape(-1, 3)).query(original.reshape(-1, 3))[0].max())
-                if note else 0.)
-    def volume(tris):
-        return float(abs(np.einsum('ij,ij->i', tris[:, 0], np.cross(tris[:, 1], tris[:, 2])).sum() / 6))
-    source_volume, working_volume = volume(original), volume(triangles)
-    preprocessing = {'changed': bool(note), 'note': note,
-        'vertex_distance_bound_source_units': distance,
-        'vertex_distance_bound_mm': distance,
-        'source_volume_units3': source_volume, 'working_volume_units3': working_volume,
-        'relative_volume_change': abs(working_volume - source_volume) / max(source_volume, 1e-18),
-        'fidelity_scope': 'Maximum original-vertex distance to a working vertex; not a full surface deviation or feature-preservation certificate.'}
+    preprocessing = _preprocessing(original, triangles, note)
     meta = {'id': sid, 'name': name, 'bytes': len(data), **report,
             'source_sha256': hashlib.sha256(data).hexdigest(),
             'working_sha256': hashlib.sha256((folder / 'unit.stl').read_bytes()).hexdigest(),
@@ -292,6 +296,9 @@ def load_inspection(stl_id: str, unit_scale: float = 1.0) -> dict:
     report = inspect_triangles(triangles, unit_scale)
     meta = read_json(folder / 'inspect.json')
     preprocessing = dict(meta.get('preprocessing', {}))
+    if not preprocessing and meta.get('source_triangles', 0) > meta.get('triangles', 0):
+        note = next((w for w in meta.get('warnings', []) if 'welded' in w), 'The original STL was simplified; inspect its small features before use.')
+        preprocessing = _preprocessing(parse_stl((folder/'source.stl').read_bytes()), triangles, note)
     if preprocessing:
         preprocessing['vertex_distance_bound_mm'] = preprocessing['vertex_distance_bound_source_units'] * unit_scale
     note = preprocessing.get('note')

@@ -56,7 +56,12 @@ export type StlInspect = {
   suggested_scale: number;
   warnings: string[];
   source_triangles?: number;
-  preprocessing?: { changed: boolean; vertex_distance_bound_mm: number; relative_volume_change: number; fidelity_scope: string };
+  preprocessing?: {
+    changed: boolean;
+    vertex_distance_bound_mm: number;
+    relative_volume_change: number;
+    fidelity_scope: string;
+  };
 };
 export type Geometry = {
   name: string;
@@ -84,6 +89,17 @@ export type Face = {
   area_mm2: number;
   triangles: number[][];
 };
+// Canonical defaults added since the first saved-study format. This only
+// normalizes client comparisons; immutable model records stay unchanged.
+export function normalizeGeometry(geometry: Geometry): Geometry {
+  return {
+    ...geometry,
+    stl_id: geometry.stl_id ?? null,
+    unit_scale: geometry.unit_scale ?? 1,
+    feature_angle_deg: geometry.feature_angle_deg ?? 40,
+    accept_stl_preprocessing: geometry.accept_stl_preprocessing ?? false,
+  };
+}
 export type Model = {
   id: string;
   spec: Geometry;
@@ -203,6 +219,7 @@ export type ReferenceImage = {
   url: string;
 };
 export type SimulationContext = {
+  print: PrintSettings;
   model_id: string;
   geometry: Geometry;
   material: Material;
@@ -213,6 +230,7 @@ export type SimulationContext = {
   annotations: Mark[];
 };
 export type SimulationProposal = {
+  print: PrintSettings;
   id: string;
   model_id: string;
   source_context: SimulationContext;
@@ -224,6 +242,7 @@ export type SimulationProposal = {
   assumptions: string[];
 };
 export type AppliedSetup = {
+  print: PrintSettings;
   model_id: string;
   material: Material;
   fixed_faces: number[];
@@ -357,14 +376,22 @@ export async function job<T>(
       signal?.throwIfAborted();
       await new Promise((r) => setTimeout(r, 900));
       signal?.throwIfAborted();
-      const j = await api<{ status: string; error?: string; result: T }>("/jobs/" + id);
+      const j = await api<{ status: string; error?: string; result: T }>(
+        "/jobs/" + id,
+      );
       signal?.throwIfAborted();
       onStatus?.(j.status);
-      if (j.status === "cancelled") throw new DOMException(j.error || "The job was cancelled.", "AbortError");
+      if (j.status === "cancelled")
+        throw new DOMException(
+          j.error || "The job was cancelled.",
+          "AbortError",
+        );
       if (j.status === "failed") throw new Error(j.error);
       if (j.status === "complete") return j.result;
     }
-    throw new Error("The job is taking longer than expected. Reload to reconnect.");
+    throw new Error(
+      "The job is taking longer than expected. Reload to reconnect.",
+    );
   } finally {
     signal?.removeEventListener("abort", cancel);
     await cancellation;

@@ -2391,3 +2391,8 @@ h1 {
     min-width: 160px;
   }
 }
+
+.print-review-layout { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(320px, 1fr); width: 100%; min-height: 500px; }
+.print-orientation-view { position: sticky; top: 0; height: 500px; min-width: 0; }
+.print-orientation-view .viewport { height: 100%; min-height: 360px; }
+@media (max-width: 1150px) { .print-review-layout { grid-template-columns: 1fr; } .print-orientation-view { position: relative; height: 380px; } }

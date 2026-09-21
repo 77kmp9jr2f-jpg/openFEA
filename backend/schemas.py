@@ -132,6 +132,7 @@ class ImageInput(StrictModel):
     data_url: str = Field(max_length=16_000_000)
 
 class AssistantRequest(StrictModel):
+    print: PrintSettings = Field(default_factory=PrintSettings)
     message: str = Field(min_length=1,max_length=16000)
     image_id: str | None = Field(default=None,pattern=r'^[a-f0-9]{32}$')
     annotations: list[Annotation] = Field(default_factory=list,max_length=100)
@@ -174,6 +175,7 @@ class GPUSolution(StrictModel):
     seconds: Number = Field(ge=0,le=600)
 
 class SimulationContext(StrictModel):
+    print: PrintSettings = Field(default_factory=PrintSettings)
     model_id: str = Field(pattern=r'^[a-f0-9]{32}$')
     geometry: Geometry
     material: Material
@@ -184,6 +186,7 @@ class SimulationContext(StrictModel):
     annotations: list[Annotation] = Field(default_factory=list,max_length=100)
 
 class SimulationDraft(StrictModel):
+    print: PrintSettings = Field(default_factory=PrintSettings)
     material: Material
     fixed_faces: list[int] = Field(min_length=1,max_length=50)
     loads: list[Force] = Field(min_length=1,max_length=20)
@@ -194,6 +197,9 @@ class SimulationDraft(StrictModel):
     @classmethod
     def complete_inputs(cls,value):
         if isinstance(value,dict):
+            settings = value.get('print')
+            if isinstance(settings, dict) and not set(PrintSettings.model_fields) <= set(settings):
+                raise ValueError('A simulation proposal must supply all print settings explicitly.')
             material=value.get('material',{})
             if isinstance(material,dict) and not set(Material.model_fields)<=set(material):
                 raise ValueError('A simulation proposal must supply all material properties explicitly.')
