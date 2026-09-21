@@ -32,7 +32,7 @@ Currently implemented analysis scope: one connected solid; small-strain static e
 - [x] Preserve original/working STL provenance, reject empty STEP downloads, retain preprocessing warnings and require review of altered geometry.
 - [x] Require real-part setup confirmation; add operation-specific cancellation through the WebGPU loop.
 - [x] Bind print settings to Astra interview/proposals and restore pinned comparisons; show print axes alongside the model.
-- [ ] Run numerical/API/build checks and the real browser conversation/GPU/save/report path, review the integration, commit and merge into local main.
+- [x] Run numerical/API/build checks and the real browser conversation/GPU/save/report path, review the integration, commit and merge into local main. Source `1a6e8d7`, research `087abcb`, evidence `5bfa601`; the merge preserves that verified tree without conflicts.
 - [ ] Continue image-to-mesh research and geometry/convergence/calibration work. Physical specimen validation and hosted Sites release remain outside current software acceptance.
 
 - First coupon analysis on CPU with trust guidance: shipped on `print-stl-workspace` (`56f0faa`). See [MAKING-FEA-COMMON.md](MAKING-FEA-COMMON.md).
