@@ -3,7 +3,7 @@ import json, os, uuid
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = Path(os.environ.get('FEAR_DATA_DIR', ROOT / 'data')).resolve()
-for name in ('models','runs','images','steps','studies','jobs','systems','setup_proposals'):
+for name in ('models','runs','images','steps','stls','studies','jobs','systems','setup_proposals'):
     (DATA/name).mkdir(parents=True,exist_ok=True)
 
 def identifier():

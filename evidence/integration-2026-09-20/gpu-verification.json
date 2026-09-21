@@ -1,0 +1,23 @@
+{
+  "gpu_run": "4d162ab8d809467ea43bf764c5c8479a",
+  "cpu_run": "febb6e6e69434455ad72f85e6ad4fe40",
+  "model": "9737ceeb435f40c6855ecef6bacf518a",
+  "device": {
+    "backend": "webgpu",
+    "device": "apple \u00b7 metal-3",
+    "precision": "GPU float32 with browser float64 iterative refinement",
+    "method": "WebGPU conjugate gradient, symmetric Jacobi scaling",
+    "iterations": 2320,
+    "refinements": 3,
+    "gpu_seconds": 0.7181999998092652,
+    "device_source": "Browser-reported adapter; numerical residual independently verified on server"
+  },
+  "gpu_relative_residual": 5.864917129345802e-10,
+  "gpu_max_displacement_mm": 0.1548826113116278,
+  "cpu_max_displacement_mm": 0.15488261131261874,
+  "relative_displacement_difference": 6.397939395721239e-12,
+  "reproduced_max_displacement_mm": 0.15488261131261874,
+  "source_sha256": "c6827271cd379b48977ea3d5491ca05681b506055b3bf97722bfab46e15ae63d",
+  "proposal_id": "ded6df2125624dfb85e07f66aea996e7",
+  "scope": "Synthetic STL coupon imported through own-part UI; live Astra interview, explicit review/apply/confirm, real local WebGPU, CPU parity and exported reproduction. No physical calibration."
+}

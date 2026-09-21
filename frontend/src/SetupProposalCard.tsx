@@ -59,6 +59,26 @@ export default function SetupProposalCard({
           </p>
         ))}
       </div>
+      <div className="proposal-condition">
+        <b>Print model</b>
+        {proposal.print?.enabled ? (
+          <p>
+            {proposal.print.infill_pattern} ·{" "}
+            {format(proposal.print.infill_density * 100)}% infill
+            <br />
+            Rotation XYZ [{proposal.print.rotation_deg.join(", ")}]°
+            <br />
+            {proposal.print.wall_count} walls × {proposal.print.line_width_mm}{" "}
+            mm; layers {proposal.print.layer_height_mm} mm; skins{" "}
+            {proposal.print.top_layers} top / {proposal.print.bottom_layers}{" "}
+            bottom.
+            <br />
+            Experimental equivalent solid; no coupon calibration.
+          </p>
+        ) : (
+          <p>Disabled · homogeneous solid</p>
+        )}
+      </div>
       <details>
         <summary>Application & assumptions</summary>
         <p>{proposal.notes}</p>
@@ -77,7 +97,7 @@ export default function SetupProposalCard({
           Inputs changed. Ask Astra to refresh this proposal.
         </p>
       ) : (
-        <p>Replaces the complete material, fixture and force setup.</p>
+        <p>Replaces the complete material, print, fixture and force setup.</p>
       )}
       <div className="proposal-actions">
         <button

@@ -6,6 +6,7 @@ import type { Model, Result, Load, Vec3 } from "./types";
 import { format } from "./types";
 
 type Props = {
+  printRotation?: Vec3;
   model: Model | null;
   result: Result | null;
   fixed: number[];
@@ -218,6 +219,7 @@ export default function Viewport(p: Props) {
       const f = m.faces.find((f) => f.id === fid);
       if (!f) continue;
       const pin = label("F" + (i + 1) + " · FIXED");
+      pin.scale.set(span * 0.28, span * 0.065, 1);
       pin.position.set(...f.center);
       pin.position.z += span * 0.14;
       scene.add(pin);
@@ -242,10 +244,12 @@ export default function Viewport(p: Props) {
         "L" + (i + 1) + " · " + format(Math.hypot(...l.vector)) + " N",
         "#a94f21",
       );
+      pin.scale.set(span * 0.28, span * 0.065, 1);
       pin.position.copy(origin).add(new THREE.Vector3(0, 0, span * 0.05));
       scene.add(pin);
     }
     const dimension = label(format(hi.x - lo.x) + " mm");
+    dimension.scale.set(span * 0.22, span * 0.055, 1);
     dimension.position.set(center.x, lo.y - span * 0.18, lo.z);
     scene.add(dimension);
     const axes = new THREE.AxesHelper(span * 0.15);
@@ -258,6 +262,38 @@ export default function Viewport(p: Props) {
       a.position.setComponent(i, a.position.getComponent(i) + span * 0.19);
       scene.add(a);
     });
+    if (p.printRotation) {
+      // SciPy extrinsic xyz is Rz Ry Rx; Three's intrinsic ZYX matches it.
+      const [rx, ry, rz] = p.printRotation.map(THREE.MathUtils.degToRad);
+      const rotation = new THREE.Matrix4().makeRotationFromEuler(
+        new THREE.Euler(rx, ry, rz, "ZYX"),
+      );
+      [
+        new THREE.Vector3(1, 0, 0),
+        new THREE.Vector3(0, 1, 0),
+        new THREE.Vector3(0, 0, 1),
+      ].forEach((axis, i) => {
+        axis.applyMatrix4(rotation);
+        const color = [0xab5b4c, 0x52815a, 0x547ab0][i];
+        scene.add(
+          new THREE.ArrowHelper(
+            axis,
+            center,
+            span * 0.45,
+            color,
+            span * 0.05,
+            span * 0.025,
+          ),
+        );
+        const pin = label(
+          i === 2 ? "PRINT Z · BUILD" : "PRINT " + "XY"[i],
+          "#263b33",
+        );
+        pin.scale.set(span * 0.32, span * 0.065, 1);
+        pin.position.copy(center).addScaledVector(axis, span * 0.53);
+        scene.add(pin);
+      });
+    }
     const ray = new THREE.Raycaster(),
       pointer = new THREE.Vector2();
     let down = { x: 0, y: 0 },
@@ -345,6 +381,7 @@ export default function Viewport(p: Props) {
     };
   }, [
     p.model,
+    p.printRotation,
     p.result,
     p.fixed,
     p.loads,
@@ -357,7 +394,7 @@ export default function Viewport(p: Props) {
     const r = sceneRef.current?.renderer;
     if (!r) return;
     const a = document.createElement("a");
-    a.download = "FEA-R-viewport.png";
+    a.download = "OpenFEA-viewport.png";
     a.href = r.domElement.toDataURL("image/png");
     a.click();
   }

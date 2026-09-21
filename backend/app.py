@@ -5,11 +5,11 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps, UnidentifiedImageError
 from .storage import ROOT, DATA, identifier, resource, write_json, read_json
-from .schemas import Geometry, Analysis, AssistantRequest, ImageInput, Study, GPUSolution, SimulationContext
+from .schemas import Geometry, Analysis, AssistantRequest, ImageInput, Study, GPUSolution, SimulationContext, PrintPreviewRequest, ReadinessRequest
 from .jobs import start_job
 from .assistant import assistant_status
 
-app = FastAPI(title='FEA-R',version='0.1.0')
+app = FastAPI(title='OpenFEA',version='0.1.0')
 Image.MAX_IMAGE_PIXELS = 25_000_000
 
 @app.middleware('http')
@@ -22,8 +22,8 @@ async def local_boundary(request: Request, call_next):
         return JSONResponse({'detail':'Foreign origin rejected.'},status_code=403)
     if request.method in ('POST','PUT'):
         body = await request.body()
-        if len(body)>20_000_000:
-            return JSONResponse({'detail':'Request is too large (20 MB maximum).'},status_code=413)
+        if len(body)>80_000_000:
+            return JSONResponse({'detail':'Request is too large (80 MB maximum).'},status_code=413)
     return await call_next(request)
 
 @app.exception_handler(ValueError)
@@ -36,7 +36,26 @@ async def missing(request,exc):
 
 @app.get('/api/health')
 def health():
-    return {'ok':True,'version':'0.1.0','assistant':assistant_status(),'solver':'scikit-fem · quadratic tetrahedra'}
+    return {'ok':True,'version':'0.1.0','assistant':assistant_status(),
+            'solver':'scikit-fem · quadratic tetrahedra','agent':'/api/agent'}
+
+@app.get('/api/agent')
+def agent():
+    from .readiness import agent_contract
+    return agent_contract()
+
+@app.get('/api/models/{mid}/readiness')
+def model_readiness(mid: str):
+    from .readiness import analysis_readiness
+    return analysis_readiness(read_json(resource('models', mid) / 'model.json'))
+
+@app.post('/api/readiness')
+def readiness(body: ReadinessRequest):
+    from .readiness import analysis_readiness
+    return analysis_readiness(
+        read_json(resource('models', body.model_id) / 'model.json'),
+        body.model_dump(),
+    )
 
 @app.post('/api/models')
 def model(spec: Geometry):
@@ -75,6 +94,11 @@ def apply_simulation_proposal(pid: str, context: SimulationContext):
 def job(jid: str):
     return read_json(resource('jobs',jid)/'status.json')
 
+@app.post('/api/jobs/{jid}/cancel')
+def cancel(jid: str):
+    from .jobs import cancel_job
+    return cancel_job(jid)
+
 @app.post('/api/images')
 def upload_image(image: ImageInput):
     try:
@@ -96,11 +120,39 @@ def upload_image(image: ImageInput):
 def image(iid: str):
     return FileResponse(resource('images',iid).with_suffix('.png'),media_type='image/png')
 
+@app.post('/api/stls')
+async def upload_stl(request: Request):
+    from .stl_io import store_stl
+    content = await request.body()
+    if not content or len(content) > 80_000_000:
+        raise ValueError('Upload an STL under 80 MB.')
+    name = request.headers.get('x-filename', 'import.stl')[:160]
+    return store_stl(content, name)
+
+@app.get('/api/stls/{sid}')
+def get_stl(sid: str, scale: float = 1.0):
+    from .stl_io import load_inspection
+    return load_inspection(sid, scale)
+
+@app.post('/api/print-preview')
+def print_preview(body: PrintPreviewRequest):
+    from .print_model import homogenize, apply_usage
+    model = read_json(resource('models', body.model_id) / 'model.json')
+    settings = body.print if body.print.enabled else body.print.model_copy(update={'enabled': True})
+    homogenized = homogenize(model['bounds'], body.material, settings)
+    return {**homogenized, **apply_usage(homogenized, model['volume_mm3'], body.material.density_kg_m3)}
+
+@app.get('/api/runs/{aid}/compare/{bid}')
+def compare_runs(aid: str, bid: str):
+    from .print_model import compare_results
+    return compare_results(read_json(resource('runs', aid) / 'result.json'),
+                           read_json(resource('runs', bid) / 'result.json'))
+
 @app.post('/api/steps')
 async def upload_step(request: Request):
     content = await request.body()
-    if not content or len(content)>15_000_000 or b'ISO-10303-21' not in content[:1000]:
-        raise ValueError('Upload a STEP (.step/.stp) file under 15 MB.')
+    if not content or len(content)>80_000_000 or b'ISO-10303-21' not in content[:1000]:
+        raise ValueError('Upload a STEP (.step/.stp) file under 80 MB.')
     sid = identifier(); resource('steps',sid).with_suffix('.step').write_bytes(content)
     return {'id':sid,'units':'Imported and converted to millimetres by OpenCASCADE; verify displayed bounds.'}
 
@@ -108,7 +160,12 @@ async def upload_step(request: Request):
 def model_file(mid: str,name: str):
     if name not in ('model.step','model.stl','mesh.msh','model.json','mesh.npz'):
         raise HTTPException(404)
-    return FileResponse(resource('models',mid)/name,filename=name)
+    folder = resource('models',mid)
+    if name == 'model.step' and read_json(folder/'model.json')['spec']['kind'] == 'stl':
+        raise HTTPException(404, 'STL imports have no CAD solid STEP representation.')
+    if not (folder/name).is_file():
+        raise HTTPException(404)
+    return FileResponse(folder/name,filename=name)
 
 @app.get('/api/studies')
 def studies():
@@ -130,7 +187,7 @@ def report(rid: str,format: str):
     if format not in ('html','pdf','zip','json'):
         raise HTTPException(404)
     path = export_report(rid,format)
-    return FileResponse(path,filename=f'FEA-R-{rid[:8]}.{format}')
+    return FileResponse(path,filename=f'OpenFEA-{rid[:8]}.{format}')
 
 if (ROOT/'dist').exists():
     app.mount('/',StaticFiles(directory=ROOT/'dist',html=True),name='frontend')

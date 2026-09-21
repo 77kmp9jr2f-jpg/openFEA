@@ -4,7 +4,7 @@ Status: planned, not deployed. The current working application runs locally. No 
 
 ## Intended hosted experience
 
-A signed-in user opens FEA-R on ChatGPT Sites, uploads a reference, annotates dimensions, works with Astra on a reviewable solid, defines fixtures and forces, and runs the stiffness solve on their own hardware GPU through WebGPU. Every report identifies the compute device and numerical verification. Geometry processing must have a concrete implementation before this is a standalone hosted product.
+A signed-in user opens OpenFEA on ChatGPT Sites, uploads a reference, annotates dimensions, works with Astra on a reviewable solid, defines fixtures and forces, and runs the stiffness solve on their own hardware GPU through WebGPU. Every report identifies the compute device and numerical verification. Geometry processing must have a concrete implementation before this is a standalone hosted product.
 
 ## Execution split
 
@@ -38,7 +38,7 @@ A future WASM path can move CAD/meshing, assembly and report generation into bro
 - Existing local studies contain references to local immutable files. Add explicit import/export migration; never assume browser localStorage moves to the hosted origin.
 - GPUs expose different limits and precision/performance. Record device identity as browser-reported and preserve numerical acceptance independently.
 - Sparse matrix transfer and assembly size can dominate small-part runtime; GPU acceleration is not a measured speedup claim.
-- Gmsh GPL terms and the FEA-R GPL-3.0-or-later source must remain available with redistributed builds. Model access is separately licensed and authenticated.
+- Gmsh GPL terms and the OpenFEA GPL-3.0-or-later source must remain available with redistributed builds. Model access is separately licensed and authenticated.
 - Hosted access control, retention, quotas, secrets, Astra entitlement and the native service are still unimplemented. The current server intentionally rejects foreign origins and is unsuitable for exposure as a public server.
 
 Planning evidence: installed Sites building/hosting skills, their runtime references and live tool descriptions inspected 2026-09-09. Recheck these contracts at release time; platform capabilities may change.

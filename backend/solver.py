@@ -8,23 +8,37 @@ import numpy as np
 import scipy, skfem
 from scipy.sparse.linalg import spsolve, MatrixRankWarning
 import warnings
-from skfem import MeshTet, Basis, FacetBasis, ElementVector, ElementTetP2, LinearForm, asm, condense
+from skfem import MeshTet, Basis, FacetBasis, ElementVector, ElementTetP1, ElementTetP2, LinearForm, BilinearForm, asm, condense
 from skfem.helpers import dot, sym_grad
 from skfem.models.elasticity import linear_elasticity, lame_parameters
-from .schemas import Analysis, GPUSolution
+from .schemas import Analysis, GPUSolution, MAX_SOLVER_DOFS
 from .storage import DATA, resource, identifier, read_json, write_json
+from .print_model import stiffness, apply_usage
+from .guidance import result_guidance
 
-def assemble_system(setup: Analysis):
+def choose_element(mesh: MeshTet, order: int = 2):
+    """Keep the reviewed quadratic formulation; never silently downgrade it."""
+    if order == 1:
+        return ElementVector(ElementTetP1()), 2, 1
+    if order != 2:
+        raise ValueError('Only P1 or P2 recorded formulations can be reproduced.')
+    p2_dofs = 3 * (mesh.nvertices + mesh.edges.shape[1])
+    if p2_dofs <= MAX_SOLVER_DOFS:
+        return ElementVector(ElementTetP2()), 4, 2
+    raise ValueError('The quadratic system exceeds 500,000 degrees of freedom. Increase mesh size or export a coarser CAD STL; interpolation is never silently reduced.')
+
+
+def assemble_system(setup: Analysis, *, reproduction_element_order: int = 2):
     from .simulation_proposals import verify_applied_setup
     verify_applied_setup(setup)
     folder = resource('models',setup.model_id)
     model = read_json(folder/'model.json')
     arrays = np.load(folder/'mesh.npz')
     mesh = MeshTet(arrays['points'].T,arrays['tets'].T)
-    element = ElementVector(ElementTetP2())
-    basis = Basis(mesh,element,intorder=4)
-    if basis.N>150000:
-        raise ValueError('Model exceeds 150,000 quadratic degrees of freedom. Increase mesh size.')
+    element, intorder, order = choose_element(mesh, reproduction_element_order)
+    basis = Basis(mesh,element,intorder=intorder)
+    if basis.N>MAX_SOLVER_DOFS:
+        raise ValueError('Model exceeds 500,000 degrees of freedom. Increase mesh size.')
     face_by_id = {f['id']:f for f in model['faces']}
     if not set(setup.fixed_faces + [l.face_id for l in setup.loads]) <= face_by_id.keys():
         raise ValueError('A selected face does not belong to this model revision. Re-select its faces.')
@@ -32,13 +46,14 @@ def assemble_system(setup: Analysis):
     face_facets = {fid:np.array([facet_lookup[tuple(sorted(t))] for t in f['triangles']],dtype=int) for fid,f in face_by_id.items()}
     fixed_facets = np.unique(np.concatenate([face_facets[f] for f in setup.fixed_faces]))
     fixed = basis.get_dofs(facets=fixed_facets).all()
+    C, print_state = stiffness(setup.material, setup.print, model['bounds'])
     lam,mu = lame_parameters(setup.material.young_mpa,setup.material.poisson)
-    K = asm(linear_elasticity(lam,mu),basis)
+    K = asm(_elasticity(C) if setup.print.enabled else linear_elasticity(lam,mu),basis)
     F = np.zeros(basis.N)
     applied = np.zeros(3)
     load_details = []
     for load in setup.loads:
-        fb = FacetBasis(mesh,element,facets=face_facets[load.face_id],intorder=4)
+        fb = FacetBasis(mesh,element,facets=face_facets[load.face_id],intorder=intorder)
         area = float(fb.dx.sum())
         traction = np.asarray(load.vector)/area
         @LinearForm
@@ -49,7 +64,24 @@ def assemble_system(setup: Analysis):
         load_details.append({'face_id':load.face_id,'vector_n':list(load.vector),'mesh_area_mm2':area,'traction_mpa':traction.tolist()})
     Kc,Fc,x,free = condense(K,F,D=fixed)
     return dict(model=model,mesh=mesh,basis=basis,K=K,F=F,Kc=Kc,Fc=Fc,x=x,free=free,
-                fixed=fixed,lam=lam,mu=mu,applied=applied,load_details=load_details)
+                fixed=fixed,lam=lam,mu=mu,C=C,print_state=print_state,applied=applied,load_details=load_details,
+                element_order=order)
+
+def _elasticity(C):
+    coeff = [[float(C[i, j]) for j in range(6)] for i in range(6)]
+    @BilinearForm
+    def elastic(u, v, _w):
+        eu, ev = sym_grad(u), sym_grad(v)
+        strain = (eu[0, 0], eu[1, 1], eu[2, 2], 2 * eu[1, 2], 2 * eu[0, 2], 2 * eu[0, 1])
+        test = (ev[0, 0], ev[1, 1], ev[2, 2], 2 * ev[1, 2], 2 * ev[0, 2], 2 * ev[0, 1])
+        acc = 0
+        for i in range(6):
+            sigma_i = 0
+            for j in range(6):
+                sigma_i = sigma_i + coeff[i][j] * strain[j]
+            acc = acc + test[i] * sigma_i
+        return acc
+    return elastic
 
 def prepare_gpu(setup: Analysis):
     state = assemble_system(setup)
@@ -68,11 +100,11 @@ def finish_gpu(solution: GPUSolution):
     setup = Analysis.model_validate(read_json(resource('systems',solution.system_id)/'setup.json'))
     return solve_model(setup,solution)
 
-def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
+def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None, *, reproduction_element_order: int = 2):
     started = time.monotonic()
-    state = assemble_system(setup)
-    model,mesh,basis,K,F,Kc,Fc,x,free,fixed,lam,mu,applied,load_details = (state[k] for k in
-        ('model','mesh','basis','K','F','Kc','Fc','x','free','fixed','lam','mu','applied','load_details'))
+    state = assemble_system(setup, reproduction_element_order=reproduction_element_order)
+    model,mesh,basis,K,F,Kc,Fc,x,free,fixed,lam,mu,C,print_state,applied,load_details,element_order = (state[k] for k in
+        ('model','mesh','basis','K','F','Kc','Fc','x','free','fixed','lam','mu','C','print_state','applied','load_details','element_order'))
     execution = {'backend':'cpu','device':'Local CPU / SciPy sparse direct', 'precision':'float64',
                  'method':'Sparse direct solve','iterations':0,'refinements':0}
     if gpu_solution is not None:
@@ -109,9 +141,16 @@ def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
         forces2 = np.zeros((len(fi),3)); forces2[:,c] = residual[fi]
         reaction_moment += np.cross(basis.doflocs[:,fi].T,forces2).sum(axis=0)
     strain = sym_grad(basis.interpolate(x))
-    sigma = 2*mu*strain
-    tr = np.einsum('iieq->eq',strain)
-    for i in range(3): sigma[i,i] += lam*tr
+    if setup.print.enabled:
+        eng = np.stack([strain[0,0],strain[1,1],strain[2,2],2*strain[1,2],2*strain[0,2],2*strain[0,1]])
+        sv = np.einsum('ij,j...->i...', C, eng)
+        sigma = np.zeros_like(strain)
+        sigma[0,0],sigma[1,1],sigma[2,2] = sv[0],sv[1],sv[2]
+        sigma[1,2]=sigma[2,1]=sv[3]; sigma[0,2]=sigma[2,0]=sv[4]; sigma[0,1]=sigma[1,0]=sv[5]
+    else:
+        sigma = 2*mu*strain
+        tr = np.einsum('iieq->eq',strain)
+        for i in range(3): sigma[i,i] += lam*tr
     vm_q = np.sqrt(0.5*((sigma[0,0]-sigma[1,1])**2+(sigma[1,1]-sigma[2,2])**2+(sigma[2,2]-sigma[0,0])**2)+3*(sigma[0,1]**2+sigma[1,2]**2+sigma[0,2]**2))
     element_vm = np.sum(vm_q*basis.dx,axis=1)/basis.dx.sum(axis=1)
     # Volume-weighted projection for visualization only. Reported peak is unaveraged quadrature.
@@ -127,9 +166,11 @@ def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
     peak = float(vm_q.max())
     span = float(np.linalg.norm(np.ptp(mesh.p,axis=1)))
     notes = [
-        'Single homogeneous isotropic solid; quadratic tetrahedral small-strain, linear-elastic static analysis.',
+        ('Printed equivalent solid with directional homogenized stiffness; tetrahedral small-strain static analysis.'
+         if setup.print.enabled else
+         'Single homogeneous isotropic solid; tetrahedral small-strain, linear-elastic static analysis.'),
         'Fixtures are ideal fully fixed faces. Forces are distributed uniformly across the selected mesh faces in global XYZ.',
-        'No contact, bolt preload, plasticity, buckling, fatigue, thermal effects or manufacturing anisotropy.',
+        'No contact, bolt preload, plasticity, buckling, fatigue or thermal effects. Explicit infill geometry is not meshed.',
         'Material presets are illustrative inputs. Verify properties for the actual alloy, condition and manufacturing process.',
         'Peak stress is the maximum unaveraged quadrature-point von Mises stress; display colors are volume-weighted nodal averages.',
         'Sharp corners and fixture edges can have stress singularities. A single mesh does not establish stress convergence.',
@@ -141,20 +182,34 @@ def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None):
         notes.append('Displacement exceeds 1% of model span. A geometrically nonlinear analysis may be needed.')
     if model['spec']['provenance'] == 'image_proposal':
         notes.append('Geometry originated from an image proposal. User confirmation does not constitute metrology.')
+    if model['spec']['provenance'] == 'stl_import':
+        notes.append('Geometry is an imported triangle mesh. Selectable surfaces are clustered patches, not CAD faces.')
+    if element_order == 2:
+        notes.append('Displacement interpolation is quadratic (P2).')
+    else:
+        notes.append(
+            'Displacement interpolation is linear (P1). The surface mesh was too dense for a local quadratic system; '
+            'export a coarser CAD STL if you need P2 on this computer.'
+        )
+    usage = apply_usage(print_state, model['volume_mm3'], setup.material.density_kg_m3)
+    if print_state.get('enabled'):
+        notes.extend(print_state['assumptions'])
     rid = identifier(); out = DATA/'runs'/rid; out.mkdir()
     result = {'id':rid,'model_id':setup.model_id,'setup':setup.model_dump(),'model_sha256':model['sha256'],'mesh_sha256':model['mesh_sha256'],
-              'nodes':int(mesh.nvertices),'elements':int(mesh.nelements),'dofs':int(basis.N),'max_displacement_mm':max_u,
+              'nodes':int(mesh.nvertices),'elements':int(mesh.nelements),'dofs':int(basis.N),'element_order':element_order,
+              'max_displacement_mm':max_u,
               'peak_von_mises_mpa':peak,'max_display_stress_mpa':float(nodal_vm.max()),
               'yield_ratio':setup.material.yield_mpa/peak if peak>0 else None,
               'reaction_n':reactions.tolist(),'applied_n':applied.tolist(),
               'force_balance_error_n':float(np.linalg.norm(reactions+applied)),
               'moment_balance_error_nmm':float(np.linalg.norm(applied_moment+reaction_moment)),
               'relative_residual':rel_residual,'strain_energy_nmm':float(0.5*x@(K@x)),
-              'mass_g':model['volume_mm3']*setup.material.density_kg_m3*1e-6,
+              'mass_g':usage['mass_g'],'print':{**print_state,**usage},
               'mesh_volume_mm3':float(tet_volumes.sum()),'displacement':displacement.tolist(),
               'nodal_stress_mpa':nodal_vm.tolist(),'loads':load_details,'warnings':notes+model['spec']['assumptions'],
               'execution':execution,'seconds':round(time.monotonic()-started+(gpu_solution.seconds if gpu_solution else 0),3),'created_at':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),
               'versions':{'scikit-fem':skfem.__version__,'numpy':np.__version__,'scipy':scipy.__version__,'gmsh':model['gmsh_version']}}
+    result['guidance'] = result_guidance(result)
     np.savez_compressed(out/'solution.npz',dof_displacement=x,dof_coordinates=basis.doflocs,element_stress_mpa=element_vm,quadrature_stress_mpa=vm_q)
     write_json(out/'result.json',result)
     return result

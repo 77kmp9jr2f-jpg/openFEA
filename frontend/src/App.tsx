@@ -19,6 +19,7 @@ import {
   MoveUpRight,
   Play,
   Plus,
+  Printer,
   Save,
   Settings2,
   ShieldCheck,
@@ -36,7 +37,20 @@ import {
 } from "./gpu";
 import ImageReview from "./ImageReview";
 import SetupProposalCard from "./SetupProposalCard";
-import { api, job, demoGeometry, materials, format, contextKey } from "./types";
+import PrintWorkspace from "./PrintWorkspace";
+import CompareTable from "./CompareTable";
+import ResultGuidance from "./ResultGuidance";
+import ReadinessPanel from "./ReadinessPanel";
+import {
+  api,
+  job,
+  demoGeometry,
+  materials,
+  format,
+  contextKey,
+  normalizeGeometry,
+  defaultPrint,
+} from "./types";
 import type {
   Geometry,
   Model,
@@ -50,13 +64,19 @@ import type {
   SimulationContext,
   SimulationProposal,
   AppliedSetup,
+  PrintSettings,
+  PrintPreview,
+  StlInspect,
+  RunCompare,
+  Readiness,
 } from "./types";
 
-type Tab = "reference" | "model" | "setup" | "results";
+type Tab = "reference" | "model" | "print" | "setup" | "results";
 type Saved = {
   spec: Geometry;
   modelId?: string;
   resultId?: string;
+  pinnedId?: string;
   material: Material;
   fixed: number[];
   loads: Load[];
@@ -65,6 +85,7 @@ type Saved = {
   messages: Message[];
   notes: string;
   setupProposalId?: string | null;
+  print?: PrintSettings;
 };
 const intro: Message = {
   role: "assistant",
@@ -73,6 +94,11 @@ const intro: Message = {
     "What dimensions are known?",
     "How is it held, and where does the force act?",
   ],
+  live: false,
+};
+const firstAnalysisIntro: Message = {
+  role: "assistant",
+  text: "This example coupon has labelled demonstration conditions. Run the simulation, then change infill, review and confirm the setup, and run again. Check mesh convergence before interpreting displacement; the print model is not calibrated strength.",
   live: false,
 };
 export default function App() {
@@ -94,6 +120,11 @@ export default function App() {
     [messages, setMessages] = useState<Message[]>([intro]),
     [prompt, setPrompt] = useState(""),
     [notes, setNotes] = useState("");
+  const [print, setPrint] = useState<PrintSettings>({ ...defaultPrint });
+  const [printPreview, setPrintPreview] = useState<PrintPreview | null>(null);
+  const [stlInspect, setStlInspect] = useState<StlInspect | null>(null);
+  const [pinned, setPinned] = useState<Result | null>(null);
+  const [compare, setCompare] = useState<RunCompare | null>(null);
   const [busy, setBusy] = useState(""),
     [aiBusy, setAiBusy] = useState(false),
     [status, setStatus] = useState("Starting local engine"),
@@ -107,7 +138,8 @@ export default function App() {
     [help, setHelp] = useState(false),
     [featureText, setFeatureText] = useState(""),
     [featureError, setFeatureError] = useState("");
-  const [compute, setCompute] = useState<"webgpu" | "cpu">("webgpu");
+  const [compute, setCompute] = useState<"webgpu" | "cpu">("cpu");
+  const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [setupPreview, setSetupPreview] = useState<SimulationProposal | null>(
     null,
   );
@@ -119,15 +151,21 @@ export default function App() {
   useEffect(() => {
     gpuCapability().then(setGpu);
   }, []);
+  const operation = useRef<AbortController | null>(null);
   const started = useRef(false),
     stepFile = useRef<HTMLInputElement>(null),
+    stlFile = useRef<HTMLInputElement>(null),
     stageElement = useRef<HTMLDivElement>(null),
     chatEnd = useRef<HTMLDivElement>(null);
-  const dirty = !!model && JSON.stringify(spec) !== JSON.stringify(model.spec);
+  const dirty =
+    !!model &&
+    contextKey(normalizeGeometry(spec)) !==
+      contextKey(normalizeGeometry(model.spec));
   const simulationContext: SimulationContext | null = model
     ? {
         model_id: model.id,
-        geometry: spec,
+        geometry: normalizeGeometry(spec),
+        print,
         material,
         fixed_faces: fixed,
         loads,
@@ -148,7 +186,7 @@ export default function App() {
   useEffect(() => {
     if (previewing)
       stageElement.current?.scrollIntoView({
-        behavior: "smooth",
+        behavior: "instant",
         block: "start",
       });
   }, [previewing]);
@@ -162,6 +200,7 @@ export default function App() {
     setField("solid");
     setSetupPreview(null);
     setSetupProposalId(null);
+    setCompare(null);
   }
   function updateSpec(patch: Partial<Geometry>) {
     setSpec((s) => ({
@@ -176,6 +215,7 @@ export default function App() {
       spec,
       modelId: model?.id,
       resultId: result?.id,
+      pinnedId: pinned?.id,
       material,
       fixed,
       loads,
@@ -184,10 +224,11 @@ export default function App() {
       messages,
       notes,
       setupProposalId,
+      print,
     };
   }
   async function restore(s: Saved) {
-    setSpec(s.spec);
+    setSpec(normalizeGeometry(s.spec));
     setMaterial(s.material);
     setFixed(s.fixed || []);
     setLoads(s.loads || []);
@@ -196,59 +237,94 @@ export default function App() {
     setMessages(s.messages || [intro]);
     setNotes(s.notes || "");
     setSetupProposalId(s.setupProposalId || null);
+    setPrint(s.print || { ...defaultPrint });
     setSetupPreview(null);
     setSelected(null);
     setConfirmed(false);
     setResult(null);
     setModel(null);
+    setPinned(null);
+    setCompare(null);
+    setStlInspect(null);
     setField("solid");
+    if (s.spec.kind === "stl" && s.spec.stl_id)
+      setStlInspect(
+        await api<StlInspect>(
+          `/stls/${s.spec.stl_id}?scale=${s.spec.unit_scale}`,
+        ),
+      );
+    if (s.pinnedId) setPinned(await api<Result>("/runs/" + s.pinnedId));
     if (s.modelId) {
       const m = await api<Model>("/models/" + s.modelId);
       setModel(m);
     }
-    if (s.resultId) {
+    if (s.resultId && s.modelId) {
       const r = await api<Result>("/runs/" + s.resultId);
-      setResult(r);
+      if (r.model_id === s.modelId) setResult(r);
     }
   }
-  async function build(next = spec, isDemo = false) {
+  async function build(
+    next = spec,
+    options:
+      | { demo?: boolean; applyRecommended?: boolean; firstAnalysis?: boolean }
+      | boolean = false,
+  ) {
+    const flags = typeof options === "boolean" ? { demo: options } : options;
+    const controller = new AbortController();
+    operation.current = controller;
     setBusy("Building solid & mesh");
     setError("");
     invalidate();
     try {
-      const m = await job<Model>("/models", next);
+      const m = await job<Model>("/models", next, undefined, controller.signal);
       setModel(m);
       setSpec(m.spec);
-      setFixed(isDemo ? [m.recommended.fixed_face] : []);
+      const preset = flags.demo || flags.firstAnalysis;
+      setFixed(preset ? [m.recommended.fixed_face] : []);
       setLoads(
-        isDemo
-          ? [{ face_id: m.recommended.load_face, vector: [0, 0, -100] }]
+        preset
+          ? [
+              {
+                face_id: m.recommended.load_face,
+                vector: [0, 0, flags.demo ? -100 : -40],
+              },
+            ]
           : [],
       );
       setSelected(null);
-      setTab("model");
-      setMessages((messages) =>
-        messages.some((message) => message.interviewFor === m.id)
-          ? messages
-          : [
-              ...messages,
-              {
-                role: "assistant",
-                live: false,
-                interviewFor: m.id,
-                text: "Your solid and mesh are ready. Next, let’s describe how the part is used so Astra can propose the simulation setup.",
-                questions: [
-                  "Which material properties should we use?",
-                  "How is it attached or held? Select a face if that helps.",
-                  "Where does the load act, and what is its magnitude and global X/Y/Z direction?",
-                ],
-              },
-            ],
-      );
+      if (flags.firstAnalysis) setTab("print");
+      else if (flags.applyRecommended)
+        setTab(next.kind === "stl" ? "print" : "setup");
+      else setTab("model");
+      if (flags.firstAnalysis) setConfirmed(true);
+      if (flags.firstAnalysis) {
+        setCompute("cpu");
+        setMessages([firstAnalysisIntro]);
+      } else {
+        setMessages((messages) =>
+          messages.some((message) => message.interviewFor === m.id)
+            ? messages
+            : [
+                ...messages,
+                {
+                  role: "assistant",
+                  live: false,
+                  interviewFor: m.id,
+                  text: "Your solid and mesh are ready. Next, let’s describe how the part is used so Astra can propose the simulation setup.",
+                  questions: [
+                    "Which material properties should we use?",
+                    "How is it attached or held? Select a face if that helps.",
+                    "Where does the load act, and what is its magnitude and global X/Y/Z direction?",
+                  ],
+                },
+              ],
+        );
+      }
       flash(`${m.tetrahedra.toLocaleString()} tetrahedra · solid ready`);
     } catch (e) {
       setError((e as Error).message);
     } finally {
+      operation.current = null;
       setBusy("");
     }
   }
@@ -260,15 +336,18 @@ export default function App() {
         const h = await api<{ assistant: { available: boolean } }>("/health");
         setAiAvailable(h.assistant.available);
         setStatus("Local engine ready");
-        const saved = localStorage.getItem("fea-r-current");
+        const saved =
+          localStorage.getItem("openfea-current") ||
+          localStorage.getItem("fea-r-current");
         if (saved) {
           try {
             await restore(JSON.parse(saved));
           } catch {
+            localStorage.removeItem("openfea-current");
             localStorage.removeItem("fea-r-current");
-            await build(demoGeometry, true);
+            await startFirstAnalysis();
           }
-        } else await build(demoGeometry, true);
+        } else await startFirstAnalysis();
       } catch (e) {
         setError((e as Error).message);
         setStatus("Local engine offline");
@@ -281,7 +360,8 @@ export default function App() {
     if (!ready) return;
     const t = setTimeout(() => {
       try {
-        localStorage.setItem("fea-r-current", JSON.stringify(snapshot()));
+        localStorage.setItem("openfea-current", JSON.stringify(snapshot()));
+        localStorage.removeItem("fea-r-current");
       } catch {
         setError(
           "Browser storage is full. Save a study to preserve this work.",
@@ -301,11 +381,67 @@ export default function App() {
     messages,
     notes,
     setupProposalId,
+    print,
+    pinned,
     ready,
   ]);
   useEffect(() => {
     chatEnd.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages, aiBusy]);
+  useEffect(() => {
+    if (!model || !print.enabled) {
+      setPrintPreview(null);
+      return;
+    }
+    let cancelled = false;
+    api<PrintPreview>("/print-preview", {
+      model_id: model.id,
+      material,
+      print,
+    })
+      .then((value) => {
+        if (!cancelled) setPrintPreview(value);
+      })
+      .catch(() => {
+        if (!cancelled) setPrintPreview(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [model, material, print]);
+  useEffect(() => {
+    if (!pinned || !result || pinned.id === result.id) {
+      setCompare(null);
+      return;
+    }
+    api<RunCompare>(`/runs/${pinned.id}/compare/${result.id}`)
+      .then(setCompare)
+      .catch(() => setCompare(null));
+  }, [pinned, result]);
+  useEffect(() => {
+    if (!model || dirty) {
+      setReadiness(null);
+      return;
+    }
+    let cancelled = false;
+    api<Readiness>("/readiness", {
+      model_id: model.id,
+      material,
+      fixed_faces: fixed,
+      loads,
+      confirmed,
+      print,
+    })
+      .then((value) => {
+        if (!cancelled) setReadiness(value);
+      })
+      .catch(() => {
+        if (!cancelled) setReadiness(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [model, dirty, material, fixed, loads, confirmed, print]);
   async function upload(file: File) {
     if (busy) return;
     setBusy("Importing reference");
@@ -331,6 +467,7 @@ export default function App() {
     } catch (e) {
       setError((e as Error).message);
     } finally {
+      operation.current = null;
       setBusy("");
     }
   }
@@ -338,6 +475,11 @@ export default function App() {
     setBusy("Importing STEP");
     setError("");
     try {
+      if (file.size > 80_000_000) {
+        throw new Error(
+          "This STEP file is over 80 MB. Export a simpler solid.",
+        );
+      }
       const res = await fetch("/api/steps", {
         method: "POST",
         headers: { "Content-Type": "application/octet-stream" },
@@ -354,10 +496,102 @@ export default function App() {
         assumptions: ["STEP units converted to mm; verify model bounds."],
       };
       setSpec(s);
-      await build(s);
+      await build(s, { applyRecommended: true });
     } catch (e) {
       setError((e as Error).message);
     } finally {
+      operation.current = null;
+      setBusy("");
+    }
+  }
+  async function startFirstAnalysis() {
+    setCompute("cpu");
+    try {
+      const response = await fetch("/print-coupon.stl");
+      if (!response.ok) throw new Error("The example coupon is missing.");
+      await importStl(
+        new File([await response.blob()], "print-coupon.stl", {
+          type: "model/stl",
+        }),
+        { firstAnalysis: true },
+      );
+    } catch (e) {
+      setError((e as Error).message);
+      await build(demoGeometry, true);
+    }
+  }
+  async function importStl(
+    file: File,
+    options: { firstAnalysis?: boolean } = {},
+  ) {
+    setBusy("Inspecting STL");
+    setError("");
+    try {
+      if (file.size > 80_000_000) {
+        throw new Error(
+          "This STL is over 80 MB. Export a binary STL from CAD, or a coarser tessellation.",
+        );
+      }
+      const res = await fetch("/api/stls", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/octet-stream",
+          "X-Filename": file.name,
+        },
+        body: file,
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.detail);
+      setStlInspect(body);
+      const extent = Math.max(...(body.extent_mm || [0]));
+      const meshSize = Math.min(
+        40,
+        Math.max(spec.mesh_size, Math.round(extent / 25) || spec.mesh_size),
+      );
+      const s: Geometry = {
+        ...spec,
+        kind: "stl",
+        name: file.name.replace(/\.stl$/i, ""),
+        stl_id: body.id,
+        unit_scale: 1,
+        accept_stl_preprocessing: false,
+        mesh_size: meshSize,
+        provenance: "stl_import",
+        assumptions: body.warnings,
+      };
+      setSpec(s);
+      setPrint((current) => ({ ...current, enabled: true }));
+      invalidate();
+      setModel(null);
+      setFixed([]);
+      setLoads([]);
+      if (options.firstAnalysis && materials[3])
+        setMaterial({ ...materials[3] });
+      if (!body.watertight) {
+        setTab("model");
+        flash("STL inspected. Repair watertightness before meshing.");
+        return;
+      }
+      if (!options.firstAnalysis) {
+        setTab("model");
+        flash(
+          "Review STL dimensions, units and preprocessing, then build the model and define its real supports and loads.",
+        );
+        return;
+      }
+      await build(s, {
+        applyRecommended: true,
+        firstAnalysis: options.firstAnalysis,
+      });
+      flash(
+        options.firstAnalysis
+          ? "Example coupon ready. Run on this computer, then change infill and run again."
+          : "STL meshed. Print settings and end-face supports/loads are ready for review.",
+      );
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      operation.current = null;
       setBusy("");
     }
   }
@@ -388,6 +622,7 @@ export default function App() {
         history,
         model_id: model?.id || null,
         material,
+        print,
         fixed_faces: fixed,
         loads,
         application_notes: notes,
@@ -395,7 +630,7 @@ export default function App() {
         selected_face: selected,
         stage:
           stage ||
-          (tab === "setup"
+          (tab === "setup" || tab === "print"
             ? "loading"
             : tab === "results"
               ? "results"
@@ -441,6 +676,7 @@ export default function App() {
       );
       invalidate();
       setMaterial(applied.material);
+      setPrint(applied.print);
       setFixed(applied.fixed_faces);
       setLoads(applied.loads);
       setNotes(applied.notes);
@@ -452,11 +688,14 @@ export default function App() {
     } catch (e) {
       setError((e as Error).message);
     } finally {
+      operation.current = null;
       setBusy("");
     }
   }
   async function solve() {
     if (!model || dirty) return;
+    const controller = new AbortController();
+    operation.current = controller;
     setBusy("Solving 3D elasticity");
     setError("");
     try {
@@ -473,24 +712,42 @@ export default function App() {
         conversation: messages
           .slice(-24)
           .map(({ role, text, live }) => ({ role, text, live: !!live })),
+        print,
       };
       let r: Result;
       if (compute === "webgpu") {
         setBusy("Assembling finite-element system");
-        const system = await job<GPUSystem>("/gpu/prepare", setup);
+        const system = await job<GPUSystem>(
+          "/gpu/prepare",
+          setup,
+          undefined,
+          controller.signal,
+        );
         setBusy("Starting local GPU solver");
-        const solution = await solveGPU(system, setBusy);
+        const solution = await solveGPU(system, setBusy, controller.signal);
         setBusy("Verifying residual & calculating stress");
-        r = await job<Result>("/gpu/finish", solution);
-      } else r = await job<Result>("/solve", setup);
+        r = await job<Result>(
+          "/gpu/finish",
+          solution,
+          undefined,
+          controller.signal,
+        );
+      } else
+        r = await job<Result>("/solve", setup, undefined, controller.signal);
       setResult(r);
       setTab("results");
-      setField("stress");
+      setField(r.print?.enabled ? "displacement" : "stress");
       setDeform(false);
-      flash(`Analysis complete in ${format(r.seconds)} s`);
+      if (r.print?.enabled && !pinned) {
+        setPinned(r);
+        flash(
+          `Analysis complete in ${format(r.seconds)} s. This run is pinned — change infill and run again.`,
+        );
+      } else flash(`Analysis complete in ${format(r.seconds)} s`);
     } catch (e) {
       setError((e as Error).message);
     } finally {
+      operation.current = null;
       setBusy("");
     }
   }
@@ -522,6 +779,7 @@ export default function App() {
   const steps: [Tab, string, typeof Box][] = [
     ["reference", "Reference", ImageIcon],
     ["model", "Model", Box],
+    ["print", "Print", Printer],
     ["setup", "Simulation", Settings2],
     ["results", "Results", Layers3],
   ];
@@ -529,16 +787,33 @@ export default function App() {
     fn();
     invalidate();
   }
+  function applyRecommendedSetup() {
+    if (!model) return;
+    invalidate();
+    const suggested = readiness?.recommended.loads[0]?.vector || vector;
+    setFixed(
+      readiness?.recommended.fixed_faces.length
+        ? readiness.recommended.fixed_faces
+        : [model.recommended.fixed_face],
+    );
+    setLoads([
+      {
+        face_id:
+          readiness?.recommended.loads[0]?.face_id ||
+          model.recommended.load_face,
+        vector: suggested,
+      },
+    ]);
+    setSelected(null);
+  }
   return (
     <div className="app-shell">
       <header className="topbar">
-        <a className="brand" href="/" aria-label="FEA-R home">
+        <a className="brand" href="/" aria-label="OpenFEA home">
           <span className="brand-mark">
             <Box size={24} strokeWidth={1.6} />
           </span>
-          <b>
-            FEA<span>—</span>R
-          </b>
+          <b>OpenFEA</b>
           <span className="beta">WORKSPACE</span>
         </a>
         <div className="top-center">
@@ -581,8 +856,12 @@ export default function App() {
           <span>
             <b>{spec.name}</b>
             <small>
-              {spec.kind === "step" ? "Imported solid" : "Parametric part"} ·
-              rev {model?.id.slice(0, 4) || "—"}
+              {spec.kind === "step"
+                ? "Imported solid"
+                : spec.kind === "stl"
+                  ? "Imported mesh"
+                  : "Parametric part"}{" "}
+              · rev {model?.id.slice(0, 4) || "—"}
             </small>
           </span>
           <MoreHorizontal size={16} />
@@ -605,9 +884,11 @@ export default function App() {
                 ? !!image
                 : key === "model"
                   ? !!model && !dirty
-                  : key === "setup"
-                    ? fixed.length > 0 && loads.length > 0
-                    : !!result) && <Check size={13} className="nav-check" />}
+                  : key === "print"
+                    ? print.enabled
+                    : key === "setup"
+                      ? fixed.length > 0 && loads.length > 0
+                      : !!result) && <Check size={13} className="nav-check" />}
             </button>
           ))}
         </nav>
@@ -693,6 +974,10 @@ export default function App() {
                       stepFile.current?.click();
                       return;
                     }
+                    if (kind === "stl") {
+                      stlFile.current?.click();
+                      return;
+                    }
                     const features =
                       kind === "custom" && !spec.features.length
                         ? [
@@ -715,46 +1000,49 @@ export default function App() {
                   <option value="shaft">Shaft / tube</option>
                   <option value="custom">Custom solid (CSG)</option>
                   <option value="step">Import STEP…</option>
+                  <option value="stl">Import STL…</option>
                 </select>
               </label>
-              {spec.kind !== "step" && spec.kind !== "custom" && (
-                <>
-                  <NumberInput
-                    label="Length"
-                    unit="mm"
-                    value={spec.length}
-                    onChange={(v) => updateSpec({ length: v })}
-                  />
-                  <NumberInput
-                    label={spec.kind === "shaft" ? "Diameter" : "Width"}
-                    unit="mm"
-                    value={spec.width}
-                    onChange={(v) => updateSpec({ width: v })}
-                  />
-                  {spec.kind === "bracket" && (
+              {spec.kind !== "step" &&
+                spec.kind !== "custom" &&
+                spec.kind !== "stl" && (
+                  <>
                     <NumberInput
-                      label="Height"
+                      label="Length"
                       unit="mm"
-                      value={spec.height}
-                      onChange={(v) => updateSpec({ height: v })}
+                      value={spec.length}
+                      onChange={(v) => updateSpec({ length: v })}
                     />
-                  )}{" "}
-                  {spec.kind !== "shaft" && (
                     <NumberInput
-                      label="Thickness"
+                      label={spec.kind === "shaft" ? "Diameter" : "Width"}
                       unit="mm"
-                      value={spec.thickness}
-                      onChange={(v) => updateSpec({ thickness: v })}
+                      value={spec.width}
+                      onChange={(v) => updateSpec({ width: v })}
                     />
-                  )}
-                  <NumberInput
-                    label="Bore diameter"
-                    unit="mm"
-                    value={spec.hole_diameter}
-                    onChange={(v) => updateSpec({ hole_diameter: v })}
-                  />
-                </>
-              )}
+                    {spec.kind === "bracket" && (
+                      <NumberInput
+                        label="Height"
+                        unit="mm"
+                        value={spec.height}
+                        onChange={(v) => updateSpec({ height: v })}
+                      />
+                    )}{" "}
+                    {spec.kind !== "shaft" && (
+                      <NumberInput
+                        label="Thickness"
+                        unit="mm"
+                        value={spec.thickness}
+                        onChange={(v) => updateSpec({ thickness: v })}
+                      />
+                    )}
+                    <NumberInput
+                      label="Bore diameter"
+                      unit="mm"
+                      value={spec.hole_diameter}
+                      onChange={(v) => updateSpec({ hole_diameter: v })}
+                    />
+                  </>
+                )}
               {spec.kind === "custom" && (
                 <label>
                   Solid recipe
@@ -794,11 +1082,102 @@ export default function App() {
                 <Layers3 size={15} />
                 {dirty ? "Rebuild model" : "Build model"}
               </button>
+              {spec.kind === "stl" && (
+                <>
+                  <NumberInput
+                    label="Unit scale"
+                    unit="×"
+                    value={spec.unit_scale}
+                    step={0.1}
+                    onChange={(v) =>
+                      updateSpec({
+                        unit_scale: v,
+                        accept_stl_preprocessing: false,
+                      })
+                    }
+                  />
+                  <NumberInput
+                    label="Feature angle"
+                    unit="deg"
+                    value={spec.feature_angle_deg}
+                    onChange={(v) => updateSpec({ feature_angle_deg: v })}
+                  />
+                  {stlInspect && (
+                    <p>
+                      Dimensions at this scale:{" "}
+                      {stlInspect.extent_mm
+                        .map((v) =>
+                          format(
+                            (v * spec.unit_scale) / (stlInspect.scale || 1),
+                          ),
+                        )
+                        .join(" × ")}{" "}
+                      mm. Suggested scale {stlInspect.suggested_scale}×; verify
+                      against a known dimension.
+                    </p>
+                  )}
+                  {stlInspect?.preprocessing?.changed && (
+                    <label className="inline-check">
+                      <input
+                        type="checkbox"
+                        checked={!!spec.accept_stl_preprocessing}
+                        onChange={(e) =>
+                          updateSpec({
+                            accept_stl_preprocessing: e.target.checked,
+                          })
+                        }
+                      />
+                      I reviewed the simplified geometry: maximum original
+                      vertex distance to a working vertex{" "}
+                      {format(
+                        (stlInspect.preprocessing.vertex_distance_bound_mm *
+                          spec.unit_scale) /
+                          (stlInspect.scale || 1),
+                      )}{" "}
+                      mm; volume change{" "}
+                      {format(
+                        100 * stlInspect.preprocessing.relative_volume_change,
+                      )}
+                      %. Small features still require inspection.
+                    </label>
+                  )}
+                  {stlInspect && (
+                    <p className="stl-report">
+                      {stlInspect.triangles.toLocaleString()} triangles ·{" "}
+                      {stlInspect.shells} shell
+                      {stlInspect.shells === 1 ? "" : "s"} ·{" "}
+                      {stlInspect.watertight ? "watertight" : "not watertight"}
+                      {stlInspect.warnings[0]
+                        ? `. ${stlInspect.warnings[0]}`
+                        : ""}
+                    </p>
+                  )}
+                </>
+              )}
               <button
                 className="text-button full-width"
                 onClick={() => stepFile.current?.click()}
               >
                 <ArrowDownToLine size={14} /> Import STEP file
+              </button>
+              <button
+                className="text-button full-width"
+                onClick={() => stlFile.current?.click()}
+              >
+                <ArrowDownToLine size={14} /> Import STL file
+              </button>
+              <button
+                className="text-button full-width"
+                onClick={async () => {
+                  const response = await fetch("/print-coupon.stl");
+                  importStl(
+                    new File([await response.blob()], "print-coupon.stl", {
+                      type: "model/stl",
+                    }),
+                  );
+                }}
+              >
+                Use example print coupon
               </button>
               <input
                 ref={stepFile}
@@ -808,6 +1187,17 @@ export default function App() {
                 onChange={(e) => {
                   const f = e.target.files?.[0];
                   if (f) importStep(f);
+                  e.target.value = "";
+                }}
+              />
+              <input
+                ref={stlFile}
+                type="file"
+                accept=".stl"
+                hidden
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) importStl(f);
                   e.target.value = "";
                 }}
               />
@@ -836,7 +1226,9 @@ export default function App() {
                   ? "Understand how it responds."
                   : tab === "setup"
                     ? "Define the real-world forces."
-                    : "A clearer view of your design."}
+                    : tab === "print"
+                      ? "Set how it would be printed."
+                      : "A clearer view of your design."}
             </h1>
             <p>
               {tab === "reference"
@@ -844,8 +1236,10 @@ export default function App() {
                 : tab === "results"
                   ? "Traceable results, from applied loads to support reactions."
                   : tab === "setup"
-                    ? "Describe the application to Astra, then review the proposed supports and forces."
-                    : "From a reference to a solid, ready for the questions that matter."}
+                    ? "Assign supports and forces on selectable surfaces, then confirm before solving."
+                    : tab === "print"
+                      ? "Run the coupon on this computer, then change infill. Settings change a homogenized solid, not a sliced print."
+                      : "From a reference, STEP or STL to a solid, ready for the questions that matter."}
             </p>
           </div>
           <button className="outline-button" onClick={openLibrary}>
@@ -860,7 +1254,13 @@ export default function App() {
                 className={tab === key ? "active" : ""}
                 onClick={() => {
                   setTab(key);
-                  setField(key === "results" && result ? "stress" : "solid");
+                  setField(
+                    key === "results" && result
+                      ? result.print?.enabled
+                        ? "displacement"
+                        : "stress"
+                      : "solid",
+                  );
                 }}
               >
                 <span>{i + 1}</span>
@@ -890,7 +1290,36 @@ export default function App() {
           </div>
         )}
         <div className="main-stage" ref={stageElement}>
-          {tab === "reference" ? (
+          {tab === "print" ? (
+            <div className="print-review-layout">
+              <div className="print-orientation-view">
+                <Viewport
+                  model={model}
+                  result={null}
+                  fixed={fixed}
+                  loads={loads}
+                  selected={selected}
+                  onSelect={setSelected}
+                  field="solid"
+                  deform={false}
+                  wireframe={wireframe}
+                  setWireframe={setWireframe}
+                  printRotation={print.enabled ? print.rotation_deg : undefined}
+                />
+              </div>
+              <PrintWorkspace
+                print={print}
+                onChange={(next) => {
+                  setPrint(next);
+                  invalidate();
+                }}
+                model={model}
+                material={material}
+                preview={printPreview}
+                disabled={!!busy}
+              />
+            </div>
+          ) : tab === "reference" ? (
             <ImageReview
               key={image?.id || "empty"}
               image={image}
@@ -905,6 +1334,11 @@ export default function App() {
           ) : (
             <Viewport
               model={model}
+              printRotation={
+                previewing && setupPreview!.print?.enabled
+                  ? setupPreview!.print.rotation_deg
+                  : undefined
+              }
               result={previewing ? null : result}
               fixed={previewing ? setupPreview!.fixed_faces : fixed}
               loads={previewing ? setupPreview!.loads : loads}
@@ -925,6 +1359,14 @@ export default function App() {
               <Loader2 size={17} className="spin" />
               {busy}
               <span>Local worker</span>
+              {operation.current && (
+                <button
+                  className="outline-button"
+                  onClick={() => operation.current?.abort()}
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -953,7 +1395,10 @@ export default function App() {
             </button>
           </div>
         )}
-        {tab === "results" && result ? (
+        {tab === "results" &&
+        result &&
+        model &&
+        result.model_id === model.id ? (
           <>
             <div className="result-toolbar">
               <div className="segmented">
@@ -992,42 +1437,81 @@ export default function App() {
                 <ArrowDownToLine size={15} /> Export package
               </a>
             </div>
+            <ResultGuidance result={result} />
             <div className="metrics-grid">
-              <Metric
-                title="Peak von Mises"
-                value={format(result.peak_von_mises_mpa)}
-                unit="MPa"
-                detail="Unaveraged quadrature peak"
-              />
               <Metric
                 title="Max displacement"
                 value={format(result.max_displacement_mm)}
                 unit="mm"
-                detail="Includes quadratic edge nodes"
+                detail="Compare this when print settings change"
+              />
+              {result.print?.enabled && (
+                <Metric
+                  title="Filament mass"
+                  value={format(result.print.filament_mass_g)}
+                  unit="g"
+                  detail={`${format(100 * result.print.volume_fraction)}% solid equivalent`}
+                />
+              )}
+              <Metric
+                title="Solve residual"
+                value={result.relative_residual.toExponential(1)}
+                unit=""
+                detail={`Force balance ${result.force_balance_error_n.toExponential(1)} N`}
+              />
+              <Metric
+                title="Peak von Mises"
+                value={format(result.peak_von_mises_mpa)}
+                unit="MPa"
+                detail="Often singular at fixtures — not printed strength"
               />
               <Metric
                 title="Yield ratio"
                 value={format(result.yield_ratio)}
                 unit="×"
-                detail="Supplied yield / peak stress"
-              />
-              <Metric
-                title="Force balance error"
-                value={result.force_balance_error_n.toExponential(1)}
-                unit="N"
-                detail={`Residual ${result.relative_residual.toExponential(1)}`}
+                detail="Uses that peak and the supplied yield"
               />
             </div>
+            <div className="compare-bar">
+              <button
+                className="outline-button"
+                onClick={() => setPinned(result)}
+              >
+                Pin this run
+              </button>
+              {pinned && (
+                <button className="text-button" onClick={() => setPinned(null)}>
+                  Clear pin
+                </button>
+              )}
+              <span>
+                {pinned && pinned.id === result.id
+                  ? "Pinned. Change print settings and run again to compare."
+                  : pinned
+                    ? "Current run is compared with the pinned configuration."
+                    : "Pin a run, change orientation/walls/infill, then solve again."}
+              </span>
+            </div>
+            {compare && pinned && pinned.id !== result.id && (
+              <CompareTable compare={compare} />
+            )}
             <details className="assumptions" open>
               <summary>
                 <ShieldCheck size={16} /> Interpretation & assumptions{" "}
                 <ChevronDown size={15} />
               </summary>
               <p>
-                {result.elements.toLocaleString()} quadratic tetrahedra ·{" "}
-                {result.dofs.toLocaleString()} degrees of freedom ·{" "}
+                {result.elements.toLocaleString()}{" "}
+                {result.element_order === 1 ? "linear" : "quadratic"} tetrahedra
+                · {result.dofs.toLocaleString()} degrees of freedom ·{" "}
                 {format(result.seconds)} s solve · {format(result.mass_g)} g
               </p>
+              {(result.model_sha256 || result.mesh_sha256) && (
+                <p className="hash-line">
+                  Geometry {result.model_sha256?.slice(0, 12)} · mesh{" "}
+                  {result.mesh_sha256?.slice(0, 12)}
+                </p>
+              )}
               <p className="execution-evidence">
                 {result.execution?.backend === "webgpu"
                   ? "Solved on local GPU"
@@ -1212,15 +1696,19 @@ export default function App() {
                     ? "Image-based proposal · verify dimensions"
                     : spec.provenance === "step_import"
                       ? "STEP import · verify units"
-                      : "User-specified geometry"}
+                      : spec.provenance === "stl_import"
+                        ? "STL import · selectable patches, not CAD faces"
+                        : "User-specified geometry"}
               </span>
             </div>
             <div className="model-exports">
               {model && (
                 <>
-                  <a href={`/api/models/${model.id}/files/model.step`}>
-                    STEP <ArrowDownToLine size={13} />
-                  </a>
+                  {model.spec.kind !== "stl" && (
+                    <a href={`/api/models/${model.id}/files/model.step`}>
+                      STEP <ArrowDownToLine size={13} />
+                    </a>
+                  )}
                   <a href={`/api/models/${model.id}/files/model.stl`}>
                     STL <ArrowDownToLine size={13} />
                   </a>
@@ -1277,7 +1765,7 @@ export default function App() {
             </button>
           </div>
         )}
-        {(tab === "model" || tab === "setup") && (
+        {(tab === "model" || tab === "print" || tab === "setup") && (
           <div className="compute-choice">
             <label>
               Simulation device{" "}
@@ -1299,7 +1787,15 @@ export default function App() {
             {busy && <strong role="status">{busy}</strong>}
           </div>
         )}
-        {(tab === "model" || tab === "setup") && (
+        {(tab === "model" || tab === "print" || tab === "setup") &&
+          readiness &&
+          !dirty && (
+            <ReadinessPanel
+              readiness={readiness}
+              onApplyRecommended={applyRecommendedSetup}
+            />
+          )}
+        {(tab === "model" || tab === "print" || tab === "setup") && (
           <div className="run-bar">
             <div>
               <label className="inline-check">
@@ -1310,7 +1806,8 @@ export default function App() {
                   onChange={(e) => setConfirmed(e.target.checked)}
                 />
                 <span>
-                  I’ve reviewed dimensions, material, fixtures and loads.
+                  I’ve reviewed dimensions, material,{" "}
+                  {print.enabled ? "print settings, " : ""}fixtures and loads.
                 </span>
               </label>
               <small>
@@ -1318,7 +1815,9 @@ export default function App() {
                   ? "Rebuild geometry to update the mesh and reselect faces."
                   : !fixed.length || !loads.length
                     ? "Select at least one fixture and one loaded face."
-                    : "Static · 3D elasticity · quadratic tetrahedra"}
+                    : print.enabled
+                      ? "Review print settings and conditions before every run; check mesh convergence before interpreting trends."
+                      : "Static · 3D elasticity · quadratic tetrahedra"}
               </small>
             </div>
             <button
@@ -1336,7 +1835,7 @@ export default function App() {
           </div>
         )}
         <footer className="workspace-footer">
-          <span>FEA-R / EARLY ACCESS</span>
+          <span>OpenFEA / LOCAL</span>
           <span>Engineering insight starts with explicit assumptions.</span>
           <span>mm · N · MPa</span>
         </footer>
@@ -1593,25 +2092,30 @@ export default function App() {
               </button>
             </div>
             <p>
-              FEA-R is a local prototype for one connected 3D mechanical solid.
+              OpenFEA is a local prototype for one connected 3D mechanical
+              solid. Astra is optional.
             </p>
             <ol>
               <li>
-                Upload or photograph a part. Draw notes, arrows, regions and
-                measured dimensions.
+                A first visit opens the example print coupon on this computer’s
+                CPU. Confirm is already checked. Click Run simulation.
               </li>
               <li>
-                Ask Astra to inspect it. Supply missing specs and review its
-                editable CAD proposal, or import a single-solid STEP.
+                Read what to trust (displacement, residual, mass) and what not
+                to treat as printed strength (peak stress, yield ratio).
               </li>
               <li>
-                Build the model. Click faces to set fixed supports and global
-                XYZ forces. Enter verified material properties.
+                The first print run is pinned. Change infill and run again to
+                compare.
               </li>
               <li>
-                Confirm the setup and run. Inspect stress, displacement,
-                reactions and assumptions; export the report and reproducibility
-                package.
+                For your own part, import a watertight STL or STEP. Readiness
+                lists what is missing. Use recommended fixture and load, then
+                confirm.
+              </li>
+              <li>
+                Agents use GET /api/agent — the same readiness, confirm gate,
+                residual &lt; 1e-7, and report hashes. No UI scraping.
               </li>
             </ol>
             <div className="stack-grid">
@@ -1628,7 +2132,8 @@ export default function App() {
               Geometry, solving and exports run locally without AI. A single
               photo cannot determine unseen geometry or real-world scale. This
               version does not model contact, assemblies, plasticity, buckling,
-              fatigue or print anisotropy. Results require engineering review
+              fatigue or explicit infill geometry. Print settings use a
+              homogenized equivalent solid. Results require engineering review
               and physical validation.
             </p>
             <p>

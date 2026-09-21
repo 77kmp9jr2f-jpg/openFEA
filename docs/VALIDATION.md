@@ -1,10 +1,27 @@
-# Validation record — updated 2026-09-13
+# Validation record — updated 2026-09-20
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
 
+## Integration acceptance — 2026-09-20
+
+The print-branch review defects were reproduced with independent tests and repaired. Added checks cover arbitrary-angle strain/stress tensor covariance, the 500,000-DOF submission boundary, no implicit P1 downgrade, queued and running-child cancellation, comparison context differences, preserved STL originals, reloadable preprocessing review, P1/P2 archive reproduction, and complete print-proposal revision/provenance binding. Frontend checks cover independent Astra/solve cancellation, cancellation before a job ID arrives, GPU readback resource cleanup and legacy geometry defaults. All 76 backend tests and five frontend regressions pass. TypeScript/Vite build passes; dependency deprecation and bundle-size advisories remain. CI now installs Gmsh's GLU dependency, but the updated Linux workflow has not run remotely because no new push is authorized.
+
+A fresh browser journey uploaded the synthetic 40 × 10 × 8 mm coupon through **Import STL file**, verified empty supports/loads and unchecked confirmation, built model `9737ceeb435f40c6855ecef6bacf518a`, and asked live Astra for missing inputs. Astra returned questions and no proposal. Explicit demonstration PLA, gyroid/20%, three walls, 0.4 mm line width, 0.2 mm layers, four top/bottom layers, rotation [30,45,20]°, face 9 fixed and total [0,0,-4] N on face 7 produced proposal `ded6df2125624dfb85e07f66aea996e7`. Preview showed support/force markers and rotated print axes before application. Apply left confirmation unchecked. The confirmed real WebGPU run is `4d162ab8d809467ea43bf764c5c8479a`.
+
+- Device: browser-reported `apple · metal-3`; 807 P2 tetrahedra / 4,455 DOFs; 2,320 dispatched iterations / three refinements.
+- Server-recomputed relative residual: 5.864917129e-10.
+- Maximum displacement: GPU 0.1548826113116278 mm; CPU 0.15488261131261874 mm; relative difference 6.39794e-12.
+- Exported ZIP contains original/working STL, transformation metadata, live interview, applied print proposal and solver source. Its reproduction script actually executed in a fresh directory and matched the CPU value.
+- Changing only infill to 35% cleared result, confirmation and proposal provenance. A second confirmed GPU run `0eefa5259a6a4a82b01ed3ec4b34b417` yielded 0.1272 mm displacement, 2.075 g and residual 1.57e-9. The comparison identified equal geometry, mesh, material, supports, loads and interpolation. Explicitly saving, reloading the browser, and reopening the saved study restored both comparison runs and conversation.
+- The current narrow in-app browser viewport was inspected; labels scale with part dimensions and preview scroll shows the model immediately. Camera hardware, other GPUs, full dense-mesh GPU performance and physical coupon calibration remain unverified.
+
+The four-page GPU PDF was rendered and inspected page by page. Section flow avoids overflow-only pages. Attached reference imagery is labelled as study context; it is not proof of geometry reconstruction. Historical print-warning boilerplate is clarified in presentation without rewriting the immutable result JSON.
+
+Evidence: `evidence/integration-2026-09-20/`. Current [saved visual review](http://127.0.0.1:8850/reviews/?id=514b555beb024e83b7955783e44a31dc), ID `514b555beb024e83b7955783e44a31dc`, binds source `1a6e8d7`; its three rendered frames and revision were inspected. [All reviews](http://127.0.0.1:8850/reviews/). Human review remains open. This is software verification on a known synthetic coupon, not dimensional reconstruction or printed-part strength validation. Historical evidence below remains scoped to its stated revision/date; this pass completes the formerly pending conversational print application/GPU/save/report path.
+
 ## Automated checks
 
-45 pytest checks passed on macOS arm64 / Python 3.12.14 on September 13. The suite covers exact 3D uniform tension, bending at two mesh sizes versus a Timoshenko beam, force and moment balance, strain energy, force/stiffness scaling, STEP round trip, connected custom CSG, invalid input/foreign-origin rejection, study persistence, archive hashes, independently accepted/rejected solution submissions, and the proposal checks described below. The mocked numerical submission test is not GPU execution evidence. Two dependency deprecation warnings remain (Starlette HTTPX / AnyIO aliases).
+54 pytest checks passed on macOS arm64 / Python 3.12 on September 14 after the OpenFEA rename (`d088ce0` on `print-stl-workspace`). The suite covers exact 3D uniform tension, bending at two mesh sizes versus a Timoshenko beam, force and moment balance, strain energy, force/stiffness scaling, STEP round trip, connected custom CSG, STL watertightness and print-stiffness comparison, job cancel, invalid input/foreign-origin rejection, study persistence, archive hashes, independently accepted/rejected solution submissions, and the proposal checks described below. The mocked numerical submission test is not GPU execution evidence. Two dependency deprecation warnings remain (Starlette HTTPX / AnyIO aliases).
 
 The measured cantilever has approximately 0.98% coarse-mesh and 0.78% fine-mesh tip displacement error against the analytic beam model, and 0.20% mesh-to-mesh change. Predetermined gates are below 5% analytic error and below 2% mesh change. These are displacement checks; they do not validate peak stress convergence at the bracket's sharp corner. Exact values: `evidence/numerical-benchmark.json`.
 
@@ -27,6 +44,18 @@ The first GPU attempt exposed a WGSL reserved-name compilation error; this was c
 A real `gpt-6-astra` image request identified the synthetic L bracket and its two bores, declined to infer scale, and asked for overall dimensions, hole locations and hidden details. After exact example dimensions were supplied, a second real request returned a valid structured bracket proposal with explicit synthetic provenance assumptions. These are actual authenticated calls, not canned assistant responses. Evidence: `evidence/astra-image-inspection.json` and `evidence/astra-dimensioned-proposal.json`.
 
 The test reference is a deliberately labelled synthetic CAD render. It is not a customer photograph and does not establish performance on arbitrary real images. General geometry support consists of brackets, plates, shafts, ordered box/cylinder CSG and imported single-solid STEP; arbitrary feature reconstruction is outside this version.
+
+## STL and print path
+
+Automated: open vs closed STL, reject non-STL, refuse to mesh an open shell, 100% vs sparse homogenization, rotation of the soft axis, selectable faces on an imported box, print solve residual `< 1e-7`, compare deltas, HTTP job cancel. See `tests/test_stl_print.py` and [PRINT-STL.md](PRINT-STL.md).
+
+Browser (built app at `http://127.0.0.1:8000/`, CPU reference solver, example print coupon, 807 quadratic tetrahedra / 4,455 DOFs):
+
+- Gyroid 20%, 3 walls: 54.3% solid equivalent, 2.15 g, 1.11 mm max displacement, residual 1.8e-11.
+- Gyroid 60%, 3 walls, same mesh: 77.1%, 3.06 g, 0.821 mm. Compare table showed those deltas plus in-plane / layer moduli.
+- Cancel on a finer bracket remesh surfaced `The job was cancelled.`
+
+This is software evidence that print settings change the equivalent solid. It is not printed-coupon calibration and not peak-stress convergence.
 
 ## Interactive and document checks
 
@@ -53,8 +82,8 @@ Human review remains open; verification does not mark the design accepted.
 
 ## Conversational setup checkpoint
 
-The 19 additional automated checks cover complete proposal application without automatic confirmation, changed context and CAD revisions, invented or conflicting face assignments, explicit material/force inputs, structured answer validation, the apply endpoint, provenance tampering, and an actual archived CPU reproduction preserving its proposal and interview transcript. The complete 45-test suite and TypeScript/Vite build passed again on September 13. The existing bundle-size advisory remains.
+The 19 additional automated checks cover complete proposal application without automatic confirmation, changed context and CAD revisions, invented or conflicting face assignments, explicit material/force inputs, structured answer validation, the apply endpoint, provenance tampering, and an actual archived CPU reproduction preserving its proposal and interview transcript. The complete 52-test suite and TypeScript/Vite build passed again on September 14 after the STL/print path. The existing bundle-size advisory remains.
 
 Two live Astra calls were exercised in the browser on September 9. An ambiguous heavy-load request returned three questions with no setup proposal. Explicit illustrative material, rear X=0 restraint and total [0,0,-150] N on the selected X=80 face returned proposal `cebc9a619837423188d290b01629635d`, bound to CAD revision `f5f0cb3a22034e0f8b67f1b4733b5573`. Inputs and replies are preserved in `evidence/conversational/`. Changing Young's modulus disabled the proposal; restoring the original value allowed preview, with Run simulation disabled during preview.
 
-The latest preview-scroll correction builds successfully but has not yet received a fresh visual check. Browser application of this new proposal, a new GPU solve carrying its provenance, saved-study reload, and a fresh PDF/visual-review handoff remain to be exercised. The earlier verified GPU runs and report artifacts above remain separate evidence; they do not establish completion of that new journey.
+This September 9 checkpoint was pending at the time. The September 20 integration acceptance above completes a fresh conversational print proposal, preview, application, GPU solve, saved comparison reload and report handoff. It uses new run IDs and does not retroactively broaden the older evidence.

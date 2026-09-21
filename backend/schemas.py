@@ -4,6 +4,7 @@ import math
 
 Number = Annotated[float, Field(allow_inf_nan=False)]
 Vec3 = tuple[Number, Number, Number]
+MAX_SOLVER_DOFS = 500000
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -26,9 +27,27 @@ class Feature(StrictModel):
             raise ValueError('Cylinder axis must have a positive length.')
         return self
 
+class PrintSettings(StrictModel):
+    enabled: bool = False
+    rotation_deg: Vec3 = (0, 0, 0)
+    infill_pattern: Literal['rectilinear', 'grid', 'triangles', 'gyroid'] = 'gyroid'
+    infill_density: Number = Field(default=0.2, ge=0.05, le=1)
+    wall_count: int = Field(default=3, ge=1, le=12)
+    line_width_mm: Number = Field(default=0.4, gt=0.1, le=2)
+    layer_height_mm: Number = Field(default=0.2, gt=0.05, le=1.2)
+    top_layers: int = Field(default=4, ge=0, le=20)
+    bottom_layers: int = Field(default=4, ge=0, le=20)
+
+    @model_validator(mode='after')
+    def finite_rotation(self):
+        if any(abs(v) > 360 for v in self.rotation_deg):
+            raise ValueError('Print rotation must be within ±360 degrees.')
+        return self
+
+
 class Geometry(StrictModel):
     name: str = Field(default='Mounting bracket', max_length=120)
-    kind: Literal['bracket', 'plate', 'shaft', 'custom', 'step'] = 'bracket'
+    kind: Literal['bracket', 'plate', 'shaft', 'custom', 'step', 'stl'] = 'bracket'
     length: Number = Field(default=80, ge=2, le=1000)
     width: Number = Field(default=40, ge=2, le=1000)
     height: Number = Field(default=60, ge=2, le=1000)
@@ -37,7 +56,11 @@ class Geometry(StrictModel):
     mesh_size: Number = Field(default=7, ge=0.5, le=100)
     features: list[Feature] = Field(default_factory=list, max_length=32)
     step_id: str | None = Field(default=None, pattern=r'^[a-f0-9]{32}$')
-    provenance: Literal['demo', 'user_dimensions', 'image_proposal', 'step_import'] = 'user_dimensions'
+    stl_id: str | None = Field(default=None, pattern=r'^[a-f0-9]{32}$')
+    unit_scale: Number = Field(default=1, gt=1e-6, le=1e4)
+    feature_angle_deg: Number = Field(default=40, ge=5, le=89)
+    accept_stl_preprocessing: bool = False
+    provenance: Literal['demo', 'user_dimensions', 'image_proposal', 'step_import', 'stl_import'] = 'user_dimensions'
     assumptions: list[str] = Field(default_factory=list, max_length=30)
 
     @model_validator(mode='after')
@@ -52,6 +75,8 @@ class Geometry(StrictModel):
             raise ValueError('A custom solid must begin with an additive feature.')
         if self.kind == 'step' and not self.step_id:
             raise ValueError('Choose a STEP file first.')
+        if self.kind == 'stl' and not self.stl_id:
+            raise ValueError('Choose an STL file first.')
         return self
 
 class Material(StrictModel):
@@ -81,6 +106,7 @@ class Analysis(StrictModel):
     annotations: list['Annotation'] = Field(default_factory=list,max_length=100)
     setup_proposal_id: str | None = Field(default=None,pattern=r'^[a-f0-9]{32}$')
     conversation: list['InterviewMessage'] = Field(default_factory=list,max_length=24)
+    print: PrintSettings = Field(default_factory=PrintSettings)
     @model_validator(mode='after')
     def validate_setup(self):
         if not self.confirmed:
@@ -106,6 +132,7 @@ class ImageInput(StrictModel):
     data_url: str = Field(max_length=16_000_000)
 
 class AssistantRequest(StrictModel):
+    print: PrintSettings = Field(default_factory=PrintSettings)
     message: str = Field(min_length=1,max_length=16000)
     image_id: str | None = Field(default=None,pattern=r'^[a-f0-9]{32}$')
     annotations: list[Annotation] = Field(default_factory=list,max_length=100)
@@ -126,15 +153,29 @@ class Study(StrictModel):
 
 Analysis.model_rebuild()
 
+class PrintPreviewRequest(StrictModel):
+    model_id: str = Field(pattern=r'^[a-f0-9]{32}$')
+    material: Material = Field(default_factory=Material)
+    print: PrintSettings = Field(default_factory=PrintSettings)
+
+class ReadinessRequest(StrictModel):
+    model_id: str = Field(pattern=r'^[a-f0-9]{32}$')
+    material: Material | None = None
+    fixed_faces: list[int] = Field(default_factory=list, max_length=50)
+    loads: list[Force] = Field(default_factory=list, max_length=20)
+    confirmed: bool = False
+    print: PrintSettings = Field(default_factory=PrintSettings)
+
 class GPUSolution(StrictModel):
     system_id: str = Field(pattern=r'^[a-f0-9]{32}$')
-    displacement: list[Number] = Field(min_length=1,max_length=150000)
+    displacement: list[Number] = Field(min_length=1,max_length=MAX_SOLVER_DOFS)
     device: str = Field(min_length=1,max_length=200)
     iterations: int = Field(ge=1,le=20000)
     refinements: int = Field(ge=1,le=10)
     seconds: Number = Field(ge=0,le=600)
 
 class SimulationContext(StrictModel):
+    print: PrintSettings = Field(default_factory=PrintSettings)
     model_id: str = Field(pattern=r'^[a-f0-9]{32}$')
     geometry: Geometry
     material: Material
@@ -145,6 +186,7 @@ class SimulationContext(StrictModel):
     annotations: list[Annotation] = Field(default_factory=list,max_length=100)
 
 class SimulationDraft(StrictModel):
+    print: PrintSettings = Field(default_factory=PrintSettings)
     material: Material
     fixed_faces: list[int] = Field(min_length=1,max_length=50)
     loads: list[Force] = Field(min_length=1,max_length=20)
@@ -155,6 +197,9 @@ class SimulationDraft(StrictModel):
     @classmethod
     def complete_inputs(cls,value):
         if isinstance(value,dict):
+            settings = value.get('print')
+            if isinstance(settings, dict) and not set(PrintSettings.model_fields) <= set(settings):
+                raise ValueError('A simulation proposal must supply all print settings explicitly.')
             material=value.get('material',{})
             if isinstance(material,dict) and not set(Material.model_fields)<=set(material):
                 raise ValueError('A simulation proposal must supply all material properties explicitly.')
