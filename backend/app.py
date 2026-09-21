@@ -160,7 +160,12 @@ async def upload_step(request: Request):
 def model_file(mid: str,name: str):
     if name not in ('model.step','model.stl','mesh.msh','model.json','mesh.npz'):
         raise HTTPException(404)
-    return FileResponse(resource('models',mid)/name,filename=name)
+    folder = resource('models',mid)
+    if name == 'model.step' and read_json(folder/'model.json')['spec']['kind'] == 'stl':
+        raise HTTPException(404, 'STL imports have no CAD solid STEP representation.')
+    if not (folder/name).is_file():
+        raise HTTPException(404)
+    return FileResponse(folder/name,filename=name)
 
 @app.get('/api/studies')
 def studies():

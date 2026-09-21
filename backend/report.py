@@ -177,7 +177,9 @@ def export_report(rid,format):
             writer=csv.writer(f);writer.writerow(['node','x_mm','y_mm','z_mm','ux_mm','uy_mm','uz_mm','averaged_von_mises_mpa'])
             for i,(xyz,u,stress) in enumerate(zip(model['nodes'],result['displacement'],result['nodal_stress_mpa'])):writer.writerow([i,*xyz,*u,stress])
         archive=folder/'report.zip';mf=resource('models',model['id']);files={}
-        for name in ['model.step','model.stl','mesh.msh','mesh.npz','model.json']:files['model/'+name]=mf/name
+        for name in ['model.step','model.stl','mesh.msh','mesh.npz','model.json','source.stl','working.stl','stl-provenance.json']:
+            if name == 'model.step' and model['spec']['kind'] == 'stl':continue
+            if (mf/name).is_file():files['model/'+name]=mf/name
         for name in ['report.pdf','report.html','result.json','solution.npz','nodes.csv']:files[name]=folder/name
         files['LICENSE']=ROOT/'LICENSE'
         if result['setup'].get('setup_proposal_id'):

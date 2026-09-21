@@ -57,7 +57,7 @@ def _make_solid(spec: Geometry):
 
 def _make_stl_solid(spec: Geometry):
     from .stl_io import scaled_stl_path
-    path = scaled_stl_path(spec.stl_id, spec.unit_scale)
+    path = scaled_stl_path(spec.stl_id, spec.unit_scale, spec.accept_stl_preprocessing)
     gmsh.merge(str(path))
     angle = spec.feature_angle_deg * math.pi / 180
     gmsh.option.setNumber('Mesh.AngleToleranceFacetOverlap', 0.2)
@@ -183,12 +183,23 @@ def build_model(spec: Geometry, destination: Path | None = None):
             qualities = gmsh.model.mesh.getElementQualities(gmsh.model.mesh.getElementsByType(4)[0],'minSICN')
             if min(qualities)<=0:
                 raise ValueError('Mesher produced an inverted element. Adjust the geometry or mesh size.')
-            try:
+            if spec.kind != 'stl':
                 gmsh.write(str(out/'model.step'))
-            except Exception:
-                (out/'model.step').write_text('ISO-10303-21;\nHEADER;\nFILE_NAME(\'OpenFEA STL import\',\'\',(\'\'),(\'\'),\'\',\'\',\'\');\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n')
             gmsh.write(str(out/'model.stl'))
             gmsh.write(str(out/'mesh.msh'))
+            provenance = {}
+            if spec.kind == 'stl':
+                from .stl_io import load_inspection, scaled_stl_path
+                import shutil
+                source = resource('stls', spec.stl_id)
+                shutil.copyfile(source/'source.stl', out/'source.stl')
+                shutil.copyfile(scaled_stl_path(spec.stl_id, spec.unit_scale, spec.accept_stl_preprocessing), out/'working.stl')
+                provenance = {'source_sha256': hashlib.sha256((out/'source.stl').read_bytes()).hexdigest(),
+                    'working_sha256': hashlib.sha256((out/'working.stl').read_bytes()).hexdigest(),
+                    'unit_scale': spec.unit_scale, 'feature_angle_deg': spec.feature_angle_deg,
+                    'preprocessing_accepted': spec.accept_stl_preprocessing,
+                    'inspection': load_inspection(spec.stl_id, spec.unit_scale)}
+                write_json(out/'stl-provenance.json', provenance)
             np.savez_compressed(out/'mesh.npz',points=points,tets=tets)
             lo,hi = points.min(axis=0),points.max(axis=0)
             left = min(faces,key=lambda f:f['center'][0])
@@ -196,7 +207,9 @@ def build_model(spec: Geometry, destination: Path | None = None):
             result = {'id':mid,'spec':spec.model_dump(),'nodes':points.tolist(),'tetrahedra':len(tets),'faces':faces,
                       'volume_mm3':volume,'bounds':[lo.tolist(),hi.tolist()],'min_quality':float(min(qualities)),
                       'recommended':{'fixed_face':left['id'],'load_face':right['id']},
-                      'sha256':hashlib.sha256((out/'model.step').read_bytes()).hexdigest(),
+                      'sha256':hashlib.sha256((out/('stl-provenance.json' if spec.kind == 'stl' else 'model.step')).read_bytes()).hexdigest(),
+                      'available_formats':['stl','msh'] + ([] if spec.kind == 'stl' else ['step']),
+                      **provenance,
                       'mesh_sha256':hashlib.sha256((out/'mesh.msh').read_bytes()).hexdigest(),
                       'seconds':round(time.monotonic()-started,3),'gmsh_version':gmsh.__version__}
             write_json(out/'model.json',result)

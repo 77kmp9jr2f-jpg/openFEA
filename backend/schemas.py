@@ -59,6 +59,7 @@ class Geometry(StrictModel):
     stl_id: str | None = Field(default=None, pattern=r'^[a-f0-9]{32}$')
     unit_scale: Number = Field(default=1, gt=1e-6, le=1e4)
     feature_angle_deg: Number = Field(default=40, ge=5, le=89)
+    accept_stl_preprocessing: bool = False
     provenance: Literal['demo', 'user_dimensions', 'image_proposal', 'step_import', 'stl_import'] = 'user_dimensions'
     assumptions: list[str] = Field(default_factory=list, max_length=30)
 

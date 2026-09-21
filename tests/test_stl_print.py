@@ -56,6 +56,14 @@ def test_dense_cad_export_is_welded_to_a_workable_mesh(tmp_path):
     assert meta['source_triangles'] == len(dense)
     assert meta['triangles'] <= MAX_WORK_TRIANGLES
     assert meta['watertight']
+    from backend.stl_io import load_inspection, scaled_stl_path
+    restored = load_inspection(meta['id'], 25.4)
+    assert restored['source_triangles'] == len(dense)
+    assert restored['preprocessing']['changed']
+    assert restored['preprocessing']['vertex_distance_bound_mm'] >= 0
+    assert any('welded' in warning for warning in restored['warnings'])
+    with pytest.raises(ValueError, match='review'):
+        scaled_stl_path(meta['id'], 1)
 
 
 def test_stl_store_rejects_non_stl_and_accepts_box():
@@ -113,6 +121,13 @@ def test_stl_import_builds_selectable_faces_and_print_solve(tmp_path):
                                  provenance='stl_import', unit_scale=1, hole_diameter=0))
     assert model['volume_mm3'] == pytest.approx(3200, rel=0.08)
     assert len(model['faces']) >= 2
+    import hashlib
+    assert 'step' not in model['available_formats']
+    assert model['source_sha256'] == hashlib.sha256(dest.read_bytes()).hexdigest()
+    assert not (DATA / 'models' / model['id'] / 'model.step').exists()
+    from fastapi.testclient import TestClient
+    from backend.app import app
+    assert TestClient(app).get(f"/api/models/{model['id']}/files/model.step").status_code == 404
     solid = solve_model(Analysis(
         model_id=model['id'], confirmed=True,
         fixed_faces=[model['recommended']['fixed_face']],
@@ -139,6 +154,13 @@ def test_stl_import_builds_selectable_faces_and_print_solve(tmp_path):
     html = export_report(sparse['id'], 'html').read_text()
     assert 'What to trust' in html
     assert 'Do not treat as printed strength' in html
+    import zipfile, json
+    with zipfile.ZipFile(export_report(sparse['id'], 'zip')) as archive:
+        assert 'model/model.step' not in archive.namelist()
+        assert archive.read('model/source.stl') == dest.read_bytes()
+        provenance = json.loads(archive.read('model/stl-provenance.json'))
+        assert provenance['unit_scale'] == 1
+        assert provenance['source_sha256'] == model['source_sha256']
 
 
 def test_compare_endpoint_reports_print_deltas(tmp_path):

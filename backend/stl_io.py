@@ -1,9 +1,9 @@
 """STL parse, quality checks, and a scaled working copy for meshing."""
 from __future__ import annotations
-import struct
+import struct, hashlib
 from pathlib import Path
 import numpy as np
-from .storage import identifier, resource, write_json
+from .storage import identifier, resource, write_json, read_json
 
 MAX_UPLOAD_BYTES = 80_000_000
 MAX_WORK_TRIANGLES = 80_000
@@ -84,9 +84,9 @@ def simplify_triangles(triangles: np.ndarray) -> tuple[np.ndarray, str | None]:
 
 def _simplify_note(source: int, used: float, result: int) -> str:
     return (
-        f'CAD export had {source:,} triangles. OpenFEA welded vertices at {used:.3g} mm '
-        f'to {result:,} triangles so this computer can mesh it. Fillets smaller than '
-        'that spacing are lost.'
+        f'CAD export had {source:,} triangles. OpenFEA welded vertices at {used:.3g} source units '
+        f'to {result:,} triangles. Review the scaled dimensions and preprocessing '
+        'before meshing; small fillets, holes and thin walls may be altered.'
     )
 
 
@@ -248,6 +248,7 @@ def store_stl(data: bytes, name: str) -> dict:
     if not data or len(data) > MAX_UPLOAD_BYTES:
         raise ValueError('Upload an STL under 80 MB.')
     triangles = parse_stl(data)
+    original = triangles
     source_count = int(len(triangles))
     note = None
     if source_count > MAX_WORK_TRIANGLES:
@@ -265,7 +266,22 @@ def store_stl(data: bytes, name: str) -> dict:
         (folder / 'unit.stl').write_bytes(data)
     else:
         write_binary_stl(folder / 'unit.stl', triangles)
-    meta = {'id': sid, 'name': name, 'bytes': len(data), **report}
+    from scipy.spatial import cKDTree
+    distance = (float(cKDTree(triangles.reshape(-1, 3)).query(original.reshape(-1, 3))[0].max())
+                if note else 0.)
+    def volume(tris):
+        return float(abs(np.einsum('ij,ij->i', tris[:, 0], np.cross(tris[:, 1], tris[:, 2])).sum() / 6))
+    source_volume, working_volume = volume(original), volume(triangles)
+    preprocessing = {'changed': bool(note), 'note': note,
+        'vertex_distance_bound_source_units': distance,
+        'vertex_distance_bound_mm': distance,
+        'source_volume_units3': source_volume, 'working_volume_units3': working_volume,
+        'relative_volume_change': abs(working_volume - source_volume) / max(source_volume, 1e-18),
+        'fidelity_scope': 'Maximum original-vertex distance to a working vertex; not a full surface deviation or feature-preservation certificate.'}
+    meta = {'id': sid, 'name': name, 'bytes': len(data), **report,
+            'source_sha256': hashlib.sha256(data).hexdigest(),
+            'working_sha256': hashlib.sha256((folder / 'unit.stl').read_bytes()).hexdigest(),
+            'preprocessing': preprocessing}
     write_json(folder / 'inspect.json', meta)
     return meta
 
@@ -274,11 +290,23 @@ def load_inspection(stl_id: str, unit_scale: float = 1.0) -> dict:
     folder = resource('stls', stl_id)
     triangles = parse_stl((folder / 'unit.stl').read_bytes())
     report = inspect_triangles(triangles, unit_scale)
-    return {**report, 'id': stl_id, 'name': _name(folder), 'scale': unit_scale}
+    meta = read_json(folder / 'inspect.json')
+    preprocessing = dict(meta.get('preprocessing', {}))
+    if preprocessing:
+        preprocessing['vertex_distance_bound_mm'] = preprocessing['vertex_distance_bound_source_units'] * unit_scale
+    note = preprocessing.get('note')
+    # Older uploads retained their weld warning only in the initial metadata.
+    preserved = [note] if note else [w for w in meta.get('warnings', []) if 'welded' in w]
+    return {**meta, **report, 'preprocessing': preprocessing,
+            'warnings': [*preserved, *report['warnings']], 'scale': unit_scale}
 
 
-def scaled_stl_path(stl_id: str, unit_scale: float) -> Path:
+def scaled_stl_path(stl_id: str, unit_scale: float, accept_preprocessing: bool = False) -> Path:
     folder = resource('stls', stl_id)
+    meta = read_json(folder / 'inspect.json')
+    changed = meta.get('preprocessing', {}).get('changed') or meta.get('source_triangles', 0) > meta.get('triangles', 0)
+    if changed and not accept_preprocessing:
+        raise ValueError('This STL was simplified. Explicitly review and accept its scaled preprocessing before meshing, or export a coarser STL.')
     triangles = parse_stl((folder / 'unit.stl').read_bytes()) * float(unit_scale)
     report = inspect_triangles(triangles, 1.0)
     if not report['watertight']:

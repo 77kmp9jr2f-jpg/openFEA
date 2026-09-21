@@ -40,6 +40,7 @@ export type PrintPreview = {
   settings: PrintSettings;
 };
 export type StlInspect = {
+  scale?: number;
   id: string;
   name: string;
   triangles: number;
@@ -55,6 +56,7 @@ export type StlInspect = {
   suggested_scale: number;
   warnings: string[];
   source_triangles?: number;
+  preprocessing?: { changed: boolean; vertex_distance_bound_mm: number; relative_volume_change: number; fidelity_scope: string };
 };
 export type Geometry = {
   name: string;
@@ -70,6 +72,7 @@ export type Geometry = {
   stl_id: string | null;
   unit_scale: number;
   feature_angle_deg: number;
+  accept_stl_preprocessing?: boolean;
   provenance: string;
   assumptions: string[];
 };
@@ -91,6 +94,7 @@ export type Model = {
   bounds: [Vec3, Vec3];
   min_quality: number;
   recommended: { fixed_face: number; load_face: number };
+  available_formats?: string[];
   sha256: string;
   mesh_sha256?: string;
   seconds: number;
@@ -169,9 +173,12 @@ export type CompareSide = {
   young_xy_mpa: number | null;
   young_z_mpa: number | null;
   print?: PrintSettings | null;
+  setup?: { material: Material; fixed_faces: number[]; loads: Load[] };
 };
 export type RunCompare = {
   same_model: boolean;
+  same_analysis_context: boolean;
+  context_differences: string[];
   a: CompareSide;
   b: CompareSide;
   delta: {
@@ -327,38 +334,41 @@ export async function api<T>(path: string, body?: unknown): Promise<T> {
   }
   return res.json();
 }
-let activeJob: string | null = null;
 export async function job<T>(
   path: string,
   body: unknown,
   onStatus?: (status: string) => void,
+  signal?: AbortSignal,
 ): Promise<T> {
+  signal?.throwIfAborted();
+  // Keep creation connected until we have the ID, even if cancellation arrives
+  // during POST. Otherwise the server may create an unreachable orphan job.
   const { id } = await api<{ id: string }>(path, body);
-  activeJob = id;
+  let cancellation: Promise<unknown> | undefined;
+  const cancel = () => {
+    cancellation ??= api("/jobs/" + id + "/cancel", {});
+    // The finally block awaits and reports cancellation failures.
+    void cancellation.catch(() => {});
+  };
+  signal?.addEventListener("abort", cancel, { once: true });
   try {
+    if (signal?.aborted) cancel();
     for (let i = 0; i < 300; i++) {
+      signal?.throwIfAborted();
       await new Promise((r) => setTimeout(r, 900));
-      const j = await api<{
-        status: string;
-        error?: string;
-        result: T;
-      }>("/jobs/" + id);
+      signal?.throwIfAborted();
+      const j = await api<{ status: string; error?: string; result: T }>("/jobs/" + id);
+      signal?.throwIfAborted();
       onStatus?.(j.status);
-      if (j.status === "cancelled")
-        throw new Error(j.error || "The job was cancelled.");
+      if (j.status === "cancelled") throw new DOMException(j.error || "The job was cancelled.", "AbortError");
       if (j.status === "failed") throw new Error(j.error);
       if (j.status === "complete") return j.result;
     }
-    throw new Error(
-      "The job is taking longer than expected. Reload to reconnect.",
-    );
+    throw new Error("The job is taking longer than expected. Reload to reconnect.");
   } finally {
-    if (activeJob === id) activeJob = null;
+    signal?.removeEventListener("abort", cancel);
+    await cancellation;
   }
-}
-export async function cancelJob() {
-  if (!activeJob) return;
-  await api("/jobs/" + activeJob + "/cancel", {});
 }
 export const format = (value: number, digits = 3) =>
   Number.isFinite(value)

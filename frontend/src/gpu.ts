@@ -96,8 +96,11 @@ var<workgroup> scratch: array<f32,128>;
 export async function solveGPU(
   system: GPUSystem,
   progress: (message: string) => void,
+  signal?: AbortSignal,
 ) {
+  signal?.throwIfAborted();
   const capability = await gpuCapability();
+  signal?.throwIfAborted();
   if (!capability.available || !adapter)
     throw new Error(
       capability.device +
@@ -107,6 +110,8 @@ export async function solveGPU(
     n = system.n,
     groups = Math.ceil(n / 128);
   const device = await adapter.requestDevice();
+  const cancel = () => device.destroy();
+  signal?.addEventListener("abort", cancel, { once: true });
   let failure = "",
     iterations = 0;
   device.lost.then((info) => {
@@ -134,6 +139,7 @@ export async function solveGPU(
     return b;
   }
   try {
+    signal?.throwIfAborted();
     const scales = Float64Array.from(system.diagonal, (d) => 1 / Math.sqrt(d));
     const values = new Float32Array(system.values.length);
     for (let i = 0; i < n; i++)
@@ -216,6 +222,7 @@ export async function solveGPU(
     const rhsNorm = norm(residual);
     let relative = 1;
     for (let outer = 0; outer < 8; outer++) {
+      signal?.throwIfAborted();
       let scaledNorm = 0;
       for (let i = 0; i < n; i++) scaledNorm += (residual[i] * scales[i]) ** 2;
       scaledNorm = Math.sqrt(scaledNorm);
@@ -230,6 +237,7 @@ export async function solveGPU(
         new Float32Array([1, 0, 0, 1, 0, 0, 0, 0]),
       );
       for (let inner = 0; inner < 2400; inner += 20) {
+        signal?.throwIfAborted();
         if (failure) throw new Error(failure);
         if (performance.now() - started > 150000)
           throw new Error(
@@ -247,6 +255,7 @@ export async function solveGPU(
         encoder.copyBufferToBuffer(state, 0, readState, 0, 32);
         device.queue.submit([encoder.finish()]);
         await readState.mapAsync(GPUMapMode.READ);
+        signal?.throwIfAborted();
         const status = new Float32Array(readState.getMappedRange().slice(0));
         readState.unmap();
         iterations += 20;
@@ -263,6 +272,7 @@ export async function solveGPU(
       encoder.copyBufferToBuffer(vectors, 0, readX, 0, n * 4);
       device.queue.submit([encoder.finish()]);
       await readX.mapAsync(GPUMapMode.READ);
+      signal?.throwIfAborted();
       const correction = new Float32Array(readX.getMappedRange().slice(0));
       readX.unmap();
       for (let i = 0; i < n; i++)
@@ -290,7 +300,11 @@ export async function solveGPU(
     throw new Error(
       `GPU residual ${relative.toExponential(2)} exceeds the acceptance threshold. Use a coarser mesh or the CPU reference solver.`,
     );
+  } catch (error) {
+    signal?.throwIfAborted();
+    throw error;
   } finally {
+    signal?.removeEventListener("abort", cancel);
     buffers.forEach((b) => b.destroy());
     device.destroy();
   }

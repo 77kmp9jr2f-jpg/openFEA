@@ -41,9 +41,15 @@ export default function CompareTable({ compare }: { compare: RunCompare }) {
   return (
     <div className="compare-table-wrap">
       <h3>Print configuration comparison</h3>
-      {!compare.same_model && (
-        <p>These runs used different meshes. Compare stiffness trends only.</p>
+      {!compare.same_analysis_context && (
+        <p role="alert">Other inputs changed: {compare.context_differences.join(", ")}. These differences cannot be attributed to print settings alone.</p>
       )}
+      {compare.same_analysis_context && <p>Same geometry, mesh, material, supports, loads and interpolation.</p>}
+      <details><summary>Analysis conditions for both runs</summary>
+        {[a, b].map(side => <div key={side.id}><b>{side.id.slice(0, 8)}</b><p>{side.setup?.material.name} · E {format(side.setup?.material.young_mpa ?? NaN)} MPa · fixed faces {side.setup?.fixed_faces.join(", ")}</p>
+          {side.setup?.loads.map((load, i) => <p key={i}>Face {load.face_id}: [{load.vector.join(", ")}] N</p>)}
+        </div>)}
+      </details>
       <table className="compare-table">
         <thead>
           <tr>
