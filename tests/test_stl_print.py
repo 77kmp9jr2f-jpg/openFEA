@@ -94,6 +94,17 @@ def test_open_stl_cannot_be_meshed():
         scaled_stl_path(meta['id'], 1.0)
 
 
+def test_failed_surface_parameterization_does_not_poison_stl_fallback():
+    import gzip
+    from backend.geometry import build_model
+    source = gzip.decompress((Path(__file__).parent/'fixtures/torque-tube.stl.gz').read_bytes())
+    upload = store_stl(source, 'torque-tube.stl')
+    model = build_model(Geometry(kind='stl', stl_id=upload['id'], mesh_size=2.5, provenance='stl_import'))
+    assert 0 < model['tetrahedra'] <= 200000
+    assert model['min_quality'] > 0
+    assert model['volume_mm3'] == pytest.approx(abs(upload['signed_volume_mm3']), rel=1e-8)
+
+
 def test_print_homogenization_changes_stiffness_and_mass():
     bounds = [[0, 0, 0], [40, 10, 8]]
     solid = homogenize(bounds, PLA, PrintSettings(enabled=True, infill_density=1, infill_pattern='gyroid'))

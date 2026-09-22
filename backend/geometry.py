@@ -58,10 +58,12 @@ def _make_solid(spec: Geometry):
 def _make_stl_solid(spec: Geometry):
     from .stl_io import scaled_stl_path
     path = scaled_stl_path(spec.stl_id, spec.unit_scale, spec.accept_stl_preprocessing)
-    gmsh.merge(str(path))
     angle = spec.feature_angle_deg * math.pi / 180
     gmsh.option.setNumber('Mesh.AngleToleranceFacetOverlap', 0.2)
-    gmsh.model.mesh.classifySurfaces(angle, True, True, math.pi)
+    def classify_source():
+        gmsh.merge(str(path))
+        gmsh.model.mesh.classifySurfaces(angle, True, True, math.pi)
+    classify_source()
     inspect = {}
     if spec.stl_id:
         inspect = read_json(resource('stls', spec.stl_id) / 'inspect.json')
@@ -73,6 +75,12 @@ def _make_stl_solid(spec: Geometry):
         try:
             gmsh.model.mesh.createGeometry()
         except Exception:
+            # createGeometry can leave some surfaces parametrized and others
+            # untouched. Reusing that state can silently produce no volume
+            # elements. Reload the immutable surface before topology fallback.
+            gmsh.clear()
+            gmsh.model.add('OpenFEA')
+            classify_source()
             gmsh.model.mesh.createTopology()
     surfaces = gmsh.model.getEntities(2)
     if len(surfaces) < 1:
@@ -162,8 +170,10 @@ def build_model(spec: Geometry, destination: Path | None = None):
             all_points = np.asarray(coords).reshape(-1,3)
             _,raw_tets = gmsh.model.mesh.getElementsByType(4)
             raw_tets = np.asarray(raw_tets).reshape(-1,4)
-            if not len(raw_tets) or len(raw_tets)>200000:
-                raise ValueError('Mesh must contain 1–200,000 tetrahedra. Increase mesh size if too dense.')
+            if not len(raw_tets):
+                raise ValueError('No tetrahedra were produced from the surface. Repair the geometry or change the STL feature angle.')
+            if len(raw_tets)>200000:
+                raise ValueError('Mesh exceeds 200,000 tetrahedra. Increase mesh size.')
             used = np.unique(raw_tets)
             index = {int(tag):i for i,tag in enumerate(used)}
             raw_index = {int(tag):i for i,tag in enumerate(tags)}
