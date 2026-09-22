@@ -1,0 +1,60 @@
+{
+  "created_at": "2026-09-22T08:05:45.414133+00:00",
+  "scope": "Actual Apple metal-3 browser GPU execution plus separate mocked API loss/deadline regressions. No physical driver-loss or second GPU evidence.",
+  "sources": {
+    "frontend/src/gpu.ts": "c10810815649211225d8f303f37ddbcab89768ae088f1dce962a6773144aa08c",
+    "frontend/src/App.tsx": "fc0726b97ec7e9c12f5f4b823bab378a11585d50a97d1734c6b5425b39a02a65",
+    "tests/frontend-gpu.test.ts": "c6609cf81d7fd4b8c8578f32d288f3bfed4a81d30fb72048dae83bb88f2fb433",
+    "tests/frontend-jobs.test.ts": "3623611881a4d25c37c821cd582710007b1c8510d39fdfbf117ec4ea2b8c9e3b"
+  },
+  "inputs": "evidence/gpu-large-inputs.json",
+  "tube": {
+    "model_id": "f75b2897b0554b54b7df402d131d65e3",
+    "total_dofs": 84324,
+    "free_dofs": 83865,
+    "min_quality": 1.4071152771599055e-06,
+    "cancelled_system_id": "74e1194c1c7e4b5f95c1d0dd9e30be71",
+    "cancelled_after_observed_iterations": 8540,
+    "cancelled_after_observed_refinement": 4,
+    "cancel_observation": "Run simulation re-enabled; reviewed setup retained. The initial browser message was the native AbortError text; App.solve now presents a plain cancellation message.",
+    "retry_system_id": "e34a1121aac54e4198b7e448e84a3371",
+    "retry_outcome": "rejected",
+    "reported_error": "GPU residual 2.11e-1 exceeds the acceptance threshold. Use a coarser mesh or the CPU reference solver.",
+    "interpretation": "This poor-quality tetrahedral mesh is not accepted by the GPU solver; CPU axial checks from the import corpus do not establish GPU convergence.",
+    "screenshots": [
+      "gpu-large-cancelled.png",
+      "gpu-large-tube-rejected.png"
+    ]
+  },
+  "automated": {
+    "before_fix": "All nine initial new lifecycle tests failed because the pending solve did not settle. Adapter-pending coverage was added afterward.",
+    "after_fix": "15 frontend tests pass, including 10 GPU lifecycle regressions. CI now runs both frontend test files.",
+    "backend": "Two affected backend checks passed: independent verification and supported submission length.",
+    "build": "TypeScript and Vite production build passed; existing bundle-size advisory.",
+    "independent_review": "Read-only review found CI test omission, now repaired; no concrete runtime regression reported."
+  },
+  "plate": {
+    "run_id": "2830d44d7b9444dcaf618d24ca7bbf8a",
+    "saved_study_id": "65ffee13d7b3440caa578c6725c5463e",
+    "saved_label": "Mounting bracket 9/22/2026, 2:06:15 AM",
+    "note": "The frozen corpus retains its original default model name; geometry is the two-bore plate.",
+    "save_reload_report_identity_verified": true,
+    "comparison": "evidence/gpu-large-comparison.json",
+    "archive": "evidence/gpu-large-archive.json",
+    "cancel_during_preparation_message": "Analysis cancelled. Your reviewed setup is ready to run again.",
+    "run_enabled_after_cancel": true,
+    "previous_completed_run_preserved_after_cancel": true
+  },
+  "screenshots": {
+    "gpu-large-cancel-guidance.png": "c2c7b60142de517949995c65f7f16db86279c18e368cf39ac310b8db1997c487",
+    "gpu-large-cancelled.png": "1d8eee590e653c7bae0a9af1849fef479b39c19e83a2a40dea5b7562632ae660",
+    "gpu-large-details.png": "e7729cb78c4a73b5e510ac55241807b1c246db0e22ecce772ea944f18af6de6c",
+    "gpu-large-plate.png": "4ca8851de564acc2d2a012586925aaada0954715eb63e758151fed17a4797f95",
+    "gpu-large-tube-rejected.png": "ac2cbd4f2c87eca4a71dad95d587df656321072a8de0fd82e9c6dc224f01fe07"
+  },
+  "restored_workspace": {
+    "model_id": "9737ceeb435f40c6855ecef6bacf518a",
+    "run_id": "12f9942450724ed1876b14254905a847",
+    "saved_study_id": "4266b85b6f0a4548b7ddb27c79e9ea83"
+  }
+}

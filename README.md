@@ -58,7 +58,7 @@ Sending a chat message transmits its image, annotations and design context to As
 
 ```sh
 .venv/bin/python -m pytest -q tests
-node --experimental-strip-types --test tests/frontend-jobs.test.ts
+node --experimental-strip-types --test tests/frontend-*.test.ts
 npm run build
 # Longer known-CAD import/refinement benchmark (isolated temporary data):
 .venv/bin/python -m scripts.validate_imports

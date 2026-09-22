@@ -66,7 +66,7 @@ test('cancellation during GPU readback destroys device and buffers', async () =>
   const descriptors = names.map(name => Object.getOwnPropertyDescriptor(globalThis, name));
   let destroyed = 0, allocated = 0, released = 0;
   const device = {
-    lost: new Promise(() => {}), addEventListener() {}, destroy() { destroyed++; },
+    lost: new Promise(() => {}), addEventListener() {}, removeEventListener() {}, destroy() { destroyed++; },
     limits: { maxStorageBufferBindingSize: 1e8, maxBufferSize: 1e8 },
     queue: { writeBuffer() {}, submit() {} },
     createBuffer() { allocated++; return { destroy() { released++; }, mapAsync() { controller.abort(); return Promise.reject(new Error('Device destroyed')); } }; },

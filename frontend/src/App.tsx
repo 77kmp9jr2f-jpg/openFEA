@@ -761,7 +761,9 @@ export default function App() {
         );
       } else flash(`Analysis complete in ${format(r.seconds)} s`);
     } catch (e) {
-      setError((e as Error).message);
+      setError((e as Error).name === "AbortError"
+        ? "Analysis cancelled. Your reviewed setup is ready to run again."
+        : (e as Error).message);
     } finally {
       operation.current = null;
       setBusy("");

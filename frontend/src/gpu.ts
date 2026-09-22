@@ -10,32 +10,26 @@ export type GPUSystem = {
   diagonal: number[];
 };
 export type GPUCapability = { available: boolean; device: string };
-let adapter: GPUAdapter | null = null;
+async function hardwareAdapter() {
+  if (!navigator.gpu) throw new Error("WebGPU is unavailable in this browser.");
+  const adapter = await navigator.gpu.requestAdapter({
+    powerPreference: "high-performance",
+  });
+  if (!adapter || adapter.info.isFallbackAdapter)
+    throw new Error("A hardware GPU adapter is unavailable.");
+  return adapter;
+}
+function deviceName(adapter: GPUAdapter) {
+  const info = adapter.info;
+  return (
+    [info.vendor, info.architecture, info.device, info.description]
+      .filter(Boolean)
+      .join(" · ") || "Local hardware GPU"
+  );
+}
 export async function gpuCapability(): Promise<GPUCapability> {
-  if (!navigator.gpu)
-    return {
-      available: false,
-      device: "WebGPU is unavailable in this browser.",
-    };
   try {
-    adapter = await navigator.gpu.requestAdapter({
-      powerPreference: "high-performance",
-    });
-    if (!adapter || adapter.info.isFallbackAdapter) {
-      adapter = null;
-      return {
-        available: false,
-        device: "A hardware GPU adapter is unavailable.",
-      };
-    }
-    const info = adapter.info;
-    return {
-      available: true,
-      device:
-        [info.vendor, info.architecture, info.device, info.description]
-          .filter(Boolean)
-          .join(" · ") || "Local hardware GPU",
-    };
+    return { available: true, device: deviceName(await hardwareAdapter()) };
   } catch (e) {
     return { available: false, device: (e as Error).message };
   }
@@ -99,27 +93,50 @@ export async function solveGPU(
   signal?: AbortSignal,
 ) {
   signal?.throwIfAborted();
-  const capability = await gpuCapability();
-  signal?.throwIfAborted();
-  if (!capability.available || !adapter)
-    throw new Error(
-      capability.device +
-        " Select the CPU reference solver explicitly if needed.",
-    );
   const started = performance.now(),
     n = system.n,
     groups = Math.ceil(n / 128);
-  const device = await adapter.requestDevice();
-  const cancel = () => device.destroy();
-  signal?.addEventListener("abort", cancel, { once: true });
-  let failure = "",
+  let device: GPUDevice | undefined;
+  let failure: Error | undefined,
+    finished = false,
     iterations = 0;
-  device.lost.then((info) => {
-    failure = info.message || "The GPU device was lost.";
+  let rejectStop!: (error: Error) => void;
+  const stopped = new Promise<never>((_, reject) => {
+    rejectStop = reject;
   });
-  device.addEventListener("uncapturederror", (e) => {
-    failure = e.error.message;
-  });
+  // Observe stop even between async operations; each wait also races it.
+  void stopped.catch(() => {});
+  const stop = (error: Error) => {
+    if (failure || finished) return;
+    failure = error;
+    rejectStop(error);
+  };
+  const cancel = () =>
+    stop(signal?.reason ?? new DOMException("Cancelled", "AbortError"));
+  signal?.addEventListener("abort", cancel, { once: true });
+  const timeoutError = () =>
+    new Error(
+      "GPU solve exceeded 150 seconds. Use a coarser mesh or select the CPU reference solver.",
+    );
+  const deadline = setTimeout(() => stop(timeoutError()), 150000);
+  function check() {
+    signal?.throwIfAborted();
+    if (performance.now() - started > 150000) stop(timeoutError());
+    if (failure) throw failure;
+  }
+  async function wait<T>(operation: Promise<T>) {
+    // Observe the operation before checking cancellation: an API can trigger
+    // abort synchronously and return an already-rejected promise.
+    const value = await Promise.race([operation, stopped]);
+    check();
+    return value;
+  }
+  const onError = (e: GPUUncapturedErrorEvent) =>
+    stop(
+      new Error(
+        `GPU error: ${e.error.message}. Retry the analysis or select the CPU reference solver.`,
+      ),
+    );
   const buffers: GPUBuffer[] = [];
   function buffer(
     data: ArrayBufferView<ArrayBuffer> | number,
@@ -127,19 +144,40 @@ export async function solveGPU(
   ) {
     const size = typeof data === "number" ? data : data.byteLength;
     if (
-      size > device.limits.maxStorageBufferBindingSize ||
-      size > device.limits.maxBufferSize
+      size > device!.limits.maxStorageBufferBindingSize ||
+      size > device!.limits.maxBufferSize
     )
       throw new Error(
         "This mesh exceeds this GPU’s buffer limit. Use a coarser mesh.",
       );
-    const b = device.createBuffer({ size: Math.max(4, size), usage });
+    const b = device!.createBuffer({ size: Math.max(4, size), usage });
     buffers.push(b);
-    if (typeof data !== "number") device.queue.writeBuffer(b, 0, data);
+    if (typeof data !== "number") device!.queue.writeBuffer(b, 0, data);
     return b;
   }
   try {
-    signal?.throwIfAborted();
+    // Keep the adapter local to this run. A capability probe or retry must not
+    // replace it while acquisition is pending.
+    const adapter = await wait(hardwareAdapter());
+    await wait(
+      adapter.requestDevice().then((acquired) => {
+        if (failure || finished || signal?.aborted) acquired.destroy();
+        else device = acquired;
+        return acquired;
+      }),
+    );
+    if (!device) {
+      check();
+      throw new Error("GPU device acquisition failed.");
+    }
+    device.lost.then((info) =>
+      stop(
+        new Error(
+          `The GPU device was lost${info.message ? `: ${info.message}` : "."} Retry the analysis or select the CPU reference solver.`,
+        ),
+      ),
+    );
+    device.addEventListener("uncapturederror", onError);
     const scales = Float64Array.from(system.diagonal, (d) => 1 / Math.sqrt(d));
     const values = new Float32Array(system.values.length);
     for (let i = 0; i < n; i++)
@@ -200,16 +238,18 @@ export async function solveGPU(
       bindGroupLayouts: [layout],
     });
     const module = device.createShaderModule({ code: shader });
-    const compilation = await module.getCompilationInfo();
+    const compilation = await wait(module.getCompilationInfo());
     const errors = compilation.messages.filter((m) => m.type === "error");
     if (errors.length) throw new Error(errors.map((m) => m.message).join(" "));
-    const pipelines = await Promise.all(
-      ["spmv", "dotp", "alpha", "update", "dotr", "beta", "direction"].map(
-        (entryPoint) =>
-          device.createComputePipelineAsync({
-            layout: pipelineLayout,
-            compute: { module, entryPoint },
-          }),
+    const pipelines = await wait(
+      Promise.all(
+        ["spmv", "dotp", "alpha", "update", "dotr", "beta", "direction"].map(
+          (entryPoint) =>
+            device!.createComputePipelineAsync({
+              layout: pipelineLayout,
+              compute: { module, entryPoint },
+            }),
+        ),
       ),
     );
     const x = new Float64Array(n),
@@ -222,7 +262,7 @@ export async function solveGPU(
     const rhsNorm = norm(residual);
     let relative = 1;
     for (let outer = 0; outer < 8; outer++) {
-      signal?.throwIfAborted();
+      check();
       let scaledNorm = 0;
       for (let i = 0; i < n; i++) scaledNorm += (residual[i] * scales[i]) ** 2;
       scaledNorm = Math.sqrt(scaledNorm);
@@ -237,12 +277,7 @@ export async function solveGPU(
         new Float32Array([1, 0, 0, 1, 0, 0, 0, 0]),
       );
       for (let inner = 0; inner < 2400; inner += 20) {
-        signal?.throwIfAborted();
-        if (failure) throw new Error(failure);
-        if (performance.now() - started > 150000)
-          throw new Error(
-            "GPU solve exceeded 150 seconds. Increase mesh size.",
-          );
+        check();
         const encoder = device.createCommandEncoder();
         const pass = encoder.beginComputePass();
         pass.setBindGroup(0, bind);
@@ -254,8 +289,7 @@ export async function solveGPU(
         pass.end();
         encoder.copyBufferToBuffer(state, 0, readState, 0, 32);
         device.queue.submit([encoder.finish()]);
-        await readState.mapAsync(GPUMapMode.READ);
-        signal?.throwIfAborted();
+        await wait(readState.mapAsync(GPUMapMode.READ));
         const status = new Float32Array(readState.getMappedRange().slice(0));
         readState.unmap();
         iterations += 20;
@@ -271,8 +305,7 @@ export async function solveGPU(
       const encoder = device.createCommandEncoder();
       encoder.copyBufferToBuffer(vectors, 0, readX, 0, n * 4);
       device.queue.submit([encoder.finish()]);
-      await readX.mapAsync(GPUMapMode.READ);
-      signal?.throwIfAborted();
+      await wait(readX.mapAsync(GPUMapMode.READ));
       const correction = new Float32Array(readX.getMappedRange().slice(0));
       readX.unmap();
       for (let i = 0; i < n; i++)
@@ -285,13 +318,14 @@ export async function solveGPU(
         residual[i] = system.rhs[i] - product;
       }
       relative = norm(residual) / rhsNorm;
+      check();
       if (!Number.isFinite(relative))
         throw new Error("GPU solution contains non-finite values.");
       if (relative < 1e-8)
         return {
           system_id: system.id,
           displacement: Array.from(x),
-          device: capability.device,
+          device: deviceName(adapter),
           iterations,
           refinements: outer + 1,
           seconds: (performance.now() - started) / 1000,
@@ -304,8 +338,11 @@ export async function solveGPU(
     signal?.throwIfAborted();
     throw error;
   } finally {
+    finished = true;
+    clearTimeout(deadline);
     signal?.removeEventListener("abort", cancel);
+    device?.removeEventListener("uncapturederror", onError);
     buffers.forEach((b) => b.destroy());
-    device.destroy();
+    device?.destroy();
   }
 }

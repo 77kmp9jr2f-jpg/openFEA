@@ -1,0 +1,41 @@
+{
+  "gpu_run": "2830d44d7b9444dcaf618d24ca7bbf8a",
+  "cpu_run": "5fd55c1875554feb902bf286f0da2b36",
+  "cpu_reference_reused_from": "evidence/dense-stl-validation.json",
+  "cpu_reference_directory": "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-validation-9s37wcyt/runs/5fd55c1875554feb902bf286f0da2b36",
+  "model_id": "dd25d6cb578c41da891d630a02374ef8",
+  "mesh_sha256": "e8c69f29f937d7aed86caab106b1ab1ec063e4ae26e9e60e5c70638a520bd268",
+  "device": {
+    "backend": "webgpu",
+    "device": "apple \u00b7 metal-3",
+    "precision": "GPU float32 with browser float64 iterative refinement",
+    "method": "WebGPU conjugate gradient, symmetric Jacobi scaling",
+    "iterations": 7200,
+    "refinements": 3,
+    "gpu_seconds": 15.152,
+    "device_source": "Browser-reported adapter; numerical residual independently verified on server"
+  },
+  "dofs": 157239,
+  "elements": 31333,
+  "identical_setup": true,
+  "element_order": 2,
+  "displacement_relative_l2_error": 1.0884829581151268e-09,
+  "peak_stress_relative_error": 1.128625082280621e-09,
+  "gpu_relative_residual": 1.389799603735738e-09,
+  "cpu_relative_residual": 1.0045572643347778e-12,
+  "gpu_seconds": 25.562,
+  "cpu_seconds": 116.678,
+  "gpu_max_displacement_mm": 0.00014793482071264743,
+  "gpu_peak_stress_mpa": 2.2477956596798503,
+  "file_hashes": {
+    "data/runs/2830d44d7b9444dcaf618d24ca7bbf8a/result.json": "930ffdf419bc3a1bf23685f4d91d23f476cbc2f0494b11695260f2a0336c19fe",
+    "data/runs/2830d44d7b9444dcaf618d24ca7bbf8a/solution.npz": "bf9cac93dac3d44399e5d25931cbbb00856d9d441b77244280bb37e93b5f8056",
+    "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-validation-9s37wcyt/runs/5fd55c1875554feb902bf286f0da2b36/result.json": "6b06e58d4e46db14f1a9ef7ad577d1d693a23fd5135e8634dac42b83fcca5239",
+    "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-validation-9s37wcyt/runs/5fd55c1875554feb902bf286f0da2b36/solution.npz": "a9b103910b130d4a856748b75e4049da1e99a4686e7b09760ec8fa630cd73ae4"
+  },
+  "gates": {
+    "relative_displacement_error_lt_1e-5": true,
+    "relative_stress_error_lt_1e-4": true,
+    "gpu_residual_lt_1e-7": true
+  }
+}

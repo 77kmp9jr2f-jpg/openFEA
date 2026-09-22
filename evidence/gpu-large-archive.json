@@ -1,0 +1,17 @@
+{
+  "created_at": "2026-09-22T08:09:38.986669+00:00",
+  "run_id": "2830d44d7b9444dcaf618d24ca7bbf8a",
+  "archive": "/Users/zach/FEA-R/data/runs/2830d44d7b9444dcaf618d24ca7bbf8a/report.zip",
+  "archive_sha256": "78a3bdace3c70ccc480d17d52dfd91b80132636fadb2d70417ee45b597c829ec",
+  "manifest_entries_verified": 27,
+  "required_files_verified": [
+    "model/source.stl",
+    "model/working.stl",
+    "model/mesh.npz",
+    "source/backend/stl_fidelity.py",
+    "source/gpu.ts",
+    "reproduce.py"
+  ],
+  "current_gpu_source_verified": true,
+  "scope": "Archive export and byte/hash integrity. Reproduction subprocess was not rerun for this larger GPU case; full solution is compared to the retained CPU reference with identical setup and mesh."
+}
