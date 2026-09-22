@@ -35,6 +35,8 @@ Distances are to actual target triangles. Triangle-size groups and enclosing-rad
 
 Inspection retains original/working hashes and counts, volume change, both the historical vertex-distance field and the new sampled surface measurements, limits and reduction mode. Confirm scale and explicitly accept preprocessing with `accept_stl_preprocessing=true` before meshing; changing scale clears the UI review checkbox. Count-targeted reductions retain their checked surface facets during volume meshing to avoid expensive surface parametrization cuts. The requested mesh size controls the interior; it does not regenerate finer CAD curvature or guarantee boundary refinement. Original bytes, scaled working geometry and transformation metadata accompany model exports; no empty STEP is offered for a discrete STL. Existing results and reports remain readable and reproducible. **Historical welded uploads must be re-uploaded before building a new mesh**, because their earlier preprocessing has not passed the current surface budget. Their stored geometry is not silently replaced.
 
+Rejected reductions report the source count, local working limit, achieved count for each attempt, and reason for rejection. Sample-distance failures include the measured bound and limit in source units. Prefer the original STEP model when available, or a CAD export with tolerances that preserve the intended small features. The [original 1.44-million-triangle assessment](ORIGINAL-STL-VALIDATION.md) records a valid closed source that the current reducer cannot bring within both the count and fidelity limits; this is a supported rejection, not a successful import.
+
 `examples/print-coupon.stl` is a 40 × 10 × 8 mm closed box (3,200 mm³). Dimensions are demonstration inputs.
 
 ## Print settings

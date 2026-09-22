@@ -1,0 +1,13 @@
+{
+  "source_name": "biscuit-blockerv4.stl",
+  "source_path": "data/stls/6aece2e705cd44bba3d302755c211625/source.stl",
+  "source_sha256": "8ec3d22525675ffb8780628497bdbc68ddad2356a4ab2c2d2afb0c14e8b13d80",
+  "bytes": 72082184,
+  "isolated_data_directory": "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-original-stl-validation-x0ryc8we",
+  "scope": "Reprocess preserved original user-uploaded STL without changing its historical upload/model/result. No known-CAD ground truth or physical input/strength claim.",
+  "source_revision": "751f2db",
+  "accepted": false,
+  "error": "No STL reduction passed the acceptance checks. The reduced STL exceeds the local triangle limit or has no usable surface. Export a coarser CAD STL.",
+  "exception_type": "ValueError",
+  "seconds": 26.530591832939535
+}

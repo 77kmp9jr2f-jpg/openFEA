@@ -2,6 +2,12 @@
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
 
+## Original large STL rejection — 2026-09-22
+
+The preserved 1,441,642-triangle `biscuit-blockerv4.stl` was reprocessed in isolated temporary storage. Its original boundary passes shell, edge, winding and degeneracy checks, but the production reducer stops at 317,596 triangles after conservative count-targeted cleanup, above the 80,000 limit. Three experimental 80,000-target candidates retain topology and volume but fail the unchanged 0.0345-source-unit surface budget. Stronger aggression and coordinate normalization were **not adopted**. No mesh or solve was accepted, and the source hash is unchanged. The [assessment](ORIGINAL-STL-VALIDATION.md) and linked measurements retain the failures and their scope.
+
+Import errors now expose the source/working limits, each achieved triangle count and rejection reason, and suggest original STEP or a controlled CAD export. Surface errors include the measured bound and limit in source units. Production reduction order, cleanup and acceptance thresholds are unchanged. All **25 affected backend tests pass** with the two known dependency warnings, including two new diagnostic regressions identified by independent review: output hard links must not overwrite the source, and malformed inputs must replace stale success evidence. The retained runner also exercises the accepted small-coupon path; no new browser, GPU or physical validation is claimed for this diagnostic change.
+
 ## Study and reference ownership — 2026-09-22
 
 The production browser reproduced annotation history crossing studies: delete a mark in study A, open study B with the same reference image, then Undo replaced B's dimension with A's. Restoring a study now resets the reference editor even when the image ID is unchanged. Replacing an image already reset it and remains supported. A failed restore does not increment the editor revision. Reference inputs, undo/redo, deletion and image replacement now respect the active-job lock; SVG pointer and drop handlers also refuse edits while locked.

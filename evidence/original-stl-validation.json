@@ -1,0 +1,240 @@
+{
+  "created_at": "2026-09-22T09:44:25.443494+00:00",
+  "scope": "Original supplied tessellation, without artificial subdivision. Checks compare reduced surfaces to the input facets, not to CAD or physical ground truth. No meshing, stress convergence, self-intersection certification or FEA acceptance is claimed.",
+  "source_name": "source.stl",
+  "source_bytes": 72082184,
+  "source_sha256": "8ec3d22525675ffb8780628497bdbc68ddad2356a4ab2c2d2afb0c14e8b13d80",
+  "source_inspection": {
+    "triangles": 1441642,
+    "bounds": [
+      [
+        -91.91178894042969,
+        0.0,
+        -1.3754543455197772e-15
+      ],
+      [
+        108.08820343017578,
+        345.0,
+        228.59999084472656
+      ]
+    ],
+    "extent_mm": [
+      199.99999237060547,
+      345.0,
+      228.59999084472656
+    ],
+    "surface_area_mm2": 533082.7553653663,
+    "signed_volume_mm3": 1072007.3278118062,
+    "watertight": true,
+    "shells": 1,
+    "boundary_edges": 0,
+    "manifold_edges": 2162463,
+    "nonmanifold_edges": 0,
+    "inconsistent_winding_edges": 0,
+    "degenerate_triangles": 0,
+    "euler_characteristic": -132,
+    "suggested_scale": 1.0,
+    "warnings": []
+  },
+  "working_triangle_limit": 80000,
+  "surface_relative_limit": 0.0001,
+  "fast_simplification_version": "0.2.0",
+  "source_hashes": {
+    "backend/stl_io.py": "39ba2410edd9bdbfb21f5dde2f4610b673ace72ba05436638d1df05f89618d20",
+    "backend/stl_fidelity.py": "af511f4e8fe4ef86dd37712863b778db8056db97a5c5c44b09a4a224117b5404",
+    "scripts/validate_original_stl.py": "228ee886d95b24d77b159eaf7ae5fd7423f5fe69827c19802c05dae2fe856c8a",
+    "requirements.txt": "84463f3eddd3f38c48252a5c1fb7f2711a691055f68894442aecd00611ce61be"
+  },
+  "experimental_probes": [
+    {
+      "name": "native-80k-agg5",
+      "adopted": false,
+      "options": {
+        "target_count": 80000,
+        "agg": 5
+      },
+      "normalization": null,
+      "raw_triangles": 80000,
+      "clean_triangles": 79998,
+      "inspection": {
+        "triangles": 79998,
+        "bounds": [
+          [
+            -91.91178894042969,
+            -0.00012645480455830693,
+            -1.3754543455197772e-15
+          ],
+          [
+            108.08821868896484,
+            345.0,
+            228.59999084472656
+          ]
+        ],
+        "extent_mm": [
+          200.00000762939453,
+          345.00012645480456,
+          228.59999084472656
+        ],
+        "surface_area_mm2": 533277.012866406,
+        "signed_volume_mm3": 1070899.3726304292,
+        "watertight": true,
+        "shells": 1,
+        "boundary_edges": 0,
+        "manifold_edges": 119997,
+        "nonmanifold_edges": 0,
+        "inconsistent_winding_edges": 0,
+        "degenerate_triangles": 0,
+        "euler_characteristic": -132,
+        "suggested_scale": 1.0,
+        "warnings": []
+      },
+      "surface_measurement": {
+        "max_sample_distance_source_units": 0.040136761441005364,
+        "max_sample_distance_mm": 0.040136761441005364,
+        "limit_source_units": 0.0345,
+        "limit_mm": 0.0345,
+        "source_to_working_source_units": 0.040136761441005364,
+        "working_to_source_source_units": 0.03562283750207277,
+        "source_samples": 1155,
+        "working_samples": 930,
+        "relative_to_longest_extent": 0.00011633843895943584,
+        "relative_limit": 0.0001,
+        "scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified."
+      },
+      "accepted_by_geometry_gates": false,
+      "error": "STL reduction exceeded the sampled surface-deviation limit: 0.0401368 > 0.0345 source units (0.01% of the longest dimension).",
+      "seconds": 3.871343042002991
+    },
+    {
+      "name": "native-80k-agg7",
+      "adopted": false,
+      "options": {
+        "target_count": 80000,
+        "agg": 7
+      },
+      "normalization": null,
+      "raw_triangles": 80000,
+      "clean_triangles": 79998,
+      "inspection": {
+        "triangles": 79998,
+        "bounds": [
+          [
+            -91.91178894042969,
+            -0.0007053076988086104,
+            -1.3754543455197772e-15
+          ],
+          [
+            108.08902740478516,
+            345.0,
+            228.60064697265625
+          ]
+        ],
+        "extent_mm": [
+          200.00081634521484,
+          345.0007053076988,
+          228.60064697265625
+        ],
+        "surface_area_mm2": 533294.5580905827,
+        "signed_volume_mm3": 1070527.372341518,
+        "watertight": true,
+        "shells": 1,
+        "boundary_edges": 0,
+        "manifold_edges": 119997,
+        "nonmanifold_edges": 0,
+        "inconsistent_winding_edges": 0,
+        "degenerate_triangles": 0,
+        "euler_characteristic": -132,
+        "suggested_scale": 1.0,
+        "warnings": []
+      },
+      "surface_measurement": {
+        "max_sample_distance_source_units": 0.05304468887289876,
+        "max_sample_distance_mm": 0.05304468887289876,
+        "limit_source_units": 0.0345,
+        "limit_mm": 0.0345,
+        "source_to_working_source_units": 0.05304468887289876,
+        "working_to_source_source_units": 0.034593042126355986,
+        "source_samples": 123,
+        "working_samples": 468,
+        "relative_to_longest_extent": 0.00015375272137072105,
+        "relative_limit": 0.0001,
+        "scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified."
+      },
+      "accepted_by_geometry_gates": false,
+      "error": "STL reduction exceeded the sampled surface-deviation limit: 0.0530447 > 0.0345 source units (0.01% of the longest dimension).",
+      "seconds": 3.641325500095263
+    },
+    {
+      "name": "normalized-80k-agg3",
+      "adopted": false,
+      "options": {
+        "target_count": 80000,
+        "agg": 3
+      },
+      "normalization": {
+        "origin": [
+          8.088207244873047,
+          172.5,
+          114.29999542236328
+        ],
+        "scale": 345.0
+      },
+      "raw_triangles": 80000,
+      "clean_triangles": 79996,
+      "inspection": {
+        "triangles": 79996,
+        "bounds": [
+          [
+            -91.91265106201172,
+            0.0,
+            0.0
+          ],
+          [
+            108.08849334716797,
+            345.0,
+            228.60092163085938
+          ]
+        ],
+        "extent_mm": [
+          200.0011444091797,
+          345.0,
+          228.60092163085938
+        ],
+        "surface_area_mm2": 533425.1950060708,
+        "signed_volume_mm3": 1070269.6805824644,
+        "watertight": true,
+        "shells": 1,
+        "boundary_edges": 0,
+        "manifold_edges": 119994,
+        "nonmanifold_edges": 0,
+        "inconsistent_winding_edges": 0,
+        "degenerate_triangles": 0,
+        "euler_characteristic": -132,
+        "suggested_scale": 1.0,
+        "warnings": []
+      },
+      "surface_measurement": {
+        "max_sample_distance_source_units": 0.06590493871298991,
+        "max_sample_distance_mm": 0.06590493871298991,
+        "limit_source_units": 0.0345,
+        "limit_mm": 0.0345,
+        "source_to_working_source_units": 0.06590493871298991,
+        "working_to_source_source_units": 0.05518943871128258,
+        "source_samples": 245,
+        "working_samples": 30,
+        "relative_to_longest_extent": 0.0001910288078637389,
+        "relative_limit": 0.0001,
+        "scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified."
+      },
+      "accepted_by_geometry_gates": false,
+      "error": "STL reduction exceeded the sampled surface-deviation limit: 0.0659049 > 0.0345 source units (0.01% of the longest dimension).",
+      "seconds": 3.6585393340792507
+    }
+  ],
+  "production_import": {
+    "accepted": false,
+    "error": "No STL reduction passed the acceptance checks. Source: 1,441,642 triangles; local working limit: 80,000. Lossless attempt produced 1,441,614 triangles: The reduced STL exceeds the local triangle limit or has no usable surface. Target 8,000 produced 317,596 triangles: The reduced STL exceeds the local triangle limit or has no usable surface. Target 40,000 produced 317,596 triangles: The reduced STL exceeds the local triangle limit or has no usable surface. Import the original STEP model if available, or export a coarser STL from CAD with tolerances that preserve the intended small features.",
+    "seconds": 25.147035375004634
+  },
+  "source_unchanged": true
+}

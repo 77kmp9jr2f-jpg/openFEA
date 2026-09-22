@@ -68,6 +68,7 @@ def _simplify_with_measurement(triangles):
     for mode, options in (('lossless', {'lossless': True}),
                           ('target-count', {'target_count': min(8000, MAX_WORK_TRIANGLES), 'agg': 3}),
                           ('target-count', {'target_count': min(40000, MAX_WORK_TRIANGLES), 'agg': 3})):
+        candidate = None
         try:
             # Keep the established numerical cleanup for lossless output.
             # Count-targeted output additionally needs true short-edge handling:
@@ -92,9 +93,14 @@ def _simplify_with_measurement(triangles):
                     'and small features before meshing; unsampled surface regions are not certified.')
             return candidate, note, measurement
         except ValueError as exc:
-            failures.append(str(exc))
-    raise ValueError('No STL reduction passed the acceptance checks. ' + ' '.join(dict.fromkeys(failures))
-                     + ' Export a coarser CAD STL.')
+            label = ('Lossless attempt' if mode == 'lossless'
+                     else f'Target {options["target_count"]:,}')
+            count = f' produced {len(candidate):,} triangles' if candidate is not None else ''
+            failures.append(f'{label}{count}: {exc}')
+    raise ValueError(f'No STL reduction passed the acceptance checks. Source: {len(tris):,} triangles; '
+                     f'local working limit: {MAX_WORK_TRIANGLES:,}. ' + ' '.join(failures)
+                     + ' Import the original STEP model if available, or export a coarser STL from CAD '
+                     'with tolerances that preserve the intended small features.')
 
 
 def _clean_reduced(candidate, coincidence=None, *, grid_cleanup=False):
@@ -158,7 +164,10 @@ def _check_reduction(tris, source, candidate):
         raise ValueError('STL reduction exceeded the 1% volume-change limit.')
     measurement = measure_surface(tris, candidate)
     if measurement['max_sample_distance_source_units'] > measurement['limit_source_units']:
-        raise ValueError('STL reduction exceeded the sampled surface-deviation limit (0.01% of the longest dimension).')
+        raise ValueError('STL reduction exceeded the sampled surface-deviation limit: '
+                         f'{measurement["max_sample_distance_source_units"]:.6g} > '
+                         f'{measurement["limit_source_units"]:.6g} source units '
+                         '(0.01% of the longest dimension).')
     return measurement
 
 
