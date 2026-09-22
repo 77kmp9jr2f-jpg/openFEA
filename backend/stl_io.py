@@ -52,12 +52,7 @@ def weld_triangles(triangles: np.ndarray, tol: float) -> np.ndarray:
 
 
 def _closed_manifold(triangles: np.ndarray) -> bool:
-    verts = np.round(_as_triangles(triangles).reshape(-1, 3), 6)
-    _, inverse = np.unique(verts, axis=0, return_inverse=True)
-    faces = inverse.reshape(-1, 3)
-    edges = np.sort(np.concatenate([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]]), axis=1)
-    _, counts = np.unique(edges, axis=0, return_counts=True)
-    return bool((counts >= 3).sum() == 0 and (counts == 1).sum() == 0)
+    return bool(inspect_triangles(triangles)['watertight'])
 
 
 def simplify_triangles(triangles: np.ndarray) -> tuple[np.ndarray, str | None]:
@@ -117,131 +112,91 @@ def write_binary_stl(path: Path, triangles: np.ndarray) -> None:
 
 
 def inspect_triangles(triangles: np.ndarray, unit_scale: float = 1.0) -> dict:
+    """Use identical topology checks for small and dense inputs.
+
+    Coincidence uses seven decimal places in the scaled coordinates. This checks
+    edge incidence, connected boundary shells, degeneracy and winding, not
+    geometric self-intersections or shell containment.
+    """
+    from scipy.sparse import coo_matrix
+    from scipy.sparse.csgraph import connected_components
+
     tris = _as_triangles(triangles) * float(unit_scale)
-    if len(tris) > MAX_WORK_TRIANGLES:
-        return _inspect_fast(tris)
     verts = tris.reshape(-1, 3)
-    edges: dict[tuple, list[int]] = {}
-    areas = []
-    volume = 0.0
-    degenerate = 0
-    for i, tri in enumerate(tris):
-        a, b, c = tri
-        cross = np.cross(b - a, c - a)
-        area = 0.5 * float(np.linalg.norm(cross))
-        if area < 1e-16 or np.unique(np.round(tri, 9), axis=0).shape[0] < 3:
-            degenerate += 1
-            continue
-        areas.append(area)
-        volume += float(np.dot(a, cross)) / 6.0
-        keys = [tuple(sorted((tuple(np.round(tri[j], 7)), tuple(np.round(tri[k], 7))))) for j, k in ((0, 1), (1, 2), (2, 0))]
-        for key in keys:
-            edges.setdefault(key, []).append(i)
-    counts = np.array([len(v) for v in edges.values()], dtype=int) if edges else np.array([0])
+    points, inverse = np.unique(np.round(verts, 7), axis=0, return_inverse=True)
+    faces = inverse.reshape(-1, 3)
+    crosses = np.cross(tris[:, 1] - tris[:, 0], tris[:, 2] - tris[:, 0])
+    areas = np.linalg.norm(crosses, axis=1) / 2
+    valid = ((areas >= 1e-16) & (faces[:, 0] != faces[:, 1]) &
+             (faces[:, 1] != faces[:, 2]) & (faces[:, 2] != faces[:, 0]))
+    degenerate = int((~valid).sum())
+    good = faces[valid]
+    directed = np.concatenate([good[:, [0, 1]], good[:, [1, 2]], good[:, [2, 0]]])
+    edges, groups, counts = np.unique(np.sort(directed, axis=1), axis=0,
+                                     return_inverse=True, return_counts=True)
     boundary = int((counts == 1).sum())
     manifold = int((counts == 2).sum())
     nonmanifold = int((counts >= 3).sum())
-    parent = list(range(len(tris)))
-
-    def find(i):
-        while parent[i] != i:
-            parent[i] = parent[parent[i]]
-            i = parent[i]
-        return i
-
-    for members in edges.values():
-        if len(members) < 2:
-            continue
-        root = find(members[0])
-        for other in members[1:]:
-            parent[find(other)] = root
-    shells = len({find(i) for i in range(len(tris))}) if len(tris) else 0
+    directions = np.where(directed[:, 0] < directed[:, 1], 1, -1)
+    winding = int(((counts == 2) & (np.bincount(groups, weights=directions,
+                                              minlength=len(edges)) != 0)).sum())
+    # Connect incident faces, including all faces around a non-manifold edge.
+    # Sparse connected-components avoids a Python loop over millions of edges.
+    order = np.argsort(groups, kind='stable')
+    same = groups[order[1:]] == groups[order[:-1]]
+    owners = np.tile(np.flatnonzero(valid), 3)[order]
+    adjacency = coo_matrix((np.ones(int(same.sum()), dtype=np.int8),
+        (owners[:-1][same], owners[1:][same])), shape=(len(tris), len(tris)))
+    shells = int(connected_components(adjacency, directed=False, return_labels=False))
     lo, hi = verts.min(axis=0), verts.max(axis=0)
     extent = hi - lo
-    watertight = boundary == 0 and nonmanifold == 0 and degenerate == 0 and shells == 1
+    watertight = boundary == 0 and nonmanifold == 0 and degenerate == 0 and shells == 1 and winding == 0
+    # Translation before the volume sum reduces cancellation for offset parts.
+    shifted = tris - lo
+    volume = float(np.einsum('ij,ij->i', shifted[:, 0], crosses).sum() / 6)
     suggested = 1.0
     warnings = []
-    max_extent = float(extent.max()) if len(verts) else 0
+    max_extent = float(extent.max())
     if max_extent < 2:
         suggested = 1000.0 if max_extent < 0.05 else 25.4
         warnings.append('The extents look like metres or inches. Confirm the unit scale before meshing.')
     elif max_extent > 800:
         warnings.append('The imported extents are large. Confirm the model is in millimetres.')
     if not watertight:
-        warnings.append('The triangle mesh is not a single watertight shell. Volume meshing requires a closed manifold.')
+        warnings.append('The STL must have one closed boundary shell with consistent triangle winding before meshing.')
     if shells > 1:
-        warnings.append(f'The STL has {shells} disconnected shells. This version analyses one connected solid.')
+        warnings.append(f'The STL has {shells} boundary shells. Separate components and enclosed cavities are not supported.')
     if degenerate:
         warnings.append(f'{degenerate} degenerate triangles were found.')
     if nonmanifold:
         warnings.append(f'{nonmanifold} non-manifold edges were found.')
     if boundary:
         warnings.append(f'{boundary} boundary edges are open (holes).')
+    if winding:
+        warnings.append(f'{winding} shared edges have inconsistent triangle winding; repair the STL orientation.')
     return {
         'triangles': int(len(tris)),
         'bounds': [lo.tolist(), hi.tolist()],
         'extent_mm': extent.tolist(),
-        'surface_area_mm2': float(sum(areas)),
+        'surface_area_mm2': float(areas[valid].sum()),
         'signed_volume_mm3': volume,
         'watertight': bool(watertight),
-        'shells': int(shells),
+        'shells': shells,
         'boundary_edges': boundary,
         'manifold_edges': manifold,
         'nonmanifold_edges': nonmanifold,
-        'degenerate_triangles': int(degenerate),
+        'inconsistent_winding_edges': winding,
+        'degenerate_triangles': degenerate,
+        'euler_characteristic': int(len(points) - len(edges) + len(tris)),
         'suggested_scale': suggested,
         'warnings': warnings,
     }
 
 
-def _inspect_fast(tris: np.ndarray) -> dict:
-    verts = tris.reshape(-1, 3)
-    lo, hi = verts.min(axis=0), verts.max(axis=0)
-    extent = hi - lo
-    a, b, c = tris[:, 0], tris[:, 1], tris[:, 2]
-    volume = float(np.einsum('ij,ij->i', a, np.cross(b - a, c - a)).sum() / 6.0)
-    rounded = np.round(verts, 6)
-    _, inverse = np.unique(rounded, axis=0, return_inverse=True)
-    faces = inverse.reshape(-1, 3)
-    edges = np.sort(np.concatenate([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]]), axis=1)
-    _, counts = np.unique(edges, axis=0, return_counts=True)
-    boundary = int((counts == 1).sum())
-    nonmanifold = int((counts >= 3).sum())
-    watertight = boundary == 0 and nonmanifold == 0
-    warnings = []
-    max_extent = float(extent.max()) if len(verts) else 0
-    suggested = 1.0
-    if max_extent < 2:
-        suggested = 1000.0 if max_extent < 0.05 else 25.4
-        warnings.append('The extents look like metres or inches. Confirm the unit scale before meshing.')
-    elif max_extent > 800:
-        warnings.append('The imported extents are large. Confirm the model is in millimetres.')
-    if not watertight:
-        warnings.append('The triangle mesh is not a single watertight shell. Volume meshing requires a closed manifold.')
-        if nonmanifold:
-            warnings.append(f'{nonmanifold} non-manifold edges were found.')
-        if boundary:
-            warnings.append(f'{boundary} boundary edges are open (holes).')
-    else:
-        warnings.append(
-            f'CAD export has {len(tris):,} triangles. The mesher will coarsen to the requested mesh size; '
-            'this is still the same solid.'
-        )
-    return {
-        'triangles': int(len(tris)),
-        'bounds': [lo.tolist(), hi.tolist()],
-        'extent_mm': extent.tolist(),
-        'surface_area_mm2': float(0.5 * np.linalg.norm(np.cross(b - a, c - a), axis=1).sum()),
-        'signed_volume_mm3': volume,
-        'watertight': bool(watertight),
-        'shells': 1 if watertight else 0,
-        'boundary_edges': boundary,
-        'manifold_edges': int((counts == 2).sum()),
-        'nonmanifold_edges': nonmanifold,
-        'degenerate_triangles': 0,
-        'suggested_scale': suggested,
-        'warnings': warnings,
-    }
+def _require_supported(report: dict, label: str = 'STL') -> None:
+    if not report['watertight']:
+        raise ValueError(f'Repair the {label} so it is a single watertight boundary shell before meshing. '
+                         + ' '.join(report['warnings']))
 
 
 def _preprocessing(original, triangles, note):
@@ -266,12 +221,15 @@ def store_stl(data: bytes, name: str) -> dict:
     original = triangles
     source_count = int(len(triangles))
     note = None
+    source_report = inspect_triangles(original)
     if source_count > MAX_WORK_TRIANGLES:
+        _require_supported(source_report, 'source STL')
         triangles, note = simplify_triangles(triangles)
     report = inspect_triangles(triangles, 1.0)
     if note:
         report['warnings'] = [note, *report['warnings']]
     report['source_triangles'] = source_count
+    report['source_inspection'] = source_report
     sid = identifier()
     folder = resource('stls', sid)
     folder.mkdir(parents=True, exist_ok=True)
@@ -294,6 +252,7 @@ def load_inspection(stl_id: str, unit_scale: float = 1.0) -> dict:
     folder = resource('stls', stl_id)
     triangles = parse_stl((folder / 'unit.stl').read_bytes())
     report = inspect_triangles(triangles, unit_scale)
+    source_report = inspect_triangles(parse_stl((folder / 'source.stl').read_bytes()), unit_scale)
     meta = read_json(folder / 'inspect.json')
     preprocessing = dict(meta.get('preprocessing', {}))
     if not preprocessing and meta.get('source_triangles', 0) > meta.get('triangles', 0):
@@ -304,20 +263,23 @@ def load_inspection(stl_id: str, unit_scale: float = 1.0) -> dict:
     note = preprocessing.get('note')
     # Older uploads retained their weld warning only in the initial metadata.
     preserved = [note] if note else [w for w in meta.get('warnings', []) if 'welded' in w]
-    return {**meta, **report, 'preprocessing': preprocessing,
-            'warnings': [*preserved, *report['warnings']], 'scale': unit_scale}
+    source_warnings = ([] if source_report['watertight'] else
+                       ['Source STL requires repair: ' + ' '.join(source_report['warnings'])])
+    return {**meta, **report, 'source_inspection': source_report, 'preprocessing': preprocessing,
+            'warnings': [*source_warnings, *preserved, *report['warnings']], 'scale': unit_scale}
 
 
 def scaled_stl_path(stl_id: str, unit_scale: float, accept_preprocessing: bool = False) -> Path:
     folder = resource('stls', stl_id)
     meta = read_json(folder / 'inspect.json')
+    # Recheck original bytes, including uploads made before source validation.
+    _require_supported(inspect_triangles(parse_stl((folder / 'source.stl').read_bytes()) * float(unit_scale)), 'source STL')
     changed = meta.get('preprocessing', {}).get('changed') or meta.get('source_triangles', 0) > meta.get('triangles', 0)
     if changed and not accept_preprocessing:
         raise ValueError('This STL was simplified. Explicitly review and accept its scaled preprocessing before meshing, or export a coarser STL.')
     triangles = parse_stl((folder / 'unit.stl').read_bytes()) * float(unit_scale)
     report = inspect_triangles(triangles, 1.0)
-    if not report['watertight']:
-        raise ValueError('Repair the STL so it is a single watertight shell before meshing. ' + ' '.join(report['warnings']))
+    _require_supported(report)
     if abs(report['signed_volume_mm3']) < 1e-6:
         raise ValueError('The STL has zero enclosed volume after scaling.')
     dest = folder / f'scaled-{unit_scale:g}.stl'

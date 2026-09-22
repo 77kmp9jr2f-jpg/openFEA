@@ -2,6 +2,12 @@
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
 
+## STL source topology repair — 2026-09-22
+
+Two reproduced import defects are fixed. A dense two-shell input could lose its small component during welding and then pass inspection. A cube with one flipped triangle could mesh successfully while reporting 666,666.7 mm³ instead of its actual 1,000,000 mm³, corrupting volume-based mass. Small and dense inputs now share shell, degeneracy, edge and winding checks; source bytes are validated before simplification and again before meshing, including historical uploads. Globally inverted winding remains supported. Multiple boundary shells (including enclosed cavities) and self-intersection certification remain outside the supported scope.
+
+All 14 affected STL/print tests passed; five dedicated topology regressions cover the original failures, historical source loss and uniform inversion. An independent recheck also verified a translated, inverted cube at scale 2: 8,000,000 mm³. Retained results: [STL topology recheck](../evidence/stl-topology-recheck.json).
+
 ## Print contour correction and flexure acceptance — 2026-09-22
 
 The print equivalent now measures nominal perimeter/skin/core volumes on actual layer contours. A 2 mm channel exposes the previous box approximation: its upright walls have no nominal infill space, yet the former model assigned the same fractions as a solid box. Independent geometric controls cover a box, channel, hollow tube, arbitrary frame rotation and open-contour rejection. Preview and solve agree, readiness rejects failed contour estimates, and actual archive subprocesses reproduce both the new contour method and historical box results with matching full displacement vectors. An independent review also exercised 25 rotated boxes; midpoint volume error remained below 0.011% in that probe. This is geometric accounting, not spatial wall/infill mechanics or calibrated printed stiffness.

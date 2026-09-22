@@ -11,9 +11,9 @@ The print model is an equivalent solid. It is not a slicer, not an explicit infi
 - triangle count and axis-aligned bounds
 - suggested unit scale when the extents look like metres or inches
 - signed volume, surface area
-- watertightness, shell count, boundary edges, non-manifold edges, degenerate triangles
+- watertightness, boundary-shell count, boundary edges, non-manifold edges, degenerate triangles and inconsistent triangle winding; dense inputs receive the same checks
 
-Open or multi-shell meshes can be inspected. They cannot be meshed. `scaled_stl_path` refuses a non-watertight file.
+Open or multi-shell meshes below the working triangle limit can be inspected, but cannot be meshed. Dense unsupported sources are rejected before simplification can erase defects. This STL importer requires one closed boundary shell with consistent winding; separate components and enclosed cavities with multiple boundary shells are unsupported. These checks do not certify freedom from geometric self-intersections. `scaled_stl_path` rechecks both source and working bytes, including historical uploads. Uniformly inverted winding can be reversed; mixed winding must be repaired before using enclosed volume or mass.
 
 Gmsh then runs `classifySurfaces` so clustered triangles become selectable faces. Those patches are not CAD faces. After a rebuild, fixtures and loads must be chosen again.
 

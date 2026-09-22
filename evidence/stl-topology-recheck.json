@@ -1,0 +1,42 @@
+{
+  "two_shells_dense": {
+    "watertight": false,
+    "shells": 2,
+    "degenerate_triangles": 0,
+    "inconsistent_winding_edges": 0,
+    "upload": "Repair the source STL so it is a single watertight boundary shell before meshing. The STL must have one closed boundary shell with consistent triangle winding before meshing. The STL has 2 boundary shells. Separate components and enclosed cavities are not supported."
+  },
+  "degenerate_dense": {
+    "watertight": false,
+    "shells": 3,
+    "degenerate_triangles": 2,
+    "inconsistent_winding_edges": 0,
+    "upload": "Repair the source STL so it is a single watertight boundary shell before meshing. The STL must have one closed boundary shell with consistent triangle winding before meshing. The STL has 3 boundary shells. Separate components and enclosed cavities are not supported. 2 degenerate triangles were found."
+  },
+  "inconsistent_winding_low": {
+    "watertight": false,
+    "shells": 1,
+    "degenerate_triangles": 0,
+    "inconsistent_winding_edges": 3,
+    "upload": "saved for inspection",
+    "scale": "Repair the source STL so it is a single watertight boundary shell before meshing. The STL must have one closed boundary shell with consistent triangle winding before meshing. 3 shared edges have inconsistent triangle winding; repair the STL orientation."
+  },
+  "historical_erased_shell": {
+    "working_watertight": true,
+    "source_watertight": false,
+    "warning": "Source STL requires repair: The imported extents are large. Confirm the model is in millimetres. The STL must have one closed boundary shell with consistent triangle winding before meshing. The STL has 2 boundary shells. Separate components and enclosed cavities are not supported.",
+    "scale": "Repair the source STL so it is a single watertight boundary shell before meshing. The imported extents are large. Confirm the model is in millimetres. The STL must have one closed boundary shell with consistent triangle winding before meshing. The STL has 2 boundary shells. Separate components and enclosed cavities are not supported."
+  },
+  "historical_bad_winding": {
+    "working_watertight": false,
+    "source_watertight": false,
+    "warning": "Source STL requires repair: The imported extents are large. Confirm the model is in millimetres. The STL must have one closed boundary shell with consistent triangle winding before meshing. 3 shared edges have inconsistent triangle winding; repair the STL orientation.",
+    "scale": "Repair the source STL so it is a single watertight boundary shell before meshing. The imported extents are large. Confirm the model is in millimetres. The STL must have one closed boundary shell with consistent triangle winding before meshing. 3 shared edges have inconsistent triangle winding; repair the STL orientation."
+  },
+  "uniform_inverted_offset": {
+    "watertight": true,
+    "shells": 1,
+    "signed_volume_mm3": 8000000.0,
+    "inconsistent_winding_edges": 0
+  }
+}
