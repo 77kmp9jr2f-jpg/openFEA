@@ -1,0 +1,100 @@
+{
+  "original_study": "4266b85b6f0a4548b7ddb27c79e9ea83",
+  "original_sha256": "219cd4e093335cca99e025aecf9b9740aec607c720c4e24efa406092b4104971",
+  "fixtures": [
+    {
+      "id": "199460cf8d064fb890bcb6e30f6f0ab2",
+      "name": "Validation annotation study A",
+      "marks": [
+        {
+          "id": "validation-A",
+          "tool": "dimension",
+          "start": [
+            0.25,
+            0.5
+          ],
+          "end": [
+            0.75,
+            0.5
+          ],
+          "text": "Study A dimension - synthetic"
+        }
+      ],
+      "image_id": "52b767032c7c4646b91b72ffaec2670c"
+    },
+    {
+      "id": "6fc1b5da42754439be9b1f65d92a65b0",
+      "name": "Validation annotation study B",
+      "marks": [
+        {
+          "id": "validation-B",
+          "tool": "dimension",
+          "start": [
+            0.25,
+            0.5
+          ],
+          "end": [
+            0.75,
+            0.5
+          ],
+          "text": "Study B dimension - synthetic"
+        }
+      ],
+      "image_id": "52b767032c7c4646b91b72ffaec2670c"
+    }
+  ],
+  "date": "2026-09-22",
+  "before_revision": "46d7a16",
+  "before": {
+    "shared_image_restore": {
+      "before_undo": "Study B dimension - synthetic",
+      "undo_enabled": true,
+      "after_undo": "Study A dimension - synthetic"
+    },
+    "during_model_build": {
+      "note_enabled": true,
+      "redo_enabled": true,
+      "delete_enabled": true,
+      "cancel_visible": true
+    }
+  },
+  "after": {
+    "shared_image_restore": {
+      "annotation": "Study B dimension - synthetic",
+      "undo_enabled": false,
+      "redo_enabled": false,
+      "editor_count": 0
+    },
+    "within_study_delete_undo_redo": "passed",
+    "during_model_build": {
+      "note_enabled": false,
+      "redo_enabled": false,
+      "delete_enabled": false,
+      "replace_image_enabled": false,
+      "library_enabled": false,
+      "cancel_visible": true
+    },
+    "after_model_build": {
+      "note_enabled": true,
+      "note": "Study B dimension - synthetic",
+      "library_enabled": true
+    },
+    "restored_original": {
+      "report_run": "12f9942450724ed1876b14254905a847",
+      "pinned_run": "4d162ab8d809467ea43bf764c5c8479a",
+      "comparison_headers": [
+        "Pinned 4d162ab8",
+        "Current 12f99424"
+      ],
+      "source_file_unchanged": true
+    }
+  },
+  "scope": "Real production browser on disposable copies of the saved synthetic study; no original study or immutable run was modified. No new GPU or physical-camera claim.",
+  "frontend_tests_passed": 17,
+  "build": "index-DVJI6fsq.js",
+  "screenshot": "evidence/workspace-reference-restored.png",
+  "source_sha256": {
+    "frontend/src/App.tsx": "8b3a9b7c98ac95dd733cd35c883e0bcb675081ac8d7d87a64e41ca4bf4d589d3",
+    "frontend/src/ImageReview.tsx": "5fd224fe1126e063cf927c7eb7d634d21a7f8afa761154629249f74f34fa14ee"
+  }
+}

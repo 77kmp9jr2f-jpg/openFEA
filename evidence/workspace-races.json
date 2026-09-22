@@ -1,0 +1,120 @@
+{
+  "source_sha256": "8b3a9b7c98ac95dd733cd35c883e0bcb675081ac8d7d87a64e41ca4bf4d589d3",
+  "startup": {
+    "pendingBusy": "Opening workspace",
+    "libraryBlocked": true,
+    "pendingSpec": "Mounting bracket",
+    "afterStartup": "Autosave A",
+    "busyAfterStartup": "",
+    "laterRestore": true,
+    "afterLaterRestore": "Study B",
+    "workspaceRevision": 2
+  },
+  "coupon": {
+    "pendingBusy": "Loading example coupon",
+    "libraryBlocked": true,
+    "afterCoupon": "print-coupon",
+    "busyAfterCoupon": "",
+    "laterRestore": true,
+    "afterLaterRestore": "Study B"
+  },
+  "comparison_success": {
+    "currentStudy": "Study B",
+    "currentResult": "B2",
+    "correctPair": {
+      "a": {
+        "id": "B1"
+      },
+      "b": {
+        "id": "B2"
+      }
+    },
+    "afterOldResponse": {
+      "a": {
+        "id": "B1"
+      },
+      "b": {
+        "id": "B2"
+      }
+    }
+  },
+  "comparison_error": {
+    "currentStudy": "Study B",
+    "currentResult": "B2",
+    "correctPair": {
+      "a": {
+        "id": "B1"
+      },
+      "b": {
+        "id": "B2"
+      }
+    },
+    "afterOldResponse": {
+      "a": {
+        "id": "B1"
+      },
+      "b": {
+        "id": "B2"
+      }
+    }
+  },
+  "first_launch": {
+    "pending": "Building solid & mesh",
+    "busy": "",
+    "ready": true,
+    "model": "FIRST",
+    "confirmed": true,
+    "compute": "cpu",
+    "messages": [
+      "This example coupon has labelled demonstration conditions. Run the simulation, then change infill, review and confirm the setup, and run again. Check mesh convergence before interpreting displacement; the print model is not calibrated strength."
+    ]
+  },
+  "startup_failure": {
+    "failed": {
+      "busy": "",
+      "ready": false,
+      "error": "offline Browser autosave is paused and the previous snapshot is preserved. Restart the local engine and reload, or open a saved study."
+    },
+    "laterRestore": true,
+    "afterRecovery": "Study B",
+    "ready": true
+  },
+  "before": {
+    "startup": {
+      "pendingBusy": "",
+      "rowEnabled": true,
+      "afterManual": "Study B",
+      "afterLateStartup": "Autosave A"
+    },
+    "coupon": {
+      "pendingBusy": "",
+      "rowEnabled": true,
+      "afterManual": "Study B",
+      "afterLateCoupon": "print-coupon"
+    },
+    "comparison": {
+      "currentStudy": "Study B",
+      "currentResult": "B2",
+      "correctPair": {
+        "a": {
+          "id": "B1"
+        },
+        "b": {
+          "id": "B2"
+        }
+      },
+      "afterLateComparison": {
+        "a": {
+          "id": "A1"
+        },
+        "b": {
+          "id": "A2"
+        }
+      }
+    }
+  },
+  "scope": "Actual App.tsx callback/effect probes using a temporary, explicitly stepped hook harness and mocked HTTP/visual/GPU dependencies. These are controlled deferred-response observations, not real React scheduling, browser or hardware execution.",
+  "source_revision_before": "46d7a16",
+  "date": "2026-09-22",
+  "probe": "evidence/workspace-race-probe.cjs"
+}

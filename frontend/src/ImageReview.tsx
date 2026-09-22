@@ -68,6 +68,7 @@ export default function ImageReview({
     return () => observer.disconnect();
   }, [image]);
   function commit(next: Mark[]) {
+    if (disabled) return;
     setPast((p) => [...p.slice(-39), marks]);
     setFuture([]);
     onChange(next);
@@ -93,6 +94,11 @@ export default function ImageReview({
     svg.current?.setPointerCapture(e.pointerId);
   }
   function end(e: React.PointerEvent) {
+    if (disabled) {
+      setDrawing(null);
+      moving.current = null;
+      return;
+    }
     if (moving.current) {
       const beforeMove = moving.current.before;
       setPast((p) => [...p.slice(-39), beforeMove]);
@@ -107,6 +113,7 @@ export default function ImageReview({
     setDrawing(null);
   }
   function move(e: React.PointerEvent) {
+    if (disabled) return;
     if (drawing) setDrawing({ ...drawing, end: pos(e) });
     if (!moving.current) return;
     const { mark, pointer, before } = moving.current,
@@ -190,7 +197,11 @@ export default function ImageReview({
     dimension: Ruler,
   };
   return (
-    <div className="image-review">
+    <fieldset
+      className="image-review"
+      disabled={disabled}
+      aria-label="Reference annotations"
+    >
       <div className="image-toolbar">
         <div>
           {(["select", "arrow", "rectangle", "note", "dimension"] as const).map(
@@ -281,6 +292,7 @@ export default function ImageReview({
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
           e.preventDefault();
+          if (disabled) return;
           const f = e.dataTransfer.files[0];
           if (f) upload(f);
         }}
@@ -299,7 +311,7 @@ export default function ImageReview({
               onPointerUp={end}
               onPointerCancel={() => {
                 setDrawing(null);
-                if (moving.current) onChange(moving.current.before);
+                if (moving.current && !disabled) onChange(moving.current.before);
                 moving.current = null;
               }}
               style={{ cursor: tool === "select" ? "default" : "crosshair" }}
@@ -333,7 +345,7 @@ export default function ImageReview({
                     tabIndex={0}
                     aria-label={`Annotation ${i + 1}: ${m.text || m.tool}`}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") setSelected(m.id);
+                      if (!disabled && e.key === "Enter") setSelected(m.id);
                     }}
                     stroke="#d77042"
                     strokeWidth="3"
@@ -525,7 +537,7 @@ export default function ImageReview({
           </div>
         </div>
       )}
-    </div>
+    </fieldset>
   );
 }
 function BoxIllustration() {

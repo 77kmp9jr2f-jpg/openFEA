@@ -127,13 +127,14 @@ export default function App() {
   const [stlInspect, setStlInspect] = useState<StlInspect | null>(null);
   const [pinned, setPinned] = useState<Result | null>(null);
   const [compare, setCompare] = useState<RunCompare | null>(null);
-  const [busy, setBusy] = useState(""),
+  const [busy, setBusy] = useState("Opening workspace"),
     [aiBusy, setAiBusy] = useState(false),
     [status, setStatus] = useState("Starting local engine"),
     [aiAvailable, setAiAvailable] = useState(false),
     [toast, setToast] = useState(""),
     [error, setError] = useState(""),
     [ready, setReady] = useState(false);
+  const [workspaceRevision, setWorkspaceRevision] = useState(0);
   const [library, setLibrary] = useState<
       { id: string; name: string; updated_at: number }[] | null
     >(null),
@@ -267,6 +268,8 @@ export default function App() {
     setCompare(null);
     setStlInspect(inspection);
     setField("solid");
+    // Even two snapshots of the same image have separate annotation history.
+    setWorkspaceRevision((revision) => revision + 1);
     setReady(true);
   }
   async function build(
@@ -350,7 +353,7 @@ export default function App() {
           localStorage.getItem("fea-r-current");
         if (saved) {
           await restore(JSON.parse(saved));
-        } else await startFirstAnalysis();
+        } else await loadExample(true);
       } catch (e) {
         setError(
           `${(e as Error).message} Browser autosave is paused and the previous snapshot is preserved. Restart the local engine and reload, or open a saved study.`,
@@ -358,6 +361,8 @@ export default function App() {
         setStatus(
           engineReady ? "Workspace restore failed" : "Local engine offline",
         );
+      } finally {
+        setBusy("");
       }
     })();
   }, []);
@@ -416,13 +421,21 @@ export default function App() {
     };
   }, [model, material, print, readinessAttempt]);
   useEffect(() => {
+    let cancelled = false;
+    setCompare(null);
     if (!pinned || !result || pinned.id === result.id) {
-      setCompare(null);
       return;
     }
     api<RunCompare>(`/runs/${pinned.id}/compare/${result.id}`)
-      .then(setCompare)
-      .catch(() => setCompare(null));
+      .then((value) => {
+        if (!cancelled) setCompare(value);
+      })
+      .catch(() => {
+        if (!cancelled) setCompare(null);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [pinned, result]);
   useEffect(() => {
     setReadinessError("");
@@ -521,8 +534,11 @@ export default function App() {
       setBusy("");
     }
   }
-  async function startFirstAnalysis() {
-    setCompute("cpu");
+  async function loadExample(firstAnalysis = false) {
+    // Own the workspace before fetching the asset, not only during import.
+    setBusy("Loading example coupon");
+    setError("");
+    if (firstAnalysis) setCompute("cpu");
     try {
       const response = await fetch("/print-coupon.stl");
       if (!response.ok) throw new Error("The example coupon is missing.");
@@ -530,11 +546,13 @@ export default function App() {
         new File([await response.blob()], "print-coupon.stl", {
           type: "model/stl",
         }),
-        { firstAnalysis: true },
+        { firstAnalysis },
       );
     } catch (e) {
       setError((e as Error).message);
-      await build(demoGeometry, true);
+      if (firstAnalysis) await build(demoGeometry, true);
+    } finally {
+      setBusy("");
     }
   }
   async function importStl(
@@ -616,7 +634,7 @@ export default function App() {
     text = prompt,
     stage?: "geometry" | "loading" | "results",
   ) {
-    if (!text.trim() || aiBusy) return;
+    if (!text.trim() || aiBusy || busy || !ready) return;
     setPrompt("");
     setAiBusy(true);
     setError("");
@@ -775,6 +793,7 @@ export default function App() {
     }
   }
   async function openLibrary() {
+    if (busy) return;
     try {
       setLibrary(await api("/studies"));
     } catch (e) {
@@ -853,6 +872,7 @@ export default function App() {
           <button
             className="avatar"
             onClick={openLibrary}
+            disabled={!!busy}
             title="Saved studies"
           >
             Z
@@ -862,7 +882,11 @@ export default function App() {
       <aside className="sidebar">
         <div className="sidebar-heading">
           <span>DESIGN EXPLORER</span>
-          <button aria-label="Saved studies" onClick={openLibrary}>
+          <button
+            aria-label="Saved studies"
+            onClick={openLibrary}
+            disabled={!!busy}
+          >
             <FolderOpen size={16} />
           </button>
         </div>
@@ -1192,14 +1216,7 @@ export default function App() {
               </button>
               <button
                 className="text-button full-width"
-                onClick={async () => {
-                  const response = await fetch("/print-coupon.stl");
-                  importStl(
-                    new File([await response.blob()], "print-coupon.stl", {
-                      type: "model/stl",
-                    }),
-                  );
-                }}
+                onClick={() => loadExample()}
               >
                 Use example print coupon
               </button>
@@ -1346,7 +1363,7 @@ export default function App() {
             </div>
           ) : tab === "reference" ? (
             <ImageReview
-              key={image?.id || "empty"}
+              key={`${workspaceRevision}:${image?.id || "empty"}`}
               image={image}
               marks={marks}
               onChange={(marks) => {
@@ -1773,7 +1790,7 @@ export default function App() {
             </div>
             <button
               className="text-button"
-              disabled={!image || aiBusy}
+              disabled={!image || aiBusy || !!busy || !ready}
               onClick={() =>
                 ask(
                   "Inspect the reference image and my annotations. Ask for the critical specifications needed to model this part faithfully.",
@@ -1993,7 +2010,7 @@ export default function App() {
         <div className="chat-bottom">
           <div className="quick-prompts">
             <button
-              disabled={aiBusy}
+              disabled={aiBusy || !!busy || !ready}
               onClick={() =>
                 ask(
                   tab === "setup"
@@ -2016,7 +2033,7 @@ export default function App() {
               <Plus size={12} />
             </button>
             <button
-              disabled={aiBusy}
+              disabled={aiBusy || !!busy || !ready}
               onClick={() =>
                 ask(
                   "What information is still missing for a credible simulation of this part?",
@@ -2057,7 +2074,9 @@ export default function App() {
               <button
                 type="submit"
                 aria-label="Send to Astra"
-                disabled={aiBusy || !prompt.trim() || !aiAvailable}
+                disabled={
+                  aiBusy || !!busy || !ready || !prompt.trim() || !aiAvailable
+                }
               >
                 {aiBusy ? (
                   <Loader2 size={15} className="spin" />
