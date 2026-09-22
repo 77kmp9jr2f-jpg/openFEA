@@ -33,7 +33,8 @@ Currently implemented analysis scope: one connected solid; small-strain static e
 - [x] Require real-part setup confirmation; add operation-specific cancellation through the WebGPU loop.
 - [x] Bind print settings to Astra interview/proposals and restore pinned comparisons; show print axes alongside the model.
 - [x] Run numerical/API/build checks and the real browser conversation/GPU/save/report path, review the integration, commit and merge into local main. Source `1a6e8d7`, research `087abcb`, evidence `5bfa601`; the merge preserves that verified tree without conflicts.
-- [ ] Continue image-to-mesh research and geometry/convergence/calibration work. Physical specimen validation and hosted Sites release remain outside current software acceptance.
+- [x] Complete the image-to-mesh research assessment and the first known-CAD import/refinement corpus: tube, open channel and perforated plate through CAD, STEP and STL. All 15 CPU/P2 cases and 94 predefined gates pass; this is axial validation with two mesh levels, not general convergence or physical calibration.
+- [x] Gate readiness using actual quadratic DOFs, preserve browser autosave through startup outages, restore studies atomically and provide a retry after readiness failures. Browser recovery checks and the dense historical-model capacity gate passed.
 
 - First coupon analysis on CPU with trust guidance: shipped on `print-stl-workspace` (`56f0faa`). See [MAKING-FEA-COMMON.md](MAKING-FEA-COMMON.md).
 - Own-part + agent path: machine-readable readiness, documented `/api/agent` contract, residual/confirm gates, same guidance and hashes. See [AGENT.md](AGENT.md).
@@ -44,7 +45,7 @@ Currently implemented analysis scope: one connected solid; small-strain static e
 
 ## Next acceptance items
 
-1. Add representative thin-wall, curved and complex STL/STEP fixtures with geometry and displacement convergence evidence. Preserve an explicit accuracy budget when preprocessing alters a surface.
+1. Extend the passing curved/2 mm channel/perforated import corpus with thin-wall bending, torsion, finer mesh levels and dense-STL simplification fidelity. Preserve an explicit accuracy budget when preprocessing alters a surface. Current axial tests do not establish those capabilities.
 2. Compare equivalent-solid mass with slicer filament usage, then calibrate stiffness against measured printed coupons in multiple orientations. Keep illustrative pattern factors labelled until that evidence exists.
 3. Exercise another GPU/browser, device loss and larger quadratic systems. The 500,000-DOF request contract is covered; a real solve at that limit is not established.
 4. Execute the proposed image-to-3D benchmark on known CAD after selecting providers and an explicit spending budget. The research report is complete; no assets or paid trials were generated.

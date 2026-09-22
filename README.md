@@ -30,7 +30,7 @@ The development UI is at http://127.0.0.1:5173. API documentation is at http://1
 3. **Model.** Build a bracket, plate/beam, shaft/tube, a custom constructive-solid-geometry recipe, import a single-solid STEP, or import a watertight STL. Geometry and meshing are performed by Gmsh. Download STEP, STL, and the original mesh. Rebuilding clears old face selections and results. STL import checks scale, watertightness, shells and mesh defects, then clusters triangles into selectable surfaces.
 4. **Print.** Optional. Set orientation, infill, walls, line width, layer height and skins. Those settings change a documented homogenized stiffness and estimated filament mass. They are not a sliced toolpath and not a calibration against printed coupons. Pin one result and run another configuration to compare displacement, stress and mass.
 5. **Simulation.** Readiness lists missing fixtures, loads, material and confirm. Use recommended faces or click them. Each force is a total in N, uniformly distributed over its face in global model axes. Confirm before solving. Local CPU is the default; GPU is an explicit WebGPU choice.
-6. **Results.** Inspect stress, displacement, exaggerated deformation, force equilibrium, and interpretation notes. Export PDF, self-contained HTML, JSON, or the complete ZIP package. The ZIP includes original CAD/mesh, inputs/results, the last 24 interview messages, the applied Astra setup proposal when used, all quadratic solution DOFs, quadrature stresses, nodal CSV, solver source, dependency versions, hashes, and a reproduction script.
+6. **Results.** Inspect stress, displacement, exaggerated deformation, force equilibrium, and interpretation notes. Export PDF, self-contained HTML, JSON, or the complete ZIP package. The ZIP includes original CAD/mesh, inputs/results, the last 24 interview messages, the applied Astra setup proposal when used, all recorded solution DOFs, quadrature stresses, nodal CSV, solver source, dependency versions, hashes, and a reproduction script.
 7. **Save study.** The browser automatically preserves the current workspace. Save study creates a server-side snapshot that can be reopened from Studies. Geometry revisions and analysis runs are immutable.
 
 ## Astra connection
@@ -41,8 +41,8 @@ Sending a chat message transmits its image, annotations and design context to As
 
 ## Engineering scope
 
-- One connected, homogeneous, isotropic 3D solid, with small strains and static linear elasticity.
-- Quadratic tetrahedral displacement interpolation (`ElementTetP2`), assembled with scikit-fem. The default browser WebGPU solver uses sparse conjugate gradient with symmetric Jacobi scaling and float64 residual refinement. SciPy sparse direct factorization is an explicit CPU reference option. CAD generation, assembly, stress recovery and independent verification remain on the local CPU. GPU computing is not claimed to be faster on these small meshes.
+- One connected 3D solid with small strains and static linear elasticity; isotropic material by default, or the documented print equivalent below.
+- Quadratic tetrahedral displacement interpolation (`ElementTetP2`), assembled with scikit-fem. The optional browser WebGPU solver uses sparse conjugate gradient with symmetric Jacobi scaling and float64 residual refinement. SciPy sparse direct factorization is an explicit CPU reference option. CAD generation, assembly, stress recovery and independent verification remain on the local CPU. GPU computing is not claimed to be faster on these small meshes.
 - Internal units: **mm, N, MPa**. Density is kg/m³; displayed mass is grams. STEP coordinates are converted to mm and must be checked against displayed bounds.
 - Fixed faces restrain all translations. Multiple fixed/loaded faces are supported. No gravity is included automatically.
 - Total face force is integrated as uniform traction over the triangulated surface; mesh refinement does not multiply the applied force.
@@ -50,13 +50,16 @@ Sending a chat message transmits its image, annotations and design context to As
 - Optional print model: transversely isotropic equivalent solid from walls, skins, infill density/pattern and a print-axis rotation. Assumptions are written into the result. Not sliced geometry, not coupon-calibrated, not certified printed-part strength.
 - No assemblies/contact, friction, bolt preload, plasticity, large deformations, buckling, fatigue, dynamics, thermal loading, or explicit infill geometry.
 - Material presets are illustrative values. An imported or photograph-inspired geometry, a converged algebraic solve, and a physical strength validation are different kinds of evidence. Sharp fixture edges and unfilleted corners may have non-convergent peak stress.
-- The prototype bounds job time and mesh size (200,000 tetrahedra / 500,000 DOFs) and rejects disconnected solids. Dense CAD STL exports are accepted up to 80 MB and coarsened when needed. If a locked surface still exceeds the quadratic budget, the solve uses linear tetrahedra and says so.
+- The prototype bounds job time and mesh size (200,000 tetrahedra / 500,000 DOFs) and rejects disconnected solids. Dense CAD STL exports are accepted up to 80 MB and coarsened when needed. Readiness counts the actual quadratic DOFs before solving. Oversized meshes require coarsening; new analyses never silently switch to linear tetrahedra. Historical P1 archives retain their recorded interpolation when reproduced.
 
 ## Verify
 
 ```sh
 .venv/bin/python -m pytest -q tests
+node --experimental-strip-types --test tests/frontend-jobs.test.ts
 npm run build
+# Longer known-CAD import/refinement benchmark (isolated temporary data):
+.venv/bin/python -m scripts.validate_imports
 ```
 
 The numerical suite includes the exact uniform 3D tension field (`nu=0`), a Timoshenko cantilever displacement comparison at two mesh sizes, force/moment equilibrium, energy, load/stiffness scaling, STEP round trips, custom boolean geometry, STL watertightness and print-stiffness comparison, invalid inputs and report hashes. See [CONTRIBUTING.md](CONTRIBUTING.md), [docs/PRINT-STL.md](docs/PRINT-STL.md), and [examples/print-coupon.stl](examples/print-coupon.stl). Test output is isolated from user studies. See [docs/VALIDATION.md](docs/VALIDATION.md) for the recorded prototype checks and their limits.

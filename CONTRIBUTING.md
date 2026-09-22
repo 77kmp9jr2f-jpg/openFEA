@@ -14,10 +14,14 @@ Development: backend on `127.0.0.1:8000`, frontend on `127.0.0.1:5173`.
 
 ```sh
 .venv/bin/python -m pytest -q tests
+node --test tests/frontend-jobs.test.ts
 npm run build
+# Longer, isolated known-CAD/STEP/STL validation (15 CPU solves):
+.venv/bin/python -m scripts.validate_imports
 ```
 
 Add tests for numerical or import behavior. A new analysis assumption belongs in the result warnings and in `docs/VALIDATION.md` if you record evidence.
+The import suite writes `evidence/import-validation.json` and returns nonzero for a failed gate. Its two mesh levels and axial synthetic loads do not establish bending, stress convergence, dense-STL preprocessing accuracy or printed-part acceptance.
 
 ## Scope
 

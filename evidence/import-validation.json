@@ -1,0 +1,2172 @@
+{
+  "scope": "Known synthetic CAD; axial loading with Poisson ratio zero; isotropic CPU P2 validation. Two-level refinement comparison, not asymptotic convergence. No bending, stress, dense-STL simplification, GPU, generated-image or physical acceptance claim.",
+  "gates": {
+    "relative_residual": 1e-07,
+    "relative_force_balance": 1e-07,
+    "relative_moment_balance": 1e-07,
+    "cad_input_volume_relative_error": 1e-08,
+    "stl_input_volume_relative_error": 0.01,
+    "refinement_relative_change": 0.02,
+    "import_solution_relative_difference": 0.05,
+    "prismatic_analytic_relative_error": 0.03
+  },
+  "data_directory": "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-import-validation-gy7dcxdh",
+  "fixtures": [
+    {
+      "name": "tube",
+      "specification": {
+        "name": "Known tube 60 x OD20 x ID12",
+        "kind": "shaft",
+        "length": 60.0,
+        "width": 20.0,
+        "height": 60.0,
+        "thickness": 8.0,
+        "hole_diameter": 12.0,
+        "mesh_size": 7.0,
+        "features": [],
+        "step_id": null,
+        "stl_id": null,
+        "unit_scale": 1.0,
+        "feature_angle_deg": 40.0,
+        "accept_stl_preprocessing": false,
+        "provenance": "user_dimensions",
+        "assumptions": []
+      },
+      "exact_volume_mm3": 12063.715789784805,
+      "cases": {
+        "cad_coarse": {
+          "id": "24344d2e025a471f85bbbad548ed0df7",
+          "elements": 2016,
+          "dofs": 11868,
+          "element_order": 2,
+          "max_displacement_mm": 0.00014481349012956908,
+          "strain_energy_nmm": 0.0071949404499989135,
+          "relative_residual": 2.153018586474111e-13,
+          "force_balance_error_n": 5.225197148326712e-13,
+          "moment_balance_error_nmm": 9.758209620316059e-12,
+          "mesh_volume_mm3": 11914.668996980337,
+          "model_id": "46c41b84534e4f0ca81fdbd0e4f5e2cb",
+          "geometry_sha256": "104c30e1c4cbd91f26348bb5cd9d7e141e3a43a794de5d0237cf2b6a861da3d5",
+          "mesh_sha256": "c8cee5972dcc240ab05b66cc7e22403c3404dc4a5b8861e7b0cdd05a1a6fc691",
+          "volume_mm3": 12063.715789784803,
+          "bounds": [
+            [
+              0.0,
+              -10.0,
+              -10.0
+            ],
+            [
+              60.0,
+              10.0,
+              10.0
+            ]
+          ],
+          "min_quality": 0.40258926924043875,
+          "loaded_area_mm2": 198.14674589207183,
+          "setup": {
+            "model_id": "46c41b84534e4f0ca81fdbd0e4f5e2cb",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              3
+            ],
+            "loads": [
+              {
+                "face_id": 2,
+                "vector": [
+                  100.00000000000001,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 0.901,
+          "mesh_volume_relative_error": 0.012354965534804419
+        },
+        "cad_fine": {
+          "id": "cf4239023cd84316b163794bead2296e",
+          "elements": 4120,
+          "dofs": 24321,
+          "element_order": 2,
+          "max_displacement_mm": 0.00014266019267122386,
+          "strain_energy_nmm": 0.007107172409000436,
+          "relative_residual": 4.77379424633456e-13,
+          "force_balance_error_n": 9.78243352051477e-13,
+          "moment_balance_error_nmm": 4.589123530029247e-11,
+          "mesh_volume_mm3": 12060.59319276904,
+          "model_id": "800cd68e340842ceb3ec2715ec7ffe38",
+          "geometry_sha256": "5c3d8d3f67437b7500e062447f3d7057050289b433151e8fb4631a18ded6df02",
+          "mesh_sha256": "6ab16e53f32ce52a0768b1d29711a2b90c3ebf06f845db87d009237a6506a0e5",
+          "volume_mm3": 12063.715789784803,
+          "bounds": [
+            [
+              0.0,
+              -10.0,
+              -10.0
+            ],
+            [
+              60.0,
+              10.0,
+              10.0
+            ]
+          ],
+          "min_quality": 0.3287848275210409,
+          "loaded_area_mm2": 200.8975350526792,
+          "setup": {
+            "model_id": "800cd68e340842ceb3ec2715ec7ffe38",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              3
+            ],
+            "loads": [
+              {
+                "face_id": 2,
+                "vector": [
+                  100.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 3.528,
+          "mesh_volume_relative_error": 0.00025884205747028766
+        },
+        "step": {
+          "id": "0db28cd458a34e6a8094deeb0341d4ce",
+          "elements": 4181,
+          "dofs": 24603,
+          "element_order": 2,
+          "max_displacement_mm": 0.00014254012037478975,
+          "strain_energy_nmm": 0.007105014780357672,
+          "relative_residual": 4.715859143911342e-13,
+          "force_balance_error_n": 4.740741275896001e-13,
+          "moment_balance_error_nmm": 3.2437379765053254e-11,
+          "mesh_volume_mm3": 12064.263229939912,
+          "model_id": "122d8c5f972545b7b104a1ae4826fa53",
+          "geometry_sha256": "7a6db9980adb55e23bc828d906670306109a3f8f86bcabab2fe95b2017c7d398",
+          "mesh_sha256": "7569645f434c646262e3d7ba6de8aabb899f6eb3914997097cf641c90da320fb",
+          "volume_mm3": 12063.71578978507,
+          "bounds": [
+            [
+              0.0,
+              -10.0,
+              -10.0
+            ],
+            [
+              60.0,
+              10.0,
+              10.0
+            ]
+          ],
+          "min_quality": 0.3553104362953139,
+          "loaded_area_mm2": 200.89753505267927,
+          "setup": {
+            "model_id": "122d8c5f972545b7b104a1ae4826fa53",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              3
+            ],
+            "loads": [
+              {
+                "face_id": 2,
+                "vector": [
+                  100.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 3.562,
+          "mesh_volume_relative_error": 4.53790660064346e-05
+        },
+        "stl_coarse": {
+          "id": "3f95227fb44c437291c4bb0ee62b1aed",
+          "elements": 16731,
+          "dofs": 89784,
+          "element_order": 2,
+          "max_displacement_mm": 0.00014317586382609504,
+          "strain_energy_nmm": 0.007109834722464813,
+          "relative_residual": 1.2669643336847096e-12,
+          "force_balance_error_n": 1.8711316263661245e-11,
+          "moment_balance_error_nmm": 8.0161849216746e-11,
+          "mesh_volume_mm3": 12057.086751484281,
+          "model_id": "0d5dc6212b8140ecac8dd444c486dbdc",
+          "geometry_sha256": "6a53b0ad9020966a720bddcd95b6faf07224a220f6f0dd63ea12f1be8438b20e",
+          "mesh_sha256": "cc578344e0b34203b9d5d8a8febdb5139f563d1bef1fa0e604e44ada9ee95681",
+          "volume_mm3": 12064.785387458194,
+          "bounds": [
+            [
+              0.0,
+              -9.99862790747653,
+              -9.988859034877319
+            ],
+            [
+              60.00000000000001,
+              9.985131544436587,
+              10.0
+            ]
+          ],
+          "min_quality": 0.22037524324705324,
+          "loaded_area_mm2": 201.53613259844735,
+          "setup": {
+            "model_id": "0d5dc6212b8140ecac8dd444c486dbdc",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              6,
+              7
+            ],
+            "loads": [
+              {
+                "face_id": 5,
+                "vector": [
+                  100.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 35.739,
+          "mesh_volume_relative_error": 0.0005495021945176592
+        },
+        "stl_fine": {
+          "id": "8b818052d9084817bc47667fd2999f5a",
+          "elements": 20781,
+          "dofs": 109824,
+          "element_order": 2,
+          "max_displacement_mm": 0.00014278853913089745,
+          "strain_energy_nmm": 0.007107062946476429,
+          "relative_residual": 1.4103796797392129e-12,
+          "force_balance_error_n": 2.225827456430526e-11,
+          "moment_balance_error_nmm": 9.613908965400286e-11,
+          "mesh_volume_mm3": 12061.654543768884,
+          "model_id": "0c945b2e532548688e671e681c06f1a9",
+          "geometry_sha256": "6a53b0ad9020966a720bddcd95b6faf07224a220f6f0dd63ea12f1be8438b20e",
+          "mesh_sha256": "e5580abd860955827762ef3b89015a00d2708a6d01834b3bad1dc4508b679b4b",
+          "volume_mm3": 12064.785387458194,
+          "bounds": [
+            [
+              0.0,
+              -9.998029855791433,
+              -9.990093815913735
+            ],
+            [
+              60.00000000000001,
+              9.9865686104702,
+              10.0
+            ]
+          ],
+          "min_quality": 0.11807821270494123,
+          "loaded_area_mm2": 201.72126661761132,
+          "setup": {
+            "model_id": "0c945b2e532548688e671e681c06f1a9",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              6,
+              7
+            ],
+            "loads": [
+              {
+                "face_id": 5,
+                "vector": [
+                  100.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 50.755,
+          "mesh_volume_relative_error": 0.00017086327727200423
+        }
+      },
+      "checks": [
+        {
+          "gate": "cad_coarse: residual",
+          "value": 2.153018586474111e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_coarse: force balance / 100 N",
+          "value": 5.225197148326711e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_coarse: moment balance / 6000 N mm",
+          "value": 1.6263682700526765e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_coarse: input-solid volume error",
+          "value": 1.1102230246251565e-16,
+          "limit": 1e-08,
+          "passed": true
+        },
+        {
+          "gate": "cad_coarse: exact prismatic displacement",
+          "value": 0.019076792679124654,
+          "limit": 0.03,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: residual",
+          "value": 4.77379424633456e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: force balance / 100 N",
+          "value": 9.78243352051477e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: moment balance / 6000 N mm",
+          "value": 7.64853921671541e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: input-solid volume error",
+          "value": 1.1102230246251565e-16,
+          "limit": 1e-08,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: exact prismatic displacement",
+          "value": 0.0039236776925914985,
+          "limit": 0.03,
+          "passed": true
+        },
+        {
+          "gate": "step: residual",
+          "value": 4.715859143911342e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "step: force balance / 100 N",
+          "value": 4.7407412758960004e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "step: moment balance / 6000 N mm",
+          "value": 5.406229960842209e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "step: input-solid volume error",
+          "value": 2.19824158875781e-14,
+          "limit": 1e-08,
+          "passed": true
+        },
+        {
+          "gate": "step: exact prismatic displacement",
+          "value": 0.0030787088251869044,
+          "limit": 0.03,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: residual",
+          "value": 1.2669643336847096e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: force balance / 100 N",
+          "value": 1.8711316263661244e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: moment balance / 6000 N mm",
+          "value": 1.3360308202791002e-14,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: input-solid volume error",
+          "value": 8.866237335403149e-05,
+          "limit": 0.01,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: exact prismatic displacement",
+          "value": 0.0075525420070492455,
+          "limit": 0.03,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: residual",
+          "value": 1.4103796797392129e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: force balance / 100 N",
+          "value": 2.2258274564305263e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: moment balance / 6000 N mm",
+          "value": 1.6023181609000476e-14,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: input-solid volume error",
+          "value": 8.866237335403149e-05,
+          "limit": 0.01,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: exact prismatic displacement",
+          "value": 0.00482687323299924,
+          "limit": 0.03,
+          "passed": true
+        },
+        {
+          "gate": "cad: refinement max_displacement_mm",
+          "value": 0.015093891421468442,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "stl: refinement max_displacement_mm",
+          "value": 0.0027125755158998732,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "step: CAD agreement max_displacement_mm",
+          "value": 0.0008416664395710649,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: CAD agreement max_displacement_mm",
+          "value": 0.0008996655427866429,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "cad: refinement strain_energy_nmm",
+          "value": 0.01234922075160716,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "stl: refinement strain_energy_nmm",
+          "value": 0.00039000301661284986,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "step: CAD agreement strain_energy_nmm",
+          "value": 0.0003035846773650208,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: CAD agreement strain_energy_nmm",
+          "value": 1.5401698130745878e-05,
+          "limit": 0.05,
+          "passed": true
+        }
+      ],
+      "source": {
+        "model_id": "099c1c376e0246c2934396f2c862e48b",
+        "stl_sha256": "66beb3c0f8d4bc06b9b5ae0574b60272910a5f83484c131d859080d38415df1b",
+        "inspection": {
+          "id": "2f40207fbd1a40ee8c948525d8f508bd",
+          "name": "tube.stl",
+          "bytes": 1022848,
+          "triangles": 3880,
+          "bounds": [
+            [
+              0.0,
+              -10.0,
+              -10.0
+            ],
+            [
+              60.0,
+              10.0,
+              10.0
+            ]
+          ],
+          "extent_mm": [
+            60.0,
+            20.0,
+            20.0
+          ],
+          "surface_area_mm2": 6421.873792097269,
+          "signed_volume_mm3": 12064.785387458194,
+          "watertight": true,
+          "shells": 1,
+          "boundary_edges": 0,
+          "manifold_edges": 5820,
+          "nonmanifold_edges": 0,
+          "degenerate_triangles": 0,
+          "suggested_scale": 1.0,
+          "warnings": [],
+          "source_triangles": 3880,
+          "source_sha256": "66beb3c0f8d4bc06b9b5ae0574b60272910a5f83484c131d859080d38415df1b",
+          "working_sha256": "66beb3c0f8d4bc06b9b5ae0574b60272910a5f83484c131d859080d38415df1b",
+          "preprocessing": {
+            "changed": false,
+            "note": null,
+            "vertex_distance_bound_source_units": 0.0,
+            "vertex_distance_bound_mm": 0.0,
+            "source_volume_units3": 12064.785387458216,
+            "working_volume_units3": 12064.785387458216,
+            "relative_volume_change": 0.0,
+            "fidelity_scope": "Maximum original-vertex distance to a working vertex; not a full surface deviation or feature-preservation certificate."
+          }
+        }
+      },
+      "passed": true
+    },
+    {
+      "name": "thin_channel",
+      "specification": {
+        "name": "Known open channel with 2 mm walls",
+        "kind": "custom",
+        "length": 80.0,
+        "width": 40.0,
+        "height": 60.0,
+        "thickness": 8.0,
+        "hole_diameter": 8.0,
+        "mesh_size": 7.0,
+        "features": [
+          {
+            "operation": "add",
+            "primitive": "box",
+            "origin": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "size": [
+              60.0,
+              24.0,
+              16.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              10.0
+            ],
+            "radius": 5.0
+          },
+          {
+            "operation": "cut",
+            "primitive": "box",
+            "origin": [
+              -1.0,
+              2.0,
+              2.0
+            ],
+            "size": [
+              62.0,
+              20.0,
+              15.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              10.0
+            ],
+            "radius": 5.0
+          }
+        ],
+        "step_id": null,
+        "stl_id": null,
+        "unit_scale": 1.0,
+        "feature_angle_deg": 40.0,
+        "accept_stl_preprocessing": false,
+        "provenance": "user_dimensions",
+        "assumptions": []
+      },
+      "exact_volume_mm3": 6240,
+      "cases": {
+        "cad_coarse": {
+          "id": "2fefbd8ffbda42ddb6575211c0ccdf9d",
+          "elements": 1972,
+          "dofs": 11646,
+          "element_order": 2,
+          "max_displacement_mm": 0.0002747252747253002,
+          "strain_energy_nmm": 0.013736263736263628,
+          "relative_residual": 2.6153235276065894e-13,
+          "force_balance_error_n": 2.1582836625352321e-13,
+          "moment_balance_error_nmm": 7.631365496284179e-12,
+          "mesh_volume_mm3": 6239.999999999998,
+          "model_id": "73bf7e51c4ae49eebdd18801756533c8",
+          "geometry_sha256": "c55a423856c03eb41c974320948b4a75afeb86f15ea56e8958f683aefe7e4795",
+          "mesh_sha256": "29b299087dbe8f6f78e44c8fe01776812dd88e6a22229939ac8275dbc6153fd3",
+          "volume_mm3": 6240.000000000002,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.0,
+              24.0,
+              16.0
+            ]
+          ],
+          "min_quality": 0.43676657387472806,
+          "loaded_area_mm2": 104.0,
+          "setup": {
+            "model_id": "73bf7e51c4ae49eebdd18801756533c8",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              1
+            ],
+            "loads": [
+              {
+                "face_id": 10,
+                "vector": [
+                  100.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 0.962,
+          "mesh_volume_relative_error": 3.3306690738754696e-16
+        },
+        "cad_fine": {
+          "id": "a5e96348124748d19d16f49a7ac575e8",
+          "elements": 4493,
+          "dofs": 26823,
+          "element_order": 2,
+          "max_displacement_mm": 0.0002747252747252882,
+          "strain_energy_nmm": 0.013736263736264069,
+          "relative_residual": 5.201669997813202e-13,
+          "force_balance_error_n": 1.1759828078745017e-12,
+          "moment_balance_error_nmm": 1.627171833832623e-11,
+          "mesh_volume_mm3": 6239.999999999997,
+          "model_id": "272ede9685c94647a2be952980a9e376",
+          "geometry_sha256": "ff07d495c2e0505162eab3d1b9624e83c1444119ba3ceadc532324bb8fef08f0",
+          "mesh_sha256": "0fe0c870e1638f5e921668c69d289b3aeefb2c88a9fe5fee9d77d6e67440b060",
+          "volume_mm3": 6240.000000000002,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.0,
+              24.0,
+              16.0
+            ]
+          ],
+          "min_quality": 0.485279377220791,
+          "loaded_area_mm2": 103.99999999999999,
+          "setup": {
+            "model_id": "272ede9685c94647a2be952980a9e376",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              1
+            ],
+            "loads": [
+              {
+                "face_id": 10,
+                "vector": [
+                  100.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 3.401,
+          "mesh_volume_relative_error": 4.440892098500626e-16
+        },
+        "step": {
+          "id": "439d25a7f7b648a4bbc306e46c5625d8",
+          "elements": 4495,
+          "dofs": 26868,
+          "element_order": 2,
+          "max_displacement_mm": 0.00027472527472530096,
+          "strain_energy_nmm": 0.0137362637362645,
+          "relative_residual": 4.538092227052035e-13,
+          "force_balance_error_n": 1.8907645159365038e-12,
+          "moment_balance_error_nmm": 1.98753469403297e-11,
+          "mesh_volume_mm3": 6239.999999999998,
+          "model_id": "fa4b5b9e8f574d60b045e87c28fd86db",
+          "geometry_sha256": "145cd615378853f2e835ae36a7f38671238a18bf6942ff6eb46301d2096fd0fb",
+          "mesh_sha256": "2ff63ba2ae34e50e0e7393f9b5f952275f691dc422aea980ad996edd2039262e",
+          "volume_mm3": 6240.000000000002,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.0,
+              24.0,
+              16.0
+            ]
+          ],
+          "min_quality": 0.46597562648479246,
+          "loaded_area_mm2": 103.99999999999997,
+          "setup": {
+            "model_id": "fa4b5b9e8f574d60b045e87c28fd86db",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              1
+            ],
+            "loads": [
+              {
+                "face_id": 10,
+                "vector": [
+                  99.99999999999999,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 3.124,
+          "mesh_volume_relative_error": 3.3306690738754696e-16
+        },
+        "stl_coarse": {
+          "id": "2bba0c27c0444cc18397d89d9549b1d2",
+          "elements": 12621,
+          "dofs": 73830,
+          "element_order": 2,
+          "max_displacement_mm": 0.00027472527472530584,
+          "strain_energy_nmm": 0.013736263736262216,
+          "relative_residual": 1.0283275769408958e-12,
+          "force_balance_error_n": 1.0492364594229204e-11,
+          "moment_balance_error_nmm": 5.708912130767818e-11,
+          "mesh_volume_mm3": 6239.999999999998,
+          "model_id": "ad2b0b4acc0e4927a64b226817f4da35",
+          "geometry_sha256": "094b2b85600d5829a4488cf8ffa4ba4d018fbd7d4481b8d55deb69a1c729d163",
+          "mesh_sha256": "147104c5bdbd540d66c54351383520b47ee6a904417fa56533e410f301b2dfa3",
+          "volume_mm3": 6240.000000000014,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.00000000000001,
+              24.000000000000007,
+              16.0
+            ]
+          ],
+          "min_quality": 0.2889152046181239,
+          "loaded_area_mm2": 104.0,
+          "setup": {
+            "model_id": "ad2b0b4acc0e4927a64b226817f4da35",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              2
+            ],
+            "loads": [
+              {
+                "face_id": 19,
+                "vector": [
+                  100.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 11.881,
+          "mesh_volume_relative_error": 3.3306690738754696e-16
+        },
+        "stl_fine": {
+          "id": "7f1a6174f1104238b6b9c3de67168413",
+          "elements": 25859,
+          "dofs": 143505,
+          "element_order": 2,
+          "max_displacement_mm": 0.00027472527472527885,
+          "strain_energy_nmm": 0.013736263736259488,
+          "relative_residual": 1.9363224635792483e-12,
+          "force_balance_error_n": 2.52293695679332e-11,
+          "moment_balance_error_nmm": 3.234994877005961e-10,
+          "mesh_volume_mm3": 6239.999999999998,
+          "model_id": "34663f00cd4949c498480269a05d6cf0",
+          "geometry_sha256": "094b2b85600d5829a4488cf8ffa4ba4d018fbd7d4481b8d55deb69a1c729d163",
+          "mesh_sha256": "652964a075ca979c300cdb3c3f075922f747f9b0ee0f008725ea4a40902293e5",
+          "volume_mm3": 6240.000000000014,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.00000000000001,
+              24.000000000000007,
+              16.0
+            ]
+          ],
+          "min_quality": 0.24993160550752305,
+          "loaded_area_mm2": 104.0,
+          "setup": {
+            "model_id": "34663f00cd4949c498480269a05d6cf0",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              2
+            ],
+            "loads": [
+              {
+                "face_id": 19,
+                "vector": [
+                  100.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 36.641,
+          "mesh_volume_relative_error": 3.3306690738754696e-16
+        }
+      },
+      "checks": [
+        {
+          "gate": "cad_coarse: residual",
+          "value": 2.6153235276065894e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_coarse: force balance / 100 N",
+          "value": 2.1582836625352323e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_coarse: moment balance / 6000 N mm",
+          "value": 1.2718942493806965e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_coarse: input-solid volume error",
+          "value": 2.220446049250313e-16,
+          "limit": 1e-08,
+          "passed": true
+        },
+        {
+          "gate": "cad_coarse: exact prismatic displacement",
+          "value": 9.281464485866309e-14,
+          "limit": 0.03,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: residual",
+          "value": 5.201669997813202e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: force balance / 100 N",
+          "value": 1.1759828078745018e-14,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: moment balance / 6000 N mm",
+          "value": 2.711953056387705e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: input-solid volume error",
+          "value": 2.220446049250313e-16,
+          "limit": 1e-08,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: exact prismatic displacement",
+          "value": 4.907185768843192e-14,
+          "limit": 0.03,
+          "passed": true
+        },
+        {
+          "gate": "step: residual",
+          "value": 4.538092227052035e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "step: force balance / 100 N",
+          "value": 1.890764515936504e-14,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "step: moment balance / 6000 N mm",
+          "value": 3.3125578233882833e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "step: input-solid volume error",
+          "value": 2.220446049250313e-16,
+          "limit": 1e-08,
+          "passed": true
+        },
+        {
+          "gate": "step: exact prismatic displacement",
+          "value": 9.547918011776346e-14,
+          "limit": 0.03,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: residual",
+          "value": 1.0283275769408958e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: force balance / 100 N",
+          "value": 1.0492364594229204e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: moment balance / 6000 N mm",
+          "value": 9.514853551279697e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: input-solid volume error",
+          "value": 2.220446049250313e-15,
+          "limit": 0.01,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: exact prismatic displacement",
+          "value": 1.1324274851176597e-13,
+          "limit": 0.03,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: residual",
+          "value": 1.9363224635792483e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: force balance / 100 N",
+          "value": 2.52293695679332e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: moment balance / 6000 N mm",
+          "value": 5.391658128343269e-14,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: input-solid volume error",
+          "value": 2.220446049250313e-15,
+          "limit": 0.01,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: exact prismatic displacement",
+          "value": 1.509903313490213e-14,
+          "limit": 0.03,
+          "passed": true
+        },
+        {
+          "gate": "cad: refinement max_displacement_mm",
+          "value": 4.3520742565306136e-14,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "stl: refinement max_displacement_mm",
+          "value": 9.836575998178887e-14,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "step: CAD agreement max_displacement_mm",
+          "value": 4.6407322429331543e-14,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: CAD agreement max_displacement_mm",
+          "value": 3.4083846855992306e-14,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "cad: refinement strain_energy_nmm",
+          "value": 3.2085445411667024e-14,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "stl: refinement strain_energy_nmm",
+          "value": 1.9872992140790302e-13,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "step: CAD agreement strain_energy_nmm",
+          "value": 3.1308289294429414e-14,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: CAD agreement strain_energy_nmm",
+          "value": 3.33510996597397e-13,
+          "limit": 0.05,
+          "passed": true
+        }
+      ],
+      "source": {
+        "model_id": "41856bd6f7c44038940e0bd1371f720d",
+        "stl_sha256": "2e25e129cade767aadca7f4f7334d6dc573f6cd719d658e96f60ae1bf9a54888",
+        "inspection": {
+          "id": "9c7f706da49942b9a79df7a3b144c6fd",
+          "name": "thin_channel.stl",
+          "bytes": 745128,
+          "triangles": 4186,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.0,
+              24.0,
+              16.0
+            ]
+          ],
+          "extent_mm": [
+            60.0,
+            24.0,
+            16.0
+          ],
+          "surface_area_mm2": 6688.0,
+          "signed_volume_mm3": 6240.000000000014,
+          "watertight": true,
+          "shells": 1,
+          "boundary_edges": 0,
+          "manifold_edges": 6279,
+          "nonmanifold_edges": 0,
+          "degenerate_triangles": 0,
+          "suggested_scale": 1.0,
+          "warnings": [],
+          "source_triangles": 4186,
+          "source_sha256": "2e25e129cade767aadca7f4f7334d6dc573f6cd719d658e96f60ae1bf9a54888",
+          "working_sha256": "2e25e129cade767aadca7f4f7334d6dc573f6cd719d658e96f60ae1bf9a54888",
+          "preprocessing": {
+            "changed": false,
+            "note": null,
+            "vertex_distance_bound_source_units": 0.0,
+            "vertex_distance_bound_mm": 0.0,
+            "source_volume_units3": 6240.000000000006,
+            "working_volume_units3": 6240.000000000006,
+            "relative_volume_change": 0.0,
+            "fidelity_scope": "Maximum original-vertex distance to a working vertex; not a full surface deviation or feature-preservation certificate."
+          }
+        }
+      },
+      "passed": true
+    },
+    {
+      "name": "perforated_plate",
+      "specification": {
+        "name": "Known asymmetric two-bore plate",
+        "kind": "custom",
+        "length": 80.0,
+        "width": 40.0,
+        "height": 60.0,
+        "thickness": 8.0,
+        "hole_diameter": 8.0,
+        "mesh_size": 7.0,
+        "features": [
+          {
+            "operation": "add",
+            "primitive": "box",
+            "origin": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "size": [
+              60.0,
+              40.0,
+              6.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              10.0
+            ],
+            "radius": 5.0
+          },
+          {
+            "operation": "cut",
+            "primitive": "cylinder",
+            "origin": [
+              15.0,
+              12.0,
+              -1.0
+            ],
+            "size": [
+              10.0,
+              10.0,
+              10.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              8.0
+            ],
+            "radius": 3.0
+          },
+          {
+            "operation": "cut",
+            "primitive": "cylinder",
+            "origin": [
+              43.0,
+              27.0,
+              -1.0
+            ],
+            "size": [
+              10.0,
+              10.0,
+              10.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              8.0
+            ],
+            "radius": 5.0
+          }
+        ],
+        "step_id": null,
+        "stl_id": null,
+        "unit_scale": 1.0,
+        "feature_angle_deg": 40.0,
+        "accept_stl_preprocessing": false,
+        "provenance": "user_dimensions",
+        "assumptions": []
+      },
+      "exact_volume_mm3": 13759.115098667682,
+      "cases": {
+        "cad_coarse": {
+          "id": "f2a11c11b5b741aba97d430f339407a1",
+          "elements": 3759,
+          "dofs": 20451,
+          "element_order": 2,
+          "max_displacement_mm": 0.00014724027577558746,
+          "strain_energy_nmm": 0.0068324281107453476,
+          "relative_residual": 3.247997860093108e-13,
+          "force_balance_error_n": 2.7244378681995637e-13,
+          "moment_balance_error_nmm": 9.608592331846251e-12,
+          "mesh_volume_mm3": 13781.04285053079,
+          "model_id": "2badb111146e4fac8279e57dc1d46fbc",
+          "geometry_sha256": "feeb268eeae5cfc8d5ef140404c72a4b34831b0243398b9f445fb4f7d64aed2b",
+          "mesh_sha256": "a9bd3739d9e8bc86681c002b8a8cdfcffc63690516c4549682ba99bd567fbad7",
+          "volume_mm3": 13759.115098667682,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.0,
+              40.0,
+              6.0
+            ]
+          ],
+          "min_quality": 0.3189193299015307,
+          "loaded_area_mm2": 240.0,
+          "setup": {
+            "model_id": "2badb111146e4fac8279e57dc1d46fbc",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              1
+            ],
+            "loads": [
+              {
+                "face_id": 6,
+                "vector": [
+                  100.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 3.401,
+          "mesh_volume_relative_error": 0.0015936891076107074
+        },
+        "cad_fine": {
+          "id": "59eca6b1337f4aef87a13e2d5b93ab59",
+          "elements": 7087,
+          "dofs": 37503,
+          "element_order": 2,
+          "max_displacement_mm": 0.0001475000040504256,
+          "strain_energy_nmm": 0.006840066409616654,
+          "relative_residual": 6.021619888486074e-13,
+          "force_balance_error_n": 8.089755246434279e-12,
+          "moment_balance_error_nmm": 1.0385449531095618e-10,
+          "mesh_volume_mm3": 13778.015052774299,
+          "model_id": "c146da080f7243cda288491ccf10f413",
+          "geometry_sha256": "783403540fb1bb668986f331d698d901538d1f5d8e634b1a493f6cc95b9e99d0",
+          "mesh_sha256": "3fe5858dd6de8062b32a8ee5dc390e456711bed09fecf238209e06e6069dd588",
+          "volume_mm3": 13759.115098667682,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.0,
+              40.0,
+              6.0
+            ]
+          ],
+          "min_quality": 0.47720575465529746,
+          "loaded_area_mm2": 240.0,
+          "setup": {
+            "model_id": "c146da080f7243cda288491ccf10f413",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              1
+            ],
+            "loads": [
+              {
+                "face_id": 6,
+                "vector": [
+                  100.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 8.218,
+          "mesh_volume_relative_error": 0.001373631514169693
+        },
+        "step": {
+          "id": "9d35d5e8fd92451fb0b943dc95cef3ec",
+          "elements": 7124,
+          "dofs": 37635,
+          "element_order": 2,
+          "max_displacement_mm": 0.00014750225543507125,
+          "strain_energy_nmm": 0.006839911675826007,
+          "relative_residual": 5.594033787855119e-13,
+          "force_balance_error_n": 5.005676000766834e-12,
+          "moment_balance_error_nmm": 1.5152666941528608e-10,
+          "mesh_volume_mm3": 13778.014492110156,
+          "model_id": "828a28e7c92143639fd0fb8f3105afaa",
+          "geometry_sha256": "7535b72c4f61c20cec0202e83187afc85d9713238f3a928a6a4c5b8b19aea024",
+          "mesh_sha256": "39978a6fce8b14e6ef74558ea067558e9d924f208be527ec4526adb39a1a0e12",
+          "volume_mm3": 13759.115098667644,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.0,
+              40.0,
+              6.0
+            ]
+          ],
+          "min_quality": 0.47504750841212634,
+          "loaded_area_mm2": 240.0,
+          "setup": {
+            "model_id": "828a28e7c92143639fd0fb8f3105afaa",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              1
+            ],
+            "loads": [
+              {
+                "face_id": 6,
+                "vector": [
+                  100.0,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 7.128,
+          "mesh_volume_relative_error": 0.0013735907656085011
+        },
+        "stl_coarse": {
+          "id": "4771ef27fce64013bc2d78da72694e6e",
+          "elements": 22918,
+          "dofs": 115404,
+          "element_order": 2,
+          "max_displacement_mm": 0.00014766338930583702,
+          "strain_energy_nmm": 0.006842030196822845,
+          "relative_residual": 1.7622005339616626e-12,
+          "force_balance_error_n": 3.824185377847816e-11,
+          "moment_balance_error_nmm": 5.987414883494029e-10,
+          "mesh_volume_mm3": 13780.44094024482,
+          "model_id": "9d91226ae1e149d4a630cadb7261177e",
+          "geometry_sha256": "0d9f79f1fbe9589c24f6dd56ca8e38086623f603d19bddb7a9b75558fa7925da",
+          "mesh_sha256": "3a1f7ac3071226029376f8f6ba188c8e1dbd405b8cbd81c6149270b3961dce0d",
+          "volume_mm3": 13773.39082569747,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.00000000000001,
+              40.00000000000001,
+              6.000000000000002
+            ]
+          ],
+          "min_quality": 0.4263508934998249,
+          "loaded_area_mm2": 240.0,
+          "setup": {
+            "model_id": "9d91226ae1e149d4a630cadb7261177e",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              2,
+              3
+            ],
+            "loads": [
+              {
+                "face_id": 22,
+                "vector": [
+                  40.000000003532186,
+                  0.0,
+                  0.0
+                ]
+              },
+              {
+                "face_id": 23,
+                "vector": [
+                  59.999999996467814,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 68.395,
+          "mesh_volume_relative_error": 0.0015499428142151661
+        },
+        "stl_fine": {
+          "id": "2b16f0e8162447129df0d70ee232e648",
+          "elements": 30247,
+          "dofs": 150654,
+          "element_order": 2,
+          "max_displacement_mm": 0.00014767047707779033,
+          "strain_energy_nmm": 0.006842757034141157,
+          "relative_residual": 2.1561931608379774e-12,
+          "force_balance_error_n": 7.093012575065946e-11,
+          "moment_balance_error_nmm": 1.2959703176474969e-09,
+          "mesh_volume_mm3": 13779.283736521564,
+          "model_id": "772ce8ce10514666b489a5b57c7aaa68",
+          "geometry_sha256": "0d9f79f1fbe9589c24f6dd56ca8e38086623f603d19bddb7a9b75558fa7925da",
+          "mesh_sha256": "ac403dd588218782fb27636ea9adee0c4ae01de1a9069133ac979b60824890e3",
+          "volume_mm3": 13773.39082569747,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.00000000000001,
+              40.00000000000001,
+              6.000000000000002
+            ]
+          ],
+          "min_quality": 0.3605141720009547,
+          "loaded_area_mm2": 240.0,
+          "setup": {
+            "model_id": "772ce8ce10514666b489a5b57c7aaa68",
+            "material": {
+              "name": "Synthetic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.0,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              2,
+              3
+            ],
+            "loads": [
+              {
+                "face_id": 22,
+                "vector": [
+                  40.000000003532186,
+                  0.0,
+                  0.0
+                ]
+              },
+              {
+                "face_id": 23,
+                "vector": [
+                  59.999999996467814,
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 103.086,
+          "mesh_volume_relative_error": 0.0014658382976848738
+        }
+      },
+      "checks": [
+        {
+          "gate": "cad_coarse: residual",
+          "value": 3.247997860093108e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_coarse: force balance / 100 N",
+          "value": 2.7244378681995636e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_coarse: moment balance / 6000 N mm",
+          "value": 1.6014320553077085e-15,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_coarse: input-solid volume error",
+          "value": 0.0,
+          "limit": 1e-08,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: residual",
+          "value": 6.021619888486074e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: force balance / 100 N",
+          "value": 8.089755246434279e-14,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: moment balance / 6000 N mm",
+          "value": 1.730908255182603e-14,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "cad_fine: input-solid volume error",
+          "value": 0.0,
+          "limit": 1e-08,
+          "passed": true
+        },
+        {
+          "gate": "step: residual",
+          "value": 5.594033787855119e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "step: force balance / 100 N",
+          "value": 5.005676000766834e-14,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "step: moment balance / 6000 N mm",
+          "value": 2.525444490254768e-14,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "step: input-solid volume error",
+          "value": 2.7755575615628914e-15,
+          "limit": 1e-08,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: residual",
+          "value": 1.7622005339616626e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: force balance / 100 N",
+          "value": 3.8241853778478163e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: moment balance / 6000 N mm",
+          "value": 9.979024805823382e-14,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_coarse: input-solid volume error",
+          "value": 0.0010375468863670356,
+          "limit": 0.01,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: residual",
+          "value": 2.1561931608379774e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: force balance / 100 N",
+          "value": 7.093012575065946e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: moment balance / 6000 N mm",
+          "value": 2.159950529412495e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: input-solid volume error",
+          "value": 0.0010375468863670356,
+          "limit": 0.01,
+          "passed": true
+        },
+        {
+          "gate": "cad: refinement max_displacement_mm",
+          "value": 0.0017608696115652966,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "stl: refinement max_displacement_mm",
+          "value": 4.7997217138884274e-05,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "step: CAD agreement max_displacement_mm",
+          "value": 1.5263624296935063e-05,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: CAD agreement max_displacement_mm",
+          "value": 0.0011557493063283353,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "cad: refinement strain_energy_nmm",
+          "value": 0.0011166995192571916,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "stl: refinement strain_energy_nmm",
+          "value": 0.00010621995121040673,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "step: CAD agreement strain_energy_nmm",
+          "value": 2.2621679583334497e-05,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "stl_fine: CAD agreement strain_energy_nmm",
+          "value": 0.00039336233939479825,
+          "limit": 0.05,
+          "passed": true
+        }
+      ],
+      "source": {
+        "model_id": "48d7529f8fdf4e38bdf5fb4992f2f11e",
+        "stl_sha256": "247a8aaa03cd2413bff70382d0c0a2544386f1f94331fe7e4d35605deead47cf",
+        "inspection": {
+          "id": "05f82946a9fd430ebdf2a2cdc6993ae6",
+          "name": "perforated_plate.stl",
+          "bytes": 777815,
+          "triangles": 4172,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.0,
+              40.0,
+              6.0
+            ]
+          ],
+          "extent_mm": [
+            60.0,
+            40.0,
+            6.0
+          ],
+          "surface_area_mm2": 6092.811620305996,
+          "signed_volume_mm3": 13773.39082569747,
+          "watertight": true,
+          "shells": 1,
+          "boundary_edges": 0,
+          "manifold_edges": 6258,
+          "nonmanifold_edges": 0,
+          "degenerate_triangles": 0,
+          "suggested_scale": 1.0,
+          "warnings": [],
+          "source_triangles": 4172,
+          "source_sha256": "247a8aaa03cd2413bff70382d0c0a2544386f1f94331fe7e4d35605deead47cf",
+          "working_sha256": "247a8aaa03cd2413bff70382d0c0a2544386f1f94331fe7e4d35605deead47cf",
+          "preprocessing": {
+            "changed": false,
+            "note": null,
+            "vertex_distance_bound_source_units": 0.0,
+            "vertex_distance_bound_mm": 0.0,
+            "source_volume_units3": 13773.390825697474,
+            "working_volume_units3": 13773.390825697474,
+            "relative_volume_change": 0.0,
+            "fidelity_scope": "Maximum original-vertex distance to a working vertex; not a full surface deviation or feature-preservation certificate."
+          }
+        }
+      },
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "created_at": "2026-09-22T05:55:16.965063+00:00",
+  "source_hashes": {
+    "backend/geometry.py": "94aa0a59525ac549e6d60378124674825651e664e012bb9e68f02579d086cbfd",
+    "backend/solver.py": "200126879092027e859e60fe77250fb9112a2fb2a2350b8b9b68bfe3a1a5975c",
+    "backend/stl_io.py": "e8309d13036c14d51a2d38db038adecce49bccb7ac7dd7f5a2e83b7c127db4f8",
+    "backend/schemas.py": "d6105a4fec514de5436f21a2a606e76ec5d4598b4a2b9e8e49c9b09ed30b6825",
+    "requirements.txt": "14f31b3b9f7ac3ed013226f0885fefddae288a9059d62df05b7d39121aaee704"
+  }
+}

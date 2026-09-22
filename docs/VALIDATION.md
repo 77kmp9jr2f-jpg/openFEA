@@ -1,6 +1,25 @@
-# Validation record — updated 2026-09-20
+# Validation record — updated 2026-09-22
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
+
+## Import and recovery acceptance — 2026-09-22
+
+`python -m scripts.validate_imports` completed 15 CPU/P2 solves and all 94 predetermined gates passed. The independent synthetic dimensions define a 60 mm tube (OD20/ID12), a 60 × 24 × 16 mm open channel with 2 mm walls/floor, and a 60 × 40 × 6 mm plate with two asymmetric bores. Each fixture compares two CAD meshes, one STEP round trip and two remeshes of the same frozen STL. Every end patch receives uniform axial traction sharing a total 100 N; the opposite end is fixed. Material is synthetic isotropic E=210,000 MPa, ν=0. Face coverage, force distribution and retained mesh hashes were independently checked.
+
+| Evidence | Maximum observed | Gate |
+|---|---:|---:|
+| Prismatic displacement error (tube/channel) | 1.908% | 3% |
+| Two-level displacement/energy change | 1.509% | 2% |
+| STEP/STL displacement/energy difference from fine CAD | 0.116% | 5% |
+| Relative residual | 2.16e-12 | 1e-7 |
+
+`evidence/import-validation.json` records specifications, source hashes, IDs, setup, runtime versions, solve times, volume and every check. The recorded solves total approximately 341 seconds on this machine. Volume gates explicitly refer to the **input solid** (CAD or STL). Tetrahedral volume error is recorded separately; its largest observed value is 1.2355% for the coarse curved tube and is not a post-hoc acceptance gate. The zero-Poisson-ratio axial channel is a linear-field patch test, not evidence of thin-wall bending or freedom from locking. Two mesh levels do not establish asymptotic convergence. The source STLs contain roughly 3,900–4,200 triangles, so these cases do not exercise dense-STL simplification. No stress, anisotropic printing, GPU or physical acceptance is claimed by this corpus.
+
+Readiness now counts the actual quadratic mesh DOFs before enabling Run. Boundary tests cover 500,000/500,001 DOFs and reading historical model metadata without rewriting it. The existing 120,064-tetrahedron dense STL model `4bd01a02f42f441ba22d5b6752b1f2f7` requires 684,333 quadratic DOFs: the API and production browser display the coarser-mesh action and keep Run disabled even after confirmation. Its historical P1 result remains readable; no new solve or geometry mutation was performed.
+
+Browser lifecycle checks used a real local API outage and the development frontend. Before the repair, restarting after an offline reload lost the browser snapshot to default values. After the repair, autosave stays paused until successful initialization, and restarting/reloading restores the original bracket model `f5f0cb3a22034e0f8b67f1b4733b5573`, annotation, live conversation and GPU result `af02566402df43b2b0125ff688188e74`. A deliberately unavailable saved result leaves the current workspace intact; a subsequent width edit survives reload, proving autosave continues. A failed readiness request displays Retry readiness and can recover after the engine returns. These checks reuse saved results and make no new GPU or Astra execution claim.
+
+Current automated verification: 78 backend tests, five frontend regressions and the TypeScript/Vite build pass. The two known dependency deprecation warnings and the existing bundle-size advisory remain. Remote CI, camera hardware, other GPUs, physical coupons and Sites hosting remain outside this local evidence.
 
 ## Integration acceptance — 2026-09-20
 
