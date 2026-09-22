@@ -4,7 +4,7 @@ One verdict answers: can this model be solved inside the stated scope, and
 what is still missing. The workspace and /api/agent use the same checks.
 """
 from functools import lru_cache
-from .schemas import MAX_SOLVER_DOFS
+from .schemas import MAX_SOLVER_DOFS, PrintSettings
 from .storage import resource, read_json
 
 
@@ -178,10 +178,25 @@ def analysis_readiness(model: dict, draft: dict | None = None) -> dict:
             SCOPE['physics'] + ' Residual must be < 1e-7. Model-generated CAD/solver code is not executed.',
         ),
     ]
+    settings = PrintSettings.model_validate(draft.get('print') or {})
+    print_error = None
+    if settings.enabled and mesh_ok:
+        from .print_geometry import model_regions
+        try:
+            regions = model_regions(model, settings)
+            detail = f"Perimeters and skins measured on {regions['layer_count']} closed layer contours; stiffness remains a uniform equivalent."
+        except ValueError as exc:
+            print_error = str(exc)
+            detail = print_error
+        checks.append(check('print_geometry', not print_error, detail,
+                            'Repair the surface or adjust the print layer settings, then retry readiness.'))
     missing = [item['id'] for item in checks if not item['ok']]
-    blocked = any(item['id'] in ('mesh_usable', 'faces_selectable') and not item['ok'] for item in checks)
+    blocked = any(item['id'] in ('mesh_usable', 'faces_selectable', 'print_geometry') and not item['ok'] for item in checks)
     status = 'blocked' if blocked else ('ready' if not missing else 'incomplete')
-    if blocked:
+    if blocked and mesh_ok and faces_ok and print_error:
+        nxt = print_error
+        agent_next = nxt
+    elif blocked:
         nxt = ('Increase mesh size or export a coarser STL to stay within the quadratic solver limit.'
                if quadratic_dofs and quadratic_dofs > MAX_SOLVER_DOFS
                else 'Repair the solid so it meshes as one watertight body with at least two selectable faces.')

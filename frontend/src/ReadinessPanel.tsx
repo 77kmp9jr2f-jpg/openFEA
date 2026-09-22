@@ -51,6 +51,8 @@ function labelFor(id: Readiness["checks"][number]["id"]): string {
       return "Mesh";
     case "faces_selectable":
       return "Faces";
+    case "print_geometry":
+      return "Print contours";
     case "fixture":
       return "Fixture";
     case "load":

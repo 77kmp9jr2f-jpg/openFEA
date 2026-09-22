@@ -31,6 +31,8 @@ export const defaultPrint: PrintSettings = {
 };
 export type PrintPreview = {
   enabled: boolean;
+  geometry_method?: string;
+  layer_count?: number;
   volume_fraction: number;
   young_xy_mpa: number;
   young_z_mpa: number;
@@ -126,6 +128,7 @@ export type Load = { face_id: number; vector: Vec3 };
 export type ReadinessCheckId =
   | "mesh_usable"
   | "faces_selectable"
+  | "print_geometry"
   | "fixture"
   | "load"
   | "material"
@@ -182,6 +185,7 @@ export type Result = {
 export type CompareSide = {
   id: string;
   model_id: string;
+  geometry_method?: string | null;
   max_displacement_mm: number;
   peak_von_mises_mpa: number;
   mass_g: number;

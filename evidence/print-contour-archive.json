@@ -1,0 +1,16 @@
+{
+  "run_id": "12f9942450724ed1876b14254905a847",
+  "geometry_method": "layer-contours-v1",
+  "archive_path": "/Users/zach/FEA-R/data/runs/12f9942450724ed1876b14254905a847/report.zip",
+  "archive_sha256": "161d33f61018df8ff00bc55ee490244f4646902cc41f2a2515c1f76f69646600",
+  "reproduced_directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-contour-archive-rqvrouwn",
+  "verified_manifest_entries": 27,
+  "dof_displacement_relative_error": 8.075714520419737e-13,
+  "mass_g": 2.5167733773649217,
+  "conversation_messages": 12,
+  "reference_id": "52b767032c7c4646b91b72ffaec2670c",
+  "annotation_count": 1,
+  "pdf_sha256": "3ca59eaf3f51879b002f226ac5dbdf09fa127163e3e4e3a540edf12bde370ead",
+  "pdf_pages_visually_reviewed": 4,
+  "post_layout_archive_check": "All manifest entries valid; reproduction script and bundled source match the independently executed archive byte for byte."
+}

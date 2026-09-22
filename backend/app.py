@@ -137,9 +137,10 @@ def get_stl(sid: str, scale: float = 1.0):
 @app.post('/api/print-preview')
 def print_preview(body: PrintPreviewRequest):
     from .print_model import homogenize, apply_usage
+    from .print_geometry import model_regions
     model = read_json(resource('models', body.model_id) / 'model.json')
     settings = body.print if body.print.enabled else body.print.model_copy(update={'enabled': True})
-    homogenized = homogenize(model['bounds'], body.material, settings)
+    homogenized = homogenize(model['bounds'], body.material, settings, regions=model_regions(model, settings))
     return {**homogenized, **apply_usage(homogenized, model['volume_mm3'], body.material.density_kg_m3)}
 
 @app.get('/api/runs/{aid}/compare/{bid}')

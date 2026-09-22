@@ -27,18 +27,27 @@ export default function CompareTable({ compare }: { compare: RunCompare }) {
     ["Infill", infill(a), infill(b), "—"],
     ["Walls / skins", walls(a), walls(b), "—"],
     ["Print rotation", rotation(a), rotation(b), "—"],
+    ["Print volume method", method(a), method(b), "—"],
   ];
   return (
     <div className="compare-table-wrap">
       <h3>Print configuration comparison</h3>
       {!compare.same_analysis_context && (
         <p role="alert">
-          Other inputs changed: {compare.context_differences.join(", ")}. These
-          differences cannot be attributed to print settings alone.
+          Analysis context changed:{" "}
+          {compare.context_differences
+            .map((value) =>
+              value === "print_geometry_method" ? "print volume method" : value,
+            )
+            .join(", ")}
+          . These differences cannot be attributed to print settings alone.
         </p>
       )}
       {compare.same_analysis_context && (
-        <p>Same geometry, mesh, material, supports, loads and interpolation.</p>
+        <p>
+          Same geometry, mesh, material, supports, loads, interpolation and
+          print volume method when enabled.
+        </p>
       )}
       <details>
         <summary>Analysis conditions for both runs</summary>
@@ -107,4 +116,11 @@ function rotation(side: RunCompare["a"]) {
   const print = side.print;
   if (!print?.enabled) return "—";
   return print.rotation_deg.map((v) => `${v}°`).join(", ");
+}
+
+function method(side: RunCompare["a"]) {
+  if (!side.print?.enabled) return "Print model off";
+  return side.geometry_method === "layer-contours-v1"
+    ? "Actual layer contours"
+    : "Historical bounding box";
 }

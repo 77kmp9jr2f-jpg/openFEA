@@ -122,6 +122,7 @@ export default function App() {
     [notes, setNotes] = useState("");
   const [print, setPrint] = useState<PrintSettings>({ ...defaultPrint });
   const [printPreview, setPrintPreview] = useState<PrintPreview | null>(null);
+  const [printPreviewError, setPrintPreviewError] = useState("");
   const [stlInspect, setStlInspect] = useState<StlInspect | null>(null);
   const [pinned, setPinned] = useState<Result | null>(null);
   const [compare, setCompare] = useState<RunCompare | null>(null);
@@ -389,8 +390,9 @@ export default function App() {
     chatEnd.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages, aiBusy]);
   useEffect(() => {
+    setPrintPreview(null);
+    setPrintPreviewError("");
     if (!model || !print.enabled) {
-      setPrintPreview(null);
       return;
     }
     let cancelled = false;
@@ -402,13 +404,13 @@ export default function App() {
       .then((value) => {
         if (!cancelled) setPrintPreview(value);
       })
-      .catch(() => {
-        if (!cancelled) setPrintPreview(null);
+      .catch((e) => {
+        if (!cancelled) setPrintPreviewError((e as Error).message);
       });
     return () => {
       cancelled = true;
     };
-  }, [model, material, print]);
+  }, [model, material, print, readinessAttempt]);
   useEffect(() => {
     if (!pinned || !result || pinned.id === result.id) {
       setCompare(null);
@@ -1329,6 +1331,7 @@ export default function App() {
                 model={model}
                 material={material}
                 preview={printPreview}
+                previewError={printPreviewError}
                 disabled={!!busy}
               />
             </div>

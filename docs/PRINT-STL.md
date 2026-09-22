@@ -38,14 +38,16 @@ The Print tab writes `PrintSettings` onto the analysis:
 | Enabled | Off keeps the original isotropic solid. |
 | Rotation (deg, XYZ Euler) | Orients print Z (layer normal) in global axes. The mesh is not rebuilt. |
 | Infill pattern / density | Core stiffness factors and filament fraction. 100% infill is treated as isotropic filament. |
-| Wall count × line width | Solid shell estimated from the oriented bounding box. |
-| Top / bottom layers × layer height | Solid skins estimated from the same box. |
+| Wall count × line width | Nominal perimeter depth measured inward from each actual layer contour, including hole boundaries. |
+| Top / bottom layers × layer height | Nominal solid skins at local exposed surfaces, measured using neighboring layers. |
 
 `POST /api/print-preview` returns effective moduli, volume fraction, and filament mass without solving. Changing print settings clears the result, confirmation and applied-proposal provenance while keeping fixture/load drafts. Review and confirm each changed configuration. Print axes and build direction are displayed beside the settings and in Astra proposal previews. Astra requires explicit adoption of all print inputs and binds them to the model/reference/setup revision. The first print solve is pinned automatically. Results lead with displacement, residual and mass, plus stored `guidance` that says what not to treat as printed strength.
 
 ## Homogenized stiffness
 
-`backend/print_model.py` estimates walls and skins from the axis-aligned box of the rotated part, then treats the remaining core as `infill_density × pattern factor`.
+`backend/print_geometry.py` transforms the model surface into the print frame and intersects it with layer midplanes. Closed contours preserve internal holes and disconnected islands within a layer. Inward offsets measure nominal perimeter depth; intersections with neighboring layers identify local top/bottom skins. A partial final layer uses its actual thickness. These volumes define a global shell/core fraction; `backend/print_model.py` treats the remaining core as `infill_density × pattern factor`.
+
+The method is recorded as `layer-contours-v1`. Open contours are rejected, with the same repair message in preview and readiness. Midpoint sampling and the meshed surface approximate CAD curvature and fine features; a volume discrepancy above 1% is disclosed. The local contour budget is 10,000 layers and 200 million layer/triangle pairs. These limits request adjusted settings or a coarser surface, never a silent bounding-box fallback.
 
 Illustrative core factors (not coupon-calibrated):
 
@@ -56,13 +58,25 @@ Illustrative core factors (not coupon-calibrated):
 | Triangles | 1.05 | 0.45 |
 | Gyroid | 0.82 | 0.72 |
 
-The solver uses a transversely isotropic stiffness about print Z, rotated into global axes. Reported mass is `solid volume × volume fraction × density`. Assumptions are copied onto the result and into PDF/HTML/ZIP reports.
+The solver uses one transversely isotropic stiffness throughout the body, rotated about print Z into global axes. It does **not** place separate stiff walls and soft infill in the FE mesh. Bending behavior from that spatial distribution is therefore unresolved. Reported mass is `layer-sampled solid volume × volume fraction × density`. Assumptions are copied onto the result and into PDF/HTML/ZIP reports.
 
-Published gyroid homogenization (RVE + periodic boundaries, compared to compression tests) finds near-isotropic effective elasticity as a function of relative density. OpenFEA does not use an RVE. The AABB + table-of-factors model is for directional trends on one mesh, not printed-part strength.
+OpenFEA does not use an RVE or calibrated filament/bonding law. Its table of factors remains illustrative. Nominal perimeter/skin volumes do not model bead overlap, variable extrusion widths, gap fill or actual toolpaths.
+
+## Slicer usage comparison — 2026-09-22
+
+An isolated OrcaSlicer 2.4.2 comparison used the same input surfaces, 0.2 mm layers, nominal 0.4 mm widths, three walls, four top/bottom layers, 20% gyroid and density 1.24 g/cm³. Classic walls, flow 1, no supports/adhesion/purge, and fixed upright orientation were used. The sum of positive XY extrusion by model role agrees with the slicer's rounded filament-length total within 0.01 mm. Effective settings, source surfaces, measurement-only G-code and hashes are retained under `evidence/slicer-usage-artifacts/`; regenerate with `python -m scripts.compare_slicer_usage`.
+
+| Synthetic input | Historical box estimate | Layer contours | Slicer deposition | Contour difference |
+|---|---:|---:|---:|---:|
+| 40 × 10 × 8 mm box | 2.154 g | 2.154 g | 2.107 g | +2.23% |
+| 60 × 24 × 16 mm channel, 2 mm walls/floor | 2.924 g | 7.171 g | 7.079 g | +1.29% |
+| 20 mm tall tube, OD20/ID16 | 1.207 g | 2.804 g | 2.620 g | +7.01% |
+
+This exploratory comparison supports removing the box approximation for hollow/thin geometry. It does not establish a universal error bound or physical mass. The tube still differs by 7%; its slicer uses gap fill and bead geometry that the nominal envelope does not resolve. The saved G-code omits machine startup operations and is for measurement only, not printing. Stiffness calibration still requires measured coupons in multiple orientations.
 
 ## Compare two print configs
 
-Pin a completed run. Change orientation, walls, or infill. Confirm and solve again. Results show a side-by-side table (displacement, peak von Mises, filament mass, solid fraction, effective E, print settings). `GET /api/runs/{a}/compare/{b}` is the same payload. The API returns `same_analysis_context` and `context_differences` across model, mesh, interpolation, material, supports and loads. Changed conditions are disclosed; their effects cannot be attributed to print settings alone. Pins survive browser and saved-study reload.
+Pin a completed run. Change orientation, walls, or infill. Confirm and solve again. Results show a side-by-side table (displacement, peak von Mises, filament mass, solid fraction, effective E, print settings and volume method). `GET /api/runs/{a}/compare/{b}` is the same payload. The API returns `same_analysis_context` and `context_differences` across model, mesh, interpolation, material, supports, loads and print volume method. Changed conditions are disclosed; their effects cannot be attributed to print settings alone. Pins survive browser and saved-study reload.
 
 Browser check on 2026-09-14, CPU, example coupon, same mesh, −40 N:
 
@@ -94,3 +108,5 @@ While a mesh or solve is running, **Cancel** on the busy overlay calls `POST /ap
 ## Solver and migration limits
 
 New analyses use P2 with at most 500,000 total DOFs; GPU return payloads use the same cap and browser buffer limits are checked before dispatch. Oversized meshes request coarsening instead of silently changing to P1. Historical archives reproduce their recorded P1/P2 order. Re-run old off-axis print studies: the former inverse rotation was corrected on 2026-09-20, so old results are not current evidence of the intended orientation. Stored artifacts and IDs remain unchanged.
+
+New print analyses use actual layer contours from September 22. Historical results without `geometry_method` retain `bounding-box-v1` in archive reproduction and GPU/CPU parity checks. Comparisons across methods warn that differences cannot be attributed to changed print settings alone. Re-run a baseline using the new method before interpreting an infill/orientation comparison. The older browser results above are historical box-method evidence.

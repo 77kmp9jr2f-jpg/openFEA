@@ -124,3 +124,20 @@ def test_agent_contract_names_gates_and_forbids_ui_scraping():
     assert 'Do not scrape' in steps['readiness']['note']
     assert 'confirmed=false' in steps['solve']['rejects']
     assert 'guidance' in steps['result']['read']
+
+
+def test_unusable_print_contours_block_readiness_with_repair_message(monkeypatch):
+    from backend import print_geometry
+    def broken(*args):
+        raise ValueError('Print-layer contours are not closed. Repair the surface mesh.')
+    monkeypatch.setattr(print_geometry, 'model_regions', broken)
+    draft = {'material': PLA, 'fixed_faces': [1],
+             'loads': [{'face_id': 2, 'vector': [0, 0, -40]}], 'confirmed': True,
+             'print': {'enabled': True}}
+    verdict = analysis_readiness(box_model(), draft)
+    assert verdict['status'] == 'blocked'
+    assert not verdict['can_solve']
+    assert verdict['missing'] == ['print_geometry']
+    assert 'contours are not closed' in verdict['next']
+    draft['print']['enabled'] = False
+    assert analysis_readiness(box_model(), draft)['ready']

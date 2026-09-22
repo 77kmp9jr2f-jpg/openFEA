@@ -28,7 +28,8 @@ def choose_element(mesh: MeshTet, order: int = 2):
     raise ValueError('The quadratic system exceeds 500,000 degrees of freedom. Increase mesh size or export a coarser CAD STL; interpolation is never silently reduced.')
 
 
-def assemble_system(setup: Analysis, *, reproduction_element_order: int = 2):
+def assemble_system(setup: Analysis, *, reproduction_element_order: int = 2,
+                    reproduction_print_model: str = 'layer-contours-v1'):
     from .simulation_proposals import verify_applied_setup
     verify_applied_setup(setup)
     folder = resource('models',setup.model_id)
@@ -46,7 +47,14 @@ def assemble_system(setup: Analysis, *, reproduction_element_order: int = 2):
     face_facets = {fid:np.array([facet_lookup[tuple(sorted(t))] for t in f['triangles']],dtype=int) for fid,f in face_by_id.items()}
     fixed_facets = np.unique(np.concatenate([face_facets[f] for f in setup.fixed_faces]))
     fixed = basis.get_dofs(facets=fixed_facets).all()
-    C, print_state = stiffness(setup.material, setup.print, model['bounds'])
+    regions = None
+    if setup.print.enabled:
+        if reproduction_print_model == 'layer-contours-v1':
+            from .print_geometry import model_regions
+            regions = model_regions(model, setup.print)
+        elif reproduction_print_model != 'bounding-box-v1':
+            raise ValueError('Unsupported recorded print geometry method.')
+    C, print_state = stiffness(setup.material, setup.print, model['bounds'], regions=regions)
     lam,mu = lame_parameters(setup.material.young_mpa,setup.material.poisson)
     K = asm(_elasticity(C) if setup.print.enabled else linear_elasticity(lam,mu),basis)
     F = np.zeros(basis.N)
@@ -100,9 +108,11 @@ def finish_gpu(solution: GPUSolution):
     setup = Analysis.model_validate(read_json(resource('systems',solution.system_id)/'setup.json'))
     return solve_model(setup,solution)
 
-def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None, *, reproduction_element_order: int = 2):
+def solve_model(setup: Analysis, gpu_solution: GPUSolution | None = None, *, reproduction_element_order: int = 2,
+                reproduction_print_model: str = 'layer-contours-v1'):
     started = time.monotonic()
-    state = assemble_system(setup, reproduction_element_order=reproduction_element_order)
+    state = assemble_system(setup, reproduction_element_order=reproduction_element_order,
+                            reproduction_print_model=reproduction_print_model)
     model,mesh,basis,K,F,Kc,Fc,x,free,fixed,lam,mu,C,print_state,applied,load_details,element_order = (state[k] for k in
         ('model','mesh','basis','K','F','Kc','Fc','x','free','fixed','lam','mu','C','print_state','applied','load_details','element_order'))
     execution = {'backend':'cpu','device':'Local CPU / SciPy sparse direct', 'precision':'float64',

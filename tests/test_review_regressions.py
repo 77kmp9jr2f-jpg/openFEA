@@ -102,3 +102,20 @@ def test_comparison_discloses_changed_boundary_conditions_and_material():
     assert compared['b']['setup']['loads'][0]['vector'][2] == -80
     b['setup']['material']['young_mpa'] *= .5
     assert 'material' in compare_results(a, b)['context_differences']
+
+
+def test_comparison_discloses_historical_print_geometry_method():
+    from backend.print_model import compare_results
+    a = dict(id='a', model_id='m', mesh_sha256='same', element_order=2,
+             max_displacement_mm=1., peak_von_mises_mpa=2., mass_g=3.,
+             relative_residual=1e-12, force_balance_error_n=1e-10,
+             setup=dict(material={}, fixed_faces=[1], loads=[]), print={'enabled': True})
+    b = copy.deepcopy(a); b['id'] = 'b'
+    b['print']['geometry_method'] = 'layer-contours-v1'
+    compared = compare_results(a, b)
+    assert not compared['same_analysis_context']
+    assert compared['context_differences'] == ['print_geometry_method']
+    assert compared['a']['geometry_method'] == 'bounding-box-v1'
+    assert compared['b']['geometry_method'] == 'layer-contours-v1'
+    a['print']['geometry_method'] = 'layer-contours-v1'
+    assert compare_results(a, b)['same_analysis_context']

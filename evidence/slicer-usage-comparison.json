@@ -1,0 +1,385 @@
+{
+  "created_at": "2026-09-22T06:46:01.751168+00:00",
+  "temporary_directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-usage-5kcyr99u",
+  "scope": "Exploratory material-usage comparison only. Not stiffness calibration, physical mass or printer-ready G-code.",
+  "slicer": "OrcaSlicer-2.4.2:",
+  "profile_source_hashes": {
+    "machine/Bambu Lab X1 Carbon 0.4 nozzle.json": "9732f290e2d407ba19fd3be810c3ee5ac3723da4c99426d07503d571e4e21e99",
+    "machine/fdm_bbl_3dp_001_common.json": "e90597a202d5461a2f8636a06c35409cffc79a2c1991bb726c6e465e9a0bd26c",
+    "machine/fdm_machine_common.json": "cdcaa5e5061934a9b960c94e203cc7d1e3b869a407182644f2dda9fdcbf5c2b3",
+    "process/0.20mm Standard @BBL X1C.json": "1b2b5e890d042ba34abe317cd443fd1190e095912240dc65ce8596558cdc7453",
+    "process/fdm_process_single_0.20.json": "b26b4c110e0f44dc25985af0acb2deb00d7d1b3eba57b8d2241ad8106fc8e034",
+    "process/fdm_process_single_common.json": "59fc5ca43dcf9850076708b8ca14b7f9098fe90b9b32ceffc6741b4fcaf3e73e",
+    "process/fdm_process_common.json": "398fcb322a7f459edab00cb2daf524345a19b8cef074415af52f377f91e4bd5b",
+    "filament/Generic PLA.json": "d8ff56f56066bcbc810411ebc0f6763cc9f12de752d781da9ad7c29534ae2314",
+    "filament/Generic PLA @base.json": "85ebc04bd25c236322547d6d95f5a074ce4cab53cf975392e1f6b2c1fb74d406",
+    "filament/fdm_filament_pla.json": "79f257ca32c8a938f49df82623cc84ca86d1044a818d600714b024e6b6499642",
+    "filament/fdm_filament_common.json": "05725cc129f96ea903dc77c40d248fa1bd0137cfc41216d09d952cfdd37d3683"
+  },
+  "process_overrides": {
+    "wall_loops": "3",
+    "layer_height": "0.2",
+    "initial_layer_print_height": "0.2",
+    "top_shell_layers": "4",
+    "bottom_shell_layers": "4",
+    "top_shell_thickness": "0",
+    "bottom_shell_thickness": "0",
+    "sparse_infill_density": "20%",
+    "sparse_infill_pattern": "gyroid",
+    "wall_generator": "classic",
+    "enable_support": "0",
+    "skirt_loops": "0",
+    "brim_type": "no_brim",
+    "brim_width": "0",
+    "enable_prime_tower": "0"
+  },
+  "all_process_line_widths_mm": 0.4,
+  "filament_overrides": {
+    "filament_flow_ratio": [
+      "1"
+    ],
+    "filament_density": [
+      "1.24"
+    ],
+    "filament_diameter": [
+      "1.75"
+    ]
+  },
+  "machine_overrides": {
+    "machine_start_gcode": "G90\nM83\nG92 E0\n",
+    "machine_end_gcode": "M400\n",
+    "change_filament_gcode": "",
+    "before_layer_change_gcode": "",
+    "layer_change_gcode": "",
+    "time_lapse_gcode": "",
+    "scan_first_layer": "0",
+    "use_relative_e_distances": "1"
+  },
+  "print_settings": {
+    "enabled": true,
+    "rotation_deg": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "infill_pattern": "gyroid",
+    "infill_density": 0.2,
+    "wall_count": 3,
+    "line_width_mm": 0.4,
+    "layer_height_mm": 0.2,
+    "top_layers": 4,
+    "bottom_layers": 4
+  },
+  "source_hashes": {
+    "backend/print_geometry.py": "1b1e86161762fc371cc37026377365dd07139cf8822a512654b1837b3615232e",
+    "backend/print_model.py": "8deb5178706fffdf7b12a7dbdf876a1d6ecd539dc7400c5b6cfb47157b768a7a",
+    "scripts/compare_slicer_usage.py": "f74cd521298a345fe7a26840c6b4f911174803dfcced7dab800eb42563bc3b2a"
+  },
+  "cases": [
+    {
+      "name": "box",
+      "geometry": {
+        "name": "Mounting bracket",
+        "kind": "custom",
+        "length": 80,
+        "width": 40,
+        "height": 60,
+        "thickness": 8,
+        "hole_diameter": 8,
+        "mesh_size": 3.0,
+        "features": [
+          {
+            "operation": "add",
+            "primitive": "box",
+            "origin": [
+              0,
+              0,
+              0
+            ],
+            "size": [
+              40.0,
+              10.0,
+              8.0
+            ],
+            "axis": [
+              0,
+              0,
+              10
+            ],
+            "radius": 5
+          }
+        ],
+        "step_id": null,
+        "stl_id": null,
+        "unit_scale": 1,
+        "feature_angle_deg": 40,
+        "accept_stl_preprocessing": false,
+        "provenance": "user_dimensions",
+        "assumptions": []
+      },
+      "input_triangles": 544,
+      "regions": {
+        "geometry_method": "layer-contours-v1",
+        "layer_count": 40,
+        "section_precision_mm": 1e-06,
+        "print_extents_mm": [
+          40.0,
+          10.0,
+          8.0
+        ],
+        "sampled_solid_volume_mm3": 3199.9999999999995,
+        "perimeter_volume_mm3": 913.9199999999994,
+        "skin_volume_mm3": 457.2159999999998,
+        "core_volume_mm3": 1828.864000000001,
+        "shell_volume_fraction": 0.42847999999999964
+      },
+      "openfea_mass_g": 2.1537669119999987,
+      "legacy_mass_g": 2.153766911999999,
+      "slicer_mass_g": 2.106690065052079,
+      "slicer_volume_mm3": 1698.9436008484508,
+      "slicer_deposited_length_mm": 706.3386699999999,
+      "slicer_total_length_mm": 706.34,
+      "deposition_by_role_mm": {
+        "Inner wall": 217.00389999999953,
+        "Outer wall": 116.78236000000014,
+        "Bottom surface": 23.772950000000034,
+        "Internal solid infill": 125.64692999999971,
+        "Sparse infill": 158.0079700000005,
+        "Internal Bridge": 34.4002,
+        "Top surface": 30.724359999999972
+      },
+      "relative_mass_difference": 0.022346356366737874,
+      "legacy_relative_mass_difference": 0.022346356366738096,
+      "artifacts": {
+        "evidence/slicer-usage-artifacts/box.stl.gz": {
+          "sha256": "0117fb231ace5aa1f553d4e17a06bb46e9cc651714e381620a7fa331eb629c4d",
+          "uncompressed_sha256": "7b34cc18b260866f25c6a5e5f7634ad334cf413e600e015ea16745aba63fce92"
+        },
+        "evidence/slicer-usage-artifacts/box.gcode.gz": {
+          "sha256": "e0dfe2657a5d2e7f82b8d5b990e9c8550b445bd7c59cc37a9c4ebaa71b1e25d5",
+          "uncompressed_sha256": "c1726779cfcf5b23fffa77c4d9c3daa44d4a57e9a74e00fcd9993b19bb64f694"
+        },
+        "evidence/slicer-usage-artifacts/box.settings.json.gz": {
+          "sha256": "9a8ae533154e43cc2c8cb4145fd66413496fc350f64a02812e1edaa4292a6539",
+          "uncompressed_sha256": "1f40a25c178c8e925b7ca298c6df3716b90b86f87ddf33745c4b01a973caa0fc"
+        }
+      }
+    },
+    {
+      "name": "channel",
+      "geometry": {
+        "name": "Mounting bracket",
+        "kind": "custom",
+        "length": 80,
+        "width": 40,
+        "height": 60,
+        "thickness": 8,
+        "hole_diameter": 8,
+        "mesh_size": 3.0,
+        "features": [
+          {
+            "operation": "add",
+            "primitive": "box",
+            "origin": [
+              0,
+              0,
+              0
+            ],
+            "size": [
+              60.0,
+              24.0,
+              16.0
+            ],
+            "axis": [
+              0,
+              0,
+              10
+            ],
+            "radius": 5
+          },
+          {
+            "operation": "cut",
+            "primitive": "box",
+            "origin": [
+              -1.0,
+              2.0,
+              2.0
+            ],
+            "size": [
+              62.0,
+              20.0,
+              15.0
+            ],
+            "axis": [
+              0,
+              0,
+              10
+            ],
+            "radius": 5
+          }
+        ],
+        "step_id": null,
+        "stl_id": null,
+        "unit_scale": 1,
+        "feature_angle_deg": 40,
+        "accept_stl_preprocessing": false,
+        "provenance": "user_dimensions",
+        "assumptions": []
+      },
+      "input_triangles": 1974,
+      "regions": {
+        "geometry_method": "layer-contours-v1",
+        "layer_count": 80,
+        "section_precision_mm": 1e-06,
+        "print_extents_mm": [
+          60.0,
+          24.0,
+          16.0
+        ],
+        "sampled_solid_volume_mm3": 6240.0,
+        "perimeter_volume_mm3": 3751.6800000000003,
+        "skin_volume_mm3": 1916.9280000000003,
+        "core_volume_mm3": 571.392,
+        "shell_volume_fraction": 0.9084307692307693
+      },
+      "openfea_mass_g": 7.170779135999999,
+      "legacy_mass_g": 2.9241937920000005,
+      "slicer_mass_g": 7.0793317434622125,
+      "slicer_volume_mm3": 5709.138502792107,
+      "slicer_deposited_length_mm": 2373.5839700000033,
+      "slicer_total_length_mm": 2373.58,
+      "deposition_by_role_mm": {
+        "Inner wall": 581.6894200000007,
+        "Outer wall": 557.98297,
+        "Bottom surface": 103.4948199999998,
+        "Internal solid infill": 529.3440300000034,
+        "Sparse infill": 36.35294999999953,
+        "Internal Bridge": 146.55125000000007,
+        "Gap infill": 301.51481000000024,
+        "Top surface": 116.65371999999972
+      },
+      "relative_mass_difference": 0.012917517620535168,
+      "legacy_relative_mass_difference": -0.5869392906045823,
+      "artifacts": {
+        "evidence/slicer-usage-artifacts/channel.stl.gz": {
+          "sha256": "75cd8f09dd6647adc86da2e2fa71bc027620409c6459257ff8c7ef7fb9bb6e7c",
+          "uncompressed_sha256": "fd3348a1ef018710915d884bbf867c50199a90cb126200ec323bc6f3ff5b3bf5"
+        },
+        "evidence/slicer-usage-artifacts/channel.gcode.gz": {
+          "sha256": "4c6610d24fbceed70e1c86f39cfe1485995e1984102136433d157edfa38307cf",
+          "uncompressed_sha256": "c08d099bb9a6e146c3507d1e4e24f9a570f3f45eb73ccf13df8cc4efb99bd072"
+        },
+        "evidence/slicer-usage-artifacts/channel.settings.json.gz": {
+          "sha256": "9a8ae533154e43cc2c8cb4145fd66413496fc350f64a02812e1edaa4292a6539",
+          "uncompressed_sha256": "1f40a25c178c8e925b7ca298c6df3716b90b86f87ddf33745c4b01a973caa0fc"
+        }
+      }
+    },
+    {
+      "name": "tube",
+      "geometry": {
+        "name": "Mounting bracket",
+        "kind": "custom",
+        "length": 80,
+        "width": 40,
+        "height": 60,
+        "thickness": 8,
+        "hole_diameter": 8,
+        "mesh_size": 3.0,
+        "features": [
+          {
+            "operation": "add",
+            "primitive": "cylinder",
+            "origin": [
+              0,
+              0,
+              0
+            ],
+            "size": [
+              10,
+              10,
+              10
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              20.0
+            ],
+            "radius": 10.0
+          },
+          {
+            "operation": "cut",
+            "primitive": "cylinder",
+            "origin": [
+              0.0,
+              0.0,
+              -1.0
+            ],
+            "size": [
+              10,
+              10,
+              10
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              22.0
+            ],
+            "radius": 8.0
+          }
+        ],
+        "step_id": null,
+        "stl_id": null,
+        "unit_scale": 1,
+        "feature_angle_deg": 40,
+        "accept_stl_preprocessing": false,
+        "provenance": "user_dimensions",
+        "assumptions": []
+      },
+      "input_triangles": 740,
+      "regions": {
+        "geometry_method": "layer-contours-v1",
+        "layer_count": 100,
+        "section_precision_mm": 1e-06,
+        "print_extents_mm": [
+          20.0,
+          19.958889940261862,
+          20.0
+        ],
+        "sampled_solid_volume_mm3": 2261.013722968209,
+        "perimeter_volume_mm3": 2261.013722968209,
+        "skin_volume_mm3": 0.0,
+        "core_volume_mm3": 0.0,
+        "shell_volume_fraction": 1.0
+      },
+      "openfea_mass_g": 2.8036570164805794,
+      "legacy_mass_g": 1.2066356778915914,
+      "slicer_mass_g": 2.6199746397633863,
+      "slicer_volume_mm3": 2112.882774002731,
+      "slicer_deposited_length_mm": 878.4345800000016,
+      "slicer_total_length_mm": 878.43,
+      "deposition_by_role_mm": {
+        "Inner wall": 331.70457000000005,
+        "Outer wall": 334.30360000000104,
+        "Gap infill": 205.9908400000005,
+        "Top surface": 6.435569999999999
+      },
+      "relative_mass_difference": 0.07010845598634563,
+      "legacy_relative_mass_difference": -0.5394475734312587,
+      "artifacts": {
+        "evidence/slicer-usage-artifacts/tube.stl.gz": {
+          "sha256": "3e8b8669bfa0d316d0afdc06727bb8a61a5966f6a54d71c8a4d00b95f90af934",
+          "uncompressed_sha256": "24c438438e23233b9f398664ea8c627600c86e698461ecb8f5ccd8dbd5631784"
+        },
+        "evidence/slicer-usage-artifacts/tube.gcode.gz": {
+          "sha256": "3030854a1230bf812e0b50fcfe682f7fcad7e84bcbea1c5781e56ef37742c21e",
+          "uncompressed_sha256": "eb37e099e6a6e606567769ff1685a9589a9507d0a016bdd429a8907a54c89cb9"
+        },
+        "evidence/slicer-usage-artifacts/tube.settings.json.gz": {
+          "sha256": "9a8ae533154e43cc2c8cb4145fd66413496fc350f64a02812e1edaa4292a6539",
+          "uncompressed_sha256": "1f40a25c178c8e925b7ca298c6df3716b90b86f87ddf33745c4b01a973caa0fc"
+        }
+      }
+    }
+  ]
+}

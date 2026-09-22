@@ -7,6 +7,7 @@ export default function PrintWorkspace({
   model,
   material,
   preview,
+  previewError,
   disabled = false,
 }: {
   print: PrintSettings;
@@ -14,6 +15,7 @@ export default function PrintWorkspace({
   model: Model | null;
   material: Material;
   preview: PrintPreview | null;
+  previewError?: string;
   disabled?: boolean;
 }) {
   function patch(partial: Partial<PrintSettings>) {
@@ -32,9 +34,11 @@ export default function PrintWorkspace({
           Use homogenized print stiffness
         </label>
         <p>
-          Orientation, walls, skins and infill change the equivalent solid used
-          for this solve. This is not a sliced toolpath and not a printed-coupon
-          calibration. Filament properties stay the selected material.
+          Actual layer contours estimate walls, skins and infill space. Their
+          combined fractions set one uniform equivalent stiffness throughout the
+          part. Individual wall stiffness, extrusion toolpaths and
+          printed-coupon calibration are not resolved. Filament properties stay
+          the selected material.
         </p>
       </div>
       <fieldset disabled={disabled || !print.enabled} className="print-grid">
@@ -152,6 +156,9 @@ export default function PrintWorkspace({
             <b>{format(preview.filament_mass_g)} g</b>
           </div>
         </div>
+      )}
+      {print.enabled && previewError && (
+        <p role="alert">Print estimate failed: {previewError}</p>
       )}
       {print.enabled && preview && (
         <ul className="print-assumptions">

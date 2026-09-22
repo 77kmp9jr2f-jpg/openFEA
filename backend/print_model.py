@@ -23,7 +23,7 @@ def rotation_matrix(rotation_deg) -> np.ndarray:
     return Rotation.from_euler('xyz', rotation_deg, degrees=True).as_matrix()
 
 
-def homogenize(bounds, material: Material, settings: PrintSettings) -> dict:
+def homogenize(bounds, material: Material, settings: PrintSettings, *, regions=None) -> dict:
     lo, hi = np.asarray(bounds[0], float), np.asarray(bounds[1], float)
     corners = np.array([[x, y, z] for x in (lo[0], hi[0]) for y in (lo[1], hi[1]) for z in (lo[2], hi[2])])
     local = corners @ rotation_matrix(settings.rotation_deg)
@@ -38,6 +38,11 @@ def homogenize(bounds, material: Material, settings: PrintSettings) -> dict:
     skins = inner_x * inner_y * min(skin, lz)
     core = max(box - walls - skins, 0.0)
     solid_shell = walls + skins
+    if regions is not None:
+        lx, ly, lz = regions['print_extents_mm']
+        box = regions['sampled_solid_volume_mm3']
+        core = regions['core_volume_mm3']
+        solid_shell = box-core
     if settings.infill_density >= 1 - 1e-12:
         filament = box
         eta_xy = eta_z = 1.0
@@ -61,13 +66,22 @@ def homogenize(bounds, material: Material, settings: PrintSettings) -> dict:
     shear_z = math.sqrt(max(young_xy * young_z, 1e-12)) / (2 * (1 + poisson))
     assumptions = [
         'Print stiffness is a homogenized equivalent solid, not an explicit infill mesh or sliced toolpath.',
-        'Walls and top/bottom skins are estimated from the axis-aligned box of the oriented part.',
+        ('Perimeter and skin volumes use actual layer contours, including internal holes and local top/bottom surfaces.'
+         if regions is not None else
+         'Walls and top/bottom skins are estimated from the axis-aligned box of the oriented part.'),
+        'Shell and core fractions are homogenized throughout the body; the spatial stiffness of individual walls and infill is not resolved.',
         'Layering is transversely isotropic: print Z is the weak/layer direction after the supplied rotation.',
         pattern_note,
         'Filament modulus, strength and density remain user inputs. No printed-specimen calibration is claimed.',
         'Additional raster-scale anisotropy, local voids, bonding defects and moisture are not modelled.',
     ]
+    if regions is not None:
+        assumptions.append('Layer contours use nominal line width and layer height; bead overlap, variable extrusion widths, gap fill and toolpaths are not modeled.')
+        error = regions.get('volume_discretization_relative_error', 0)
+        if error > .01:
+            assumptions.append(f'Layer-sampled volume differs from the input solid by {100*error:.3g}%; refine the surface mesh or reduce layer height before interpreting material usage.')
     return {
+        **(regions or {'geometry_method': 'bounding-box-v1'}),
         'enabled': True,
         'settings': settings.model_dump(mode='json'),
         'print_extents_mm': [lx, ly, lz],
@@ -85,10 +99,10 @@ def homogenize(bounds, material: Material, settings: PrintSettings) -> dict:
     }
 
 
-def stiffness(material: Material, settings: PrintSettings, bounds) -> tuple[np.ndarray, dict]:
+def stiffness(material: Material, settings: PrintSettings, bounds, *, regions=None) -> tuple[np.ndarray, dict]:
     if not settings.enabled:
         return _isotropic(material.young_mpa, material.poisson), {'enabled': False}
-    model = homogenize(bounds, material, settings)
+    model = homogenize(bounds, material, settings, regions=regions)
     C_print = _transverse(model['young_xy_mpa'], model['young_z_mpa'], model['poisson'],
                           model['shear_xy_mpa'], model['shear_z_mpa'])
     C = _rotate_voigt(C_print, rotation_matrix(settings.rotation_deg))
@@ -100,7 +114,9 @@ def apply_usage(homogenized: dict, solid_volume_mm3: float, density_kg_m3: float
         mass = solid_volume_mm3 * density_kg_m3 * 1e-6
         return {'filament_volume_mm3': solid_volume_mm3, 'filament_mass_g': mass, 'mass_g': mass}
     vf = homogenized['volume_fraction']
-    volume = solid_volume_mm3 * vf
+    # Use the measured section volume for new contour models, and preserve the
+    # historical box-fraction calculation for archived runs.
+    volume = homogenized.get('sampled_solid_volume_mm3', solid_volume_mm3) * vf
     mass = volume * density_kg_m3 * 1e-6
     return {'filament_volume_mm3': volume, 'filament_mass_g': mass, 'mass_g': mass}
 
@@ -171,6 +187,7 @@ def compare_results(a: dict, b: dict) -> dict:
             'volume_fraction': print_info.get('volume_fraction'),
             'young_xy_mpa': print_info.get('young_xy_mpa'),
             'young_z_mpa': print_info.get('young_z_mpa'),
+            'geometry_method': print_info.get('geometry_method', 'bounding-box-v1') if print_info.get('enabled') else None,
             'print': print_info.get('settings'),
             'relative_residual': result['relative_residual'],
             'force_balance_error_n': result['force_balance_error_n'],
@@ -179,6 +196,8 @@ def compare_results(a: dict, b: dict) -> dict:
     left, right = pack(a), pack(b)
     delta = {k: right[k] - left[k] for k in keys if left.get(k) is not None and right.get(k) is not None}
     differences = []
+    if left['geometry_method'] and right['geometry_method'] and left['geometry_method'] != right['geometry_method']:
+        differences.append('print_geometry_method')
     for key in ('model_id', 'mesh_sha256', 'element_order'):
         if a.get(key) != b.get(key):
             differences.append(key)
