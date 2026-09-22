@@ -1,12 +1,14 @@
 """STL parse, quality checks, and a scaled working copy for meshing."""
 from __future__ import annotations
 import struct, hashlib
+from threading import Lock
 from pathlib import Path
 import numpy as np
 from .storage import identifier, resource, write_json, read_json
 
 MAX_UPLOAD_BYTES = 80_000_000
 MAX_WORK_TRIANGLES = 80_000
+_SIMPLIFIER_LOCK = Lock()
 _RECORD = np.dtype([('n', '<f4', 3), ('v', '<f4', 9), ('attr', '<u2')])
 
 
@@ -39,50 +41,91 @@ def _parse_binary(data: bytes) -> np.ndarray:
     return _as_triangles(np.asarray(recs['v'], dtype=np.float64).reshape(-1, 3, 3))
 
 
-def weld_triangles(triangles: np.ndarray, tol: float) -> np.ndarray:
-    tris = _as_triangles(triangles)
-    verts = tris.reshape(-1, 3)
-    _, inverse = np.unique(np.round(verts / max(tol, 1e-9)), axis=0, return_inverse=True)
-    faces = inverse.reshape(-1, 3)
-    keep = (faces[:, 0] != faces[:, 1]) & (faces[:, 1] != faces[:, 2]) & (faces[:, 0] != faces[:, 2])
-    welded = np.zeros((int(inverse.max()) + 1, 3), dtype=np.float64)
-    np.add.at(welded, inverse, verts)
-    welded /= np.maximum(np.bincount(inverse), 1)[:, None]
-    return welded[faces[keep]]
-
-
-def _closed_manifold(triangles: np.ndarray) -> bool:
-    return bool(inspect_triangles(triangles)['watertight'])
-
-
 def simplify_triangles(triangles: np.ndarray) -> tuple[np.ndarray, str | None]:
+    candidate, note, _ = _simplify_with_measurement(triangles)
+    return candidate, note
+
+
+def _simplify_with_measurement(triangles):
+    """Reduce redundant tessellation, rejecting candidates outside our budget.
+
+    The library's 'lossless' mode is only an algorithm choice. Independent
+    topology, volume and sampled-distance checks determine acceptance.
+    """
+    import fast_simplification
+
     tris = _as_triangles(triangles)
     if len(tris) <= MAX_WORK_TRIANGLES:
-        return tris, None
-    extent = float(np.ptp(tris.reshape(-1, 3), axis=0).max())
-    steps = np.unique(np.round(np.concatenate([
-        np.array([1.5]),
-        extent * np.linspace(0.0038, 0.0055, 14),
-        extent * np.geomspace(0.0025, 0.01, 8),
-    ]), 4))
-    for step in steps:
-        candidate = weld_triangles(tris, float(step))
-        if not (2_000 <= len(candidate) <= MAX_WORK_TRIANGLES):
-            continue
-        if _closed_manifold(candidate):
-            return candidate, _simplify_note(len(tris), float(step), len(candidate))
-    raise ValueError(
-        'This STL is too densely tessellated to simplify into a local mesh. '
-        'Export a coarser CAD STL.'
-    )
+        return tris, None, None
+    source = inspect_triangles(tris)
+    _require_supported(source, 'source STL')
+    # Match inspection's coincidence tolerance without spatial grid averaging.
+    _, first, inverse = np.unique(np.round(tris.reshape(-1, 3), 7), axis=0,
+                                  return_index=True, return_inverse=True)
+    coincidence = float(np.ptp(tris.reshape(-1, 3), axis=0).max()) * 1e-6
+    failures = []
+    for mode, options in (('lossless', {'lossless': True}),
+                          ('target-count', {'target_count': min(8000, MAX_WORK_TRIANGLES), 'agg': 3}),
+                          ('target-count', {'target_count': min(40000, MAX_WORK_TRIANGLES), 'agg': 3})):
+        try:
+            # The native wrapper uses shared mutable buffers; copy under lock.
+            with _SIMPLIFIER_LOCK:
+                points, faces = fast_simplification.simplify(tris.reshape(-1, 3)[first],
+                    inverse.reshape(-1, 3), **options)
+                candidate = points[faces].astype(np.float32).astype(np.float64)
+            candidate = _clean_reduced(candidate, coincidence)
+            measurement = _check_reduction(tris, source, candidate)
+            measurement['reduction_mode'] = mode
+            measurement['coincidence_tolerance_source_units'] = coincidence
+            measurement['coincidence_tolerance_mm'] = coincidence
+            if mode == 'target-count':
+                measurement['target_triangles'] = options['target_count']
+            note = (f'CAD export had {len(tris):,} triangles. OpenFEA reduced it to {len(candidate):,} '
+                    'triangles with topology, volume and sampled surface checks. Review the scaled dimensions '
+                    'and small features before meshing; unsampled surface regions are not certified.')
+            return candidate, note, measurement
+        except ValueError as exc:
+            failures.append(str(exc))
+    raise ValueError('No STL reduction passed the acceptance checks. ' + ' '.join(dict.fromkeys(failures))
+                     + ' Export a coarser CAD STL.')
 
 
-def _simplify_note(source: int, used: float, result: int) -> str:
-    return (
-        f'CAD export had {source:,} triangles. OpenFEA welded vertices at {used:.3g} source units '
-        f'to {result:,} triangles. Review the scaled dimensions and preprocessing '
-        'before meshing; small fillets, holes and thin walls may be altered.'
-    )
+def _clean_reduced(candidate, coincidence=None):
+    # Validate actual binary-STL precision. Remove only collapsed/zero-area
+    # output faces, then independently check the entire remaining boundary.
+    # Native quadric reduction leaves near-coincident vertices on skinny faces.
+    # Merge at 1/100 of the surface budget; the complete result still has to
+    # pass the original topology, volume and bidirectional sample gates.
+    if coincidence:
+        _, inverse = np.unique(np.round(candidate.reshape(-1, 3) / coincidence),
+                               axis=0, return_inverse=True)
+        vertices = np.zeros((int(inverse.max())+1, 3))
+        np.add.at(vertices, inverse, candidate.reshape(-1, 3))
+        vertices /= np.bincount(inverse)[:, None]
+        candidate = vertices[inverse.reshape(-1, 3)].astype(np.float32).astype(np.float64)
+    _, ids = np.unique(np.round(candidate.reshape(-1, 3), 7), axis=0, return_inverse=True)
+    f = ids.reshape(-1, 3)
+    keep = ((f[:, 0] != f[:, 1]) & (f[:, 1] != f[:, 2]) & (f[:, 2] != f[:, 0]) &
+            (np.linalg.norm(np.cross(candidate[:, 1]-candidate[:, 0],
+                                     candidate[:, 2]-candidate[:, 0]), axis=1) >= 2e-16))
+    return candidate[keep]
+
+
+def _check_reduction(tris, source, candidate):
+    from .stl_fidelity import measure_surface, VOLUME_RELATIVE_LIMIT
+    if not (4 <= len(candidate) <= MAX_WORK_TRIANGLES):
+        raise ValueError('The reduced STL exceeds the local triangle limit or has no usable surface.')
+    working = inspect_triangles(candidate)
+    _require_supported(working, 'reduced STL')
+    if working['euler_characteristic'] != source['euler_characteristic']:
+        raise ValueError('STL reduction changed boundary topology.')
+    source_volume, working_volume = source['signed_volume_mm3'], working['signed_volume_mm3']
+    if source_volume * working_volume <= 0 or abs(working_volume/source_volume-1) > VOLUME_RELATIVE_LIMIT:
+        raise ValueError('STL reduction exceeded the 1% volume-change limit.')
+    measurement = measure_surface(tris, candidate)
+    if measurement['max_sample_distance_source_units'] > measurement['limit_source_units']:
+        raise ValueError('STL reduction exceeded the sampled surface-deviation limit (0.01% of the longest dimension).')
+    return measurement
 
 
 def _parse_ascii(text: str) -> np.ndarray:
@@ -199,19 +242,26 @@ def _require_supported(report: dict, label: str = 'STL') -> None:
                          + ' '.join(report['warnings']))
 
 
-def _preprocessing(original, triangles, note):
+def _preprocessing(original, triangles, note, surface_measurement=None):
     from scipy.spatial import cKDTree
     distance = (float(cKDTree(triangles.reshape(-1, 3)).query(original.reshape(-1, 3))[0].max())
                 if note else 0.)
     def volume(tris):
-        return float(abs(np.einsum('ij,ij->i', tris[:, 0], np.cross(tris[:, 1], tris[:, 2])).sum() / 6))
+        shifted = tris - tris.reshape(-1, 3).min(axis=0)
+        return float(abs(np.einsum('ij,ij->i', shifted[:, 0], np.cross(shifted[:, 1], shifted[:, 2])).sum() / 6))
     source_volume, working_volume = volume(original), volume(triangles)
-    return {'changed': bool(note), 'note': note,
+    meta = {'changed': bool(note), 'note': note,
         'vertex_distance_bound_source_units': distance,
         'vertex_distance_bound_mm': distance,
         'source_volume_units3': source_volume, 'working_volume_units3': working_volume,
         'relative_volume_change': abs(working_volume - source_volume) / max(source_volume, 1e-18),
         'fidelity_scope': 'Maximum original-vertex distance to a working vertex; not a full surface deviation or feature-preservation certificate.'}
+    if surface_measurement is not None:
+        from .stl_fidelity import VOLUME_RELATIVE_LIMIT
+        meta.update(method='quadric-v1', surface_samples=surface_measurement,
+                    relative_volume_limit=VOLUME_RELATIVE_LIMIT,
+                    fidelity_scope=surface_measurement['scope'])
+    return meta
 
 
 def store_stl(data: bytes, name: str) -> dict:
@@ -220,11 +270,11 @@ def store_stl(data: bytes, name: str) -> dict:
     triangles = parse_stl(data)
     original = triangles
     source_count = int(len(triangles))
-    note = None
+    note, surface_measurement = None, None
     source_report = inspect_triangles(original)
     if source_count > MAX_WORK_TRIANGLES:
         _require_supported(source_report, 'source STL')
-        triangles, note = simplify_triangles(triangles)
+        triangles, note, surface_measurement = _simplify_with_measurement(triangles)
     report = inspect_triangles(triangles, 1.0)
     if note:
         report['warnings'] = [note, *report['warnings']]
@@ -239,7 +289,7 @@ def store_stl(data: bytes, name: str) -> dict:
         (folder / 'unit.stl').write_bytes(data)
     else:
         write_binary_stl(folder / 'unit.stl', triangles)
-    preprocessing = _preprocessing(original, triangles, note)
+    preprocessing = _preprocessing(original, triangles, note, surface_measurement)
     meta = {'id': sid, 'name': name, 'bytes': len(data), **report,
             'source_sha256': hashlib.sha256(data).hexdigest(),
             'working_sha256': hashlib.sha256((folder / 'unit.stl').read_bytes()).hexdigest(),
@@ -260,11 +310,22 @@ def load_inspection(stl_id: str, unit_scale: float = 1.0) -> dict:
         preprocessing = _preprocessing(parse_stl((folder/'source.stl').read_bytes()), triangles, note)
     if preprocessing:
         preprocessing['vertex_distance_bound_mm'] = preprocessing['vertex_distance_bound_source_units'] * unit_scale
+        if preprocessing.get('surface_samples'):
+            samples = dict(preprocessing['surface_samples'])
+            samples['max_sample_distance_mm'] = samples['max_sample_distance_source_units'] * unit_scale
+            samples['limit_mm'] = samples['limit_source_units'] * unit_scale
+            if 'coincidence_tolerance_source_units' in samples:
+                samples['coincidence_tolerance_mm'] = samples['coincidence_tolerance_source_units'] * unit_scale
+            preprocessing['surface_samples'] = samples
+    historical = preprocessing.get('changed') and not preprocessing.get('surface_samples')
+    preprocessing['requires_reupload'] = bool(historical)
     note = preprocessing.get('note')
     # Older uploads retained their weld warning only in the initial metadata.
     preserved = [note] if note else [w for w in meta.get('warnings', []) if 'welded' in w]
     source_warnings = ([] if source_report['watertight'] else
                        ['Source STL requires repair: ' + ' '.join(source_report['warnings'])])
+    if historical:
+        source_warnings.append('This historical STL used earlier simplification. Re-upload the original STL for current fidelity checks before building a new mesh. Existing models and results remain available.')
     return {**meta, **report, 'source_inspection': source_report, 'preprocessing': preprocessing,
             'warnings': [*source_warnings, *preserved, *report['warnings']], 'scale': unit_scale}
 
@@ -275,6 +336,8 @@ def scaled_stl_path(stl_id: str, unit_scale: float, accept_preprocessing: bool =
     # Recheck original bytes, including uploads made before source validation.
     _require_supported(inspect_triangles(parse_stl((folder / 'source.stl').read_bytes()) * float(unit_scale)), 'source STL')
     changed = meta.get('preprocessing', {}).get('changed') or meta.get('source_triangles', 0) > meta.get('triangles', 0)
+    if changed and not meta.get('preprocessing', {}).get('surface_samples'):
+        raise ValueError('Re-upload the original STL for current surface-fidelity checks before building a new mesh. This historical upload used earlier simplification; existing models and results remain available.')
     if changed and not accept_preprocessing:
         raise ValueError('This STL was simplified. Explicitly review and accept its scaled preprocessing before meshing, or export a coarser STL.')
     triangles = parse_stl((folder / 'unit.stl').read_bytes()) * float(unit_scale)

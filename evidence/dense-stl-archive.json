@@ -1,0 +1,12 @@
+{
+  "run_id": "6b378a3d178649eaa255361082179a6d",
+  "reproduced_run_id": "d88f7bff6d3f486e8f55e032d0760bae",
+  "original_source_sha256": "4a573be1c545e60adaa83ca1381de2501db25c4d8e1f048289b8f152698b66b5",
+  "working_sha256": "9c32fc52ac6e8f13b8566a2fc13b5f3054f01a2846c778c960b2ae298a620816",
+  "verified_manifest_entries": 27,
+  "source_contains_fidelity_module": true,
+  "relative_displacement_error": 0.0,
+  "archive_sha256": "c4ec468ca8393e19c6f40c8fd39bbea862123ff6f01074b222e46b841fe837fb",
+  "reproduction_directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-archive-pzjj00qx",
+  "passed": true
+}

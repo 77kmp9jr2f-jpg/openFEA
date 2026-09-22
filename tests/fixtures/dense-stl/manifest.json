@@ -1,0 +1,425 @@
+{
+  "scope": "Frozen piecewise planar surfaces of synthetic known CAD, from the prior axial import corpus. Dense fixtures are made by uniform 1-to-4 triangle subdivision, not by adding new CAD curvature.",
+  "fixtures": [
+    {
+      "name": "tube",
+      "file": "tube.stl.gz",
+      "sha256": "66beb3c0f8d4bc06b9b5ae0574b60272910a5f83484c131d859080d38415df1b",
+      "specification": {
+        "name": "Known tube 60 x OD20 x ID12",
+        "kind": "shaft",
+        "length": 60.0,
+        "width": 20.0,
+        "height": 60.0,
+        "thickness": 8.0,
+        "hole_diameter": 12.0,
+        "mesh_size": 7.0,
+        "features": [],
+        "step_id": null,
+        "stl_id": null,
+        "unit_scale": 1.0,
+        "feature_angle_deg": 40.0,
+        "accept_stl_preprocessing": false,
+        "provenance": "user_dimensions",
+        "assumptions": []
+      },
+      "original_model_id": "099c1c376e0246c2934396f2c862e48b",
+      "cad_fine_response": {
+        "id": "cf4239023cd84316b163794bead2296e",
+        "elements": 4120,
+        "dofs": 24321,
+        "element_order": 2,
+        "max_displacement_mm": 0.00014266019267122386,
+        "strain_energy_nmm": 0.007107172409000436,
+        "relative_residual": 4.77379424633456e-13,
+        "force_balance_error_n": 9.78243352051477e-13,
+        "moment_balance_error_nmm": 4.589123530029247e-11,
+        "mesh_volume_mm3": 12060.59319276904,
+        "model_id": "800cd68e340842ceb3ec2715ec7ffe38",
+        "geometry_sha256": "5c3d8d3f67437b7500e062447f3d7057050289b433151e8fb4631a18ded6df02",
+        "mesh_sha256": "6ab16e53f32ce52a0768b1d29711a2b90c3ebf06f845db87d009237a6506a0e5",
+        "volume_mm3": 12063.715789784803,
+        "bounds": [
+          [
+            0.0,
+            -10.0,
+            -10.0
+          ],
+          [
+            60.0,
+            10.0,
+            10.0
+          ]
+        ],
+        "min_quality": 0.3287848275210409,
+        "loaded_area_mm2": 200.8975350526792,
+        "setup": {
+          "model_id": "800cd68e340842ceb3ec2715ec7ffe38",
+          "material": {
+            "name": "Synthetic validation material",
+            "young_mpa": 210000.0,
+            "poisson": 0.0,
+            "yield_mpa": 250.0,
+            "density_kg_m3": 7850.0
+          },
+          "fixed_faces": [
+            3
+          ],
+          "loads": [
+            {
+              "face_id": 2,
+              "vector": [
+                100.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+          "confirmed": true,
+          "reference_id": null,
+          "annotations": [],
+          "setup_proposal_id": null,
+          "conversation": [],
+          "print": {
+            "enabled": false,
+            "rotation_deg": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "infill_pattern": "gyroid",
+            "infill_density": 0.2,
+            "wall_count": 3,
+            "line_width_mm": 0.4,
+            "layer_height_mm": 0.2,
+            "top_layers": 4,
+            "bottom_layers": 4
+          }
+        },
+        "versions": {
+          "scikit-fem": "12.0.2",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "gmsh": "4.15.2"
+        },
+        "seconds": 3.528,
+        "mesh_volume_relative_error": 0.00025884205747028766
+      }
+    },
+    {
+      "name": "thin_channel",
+      "file": "thin_channel.stl.gz",
+      "sha256": "2e25e129cade767aadca7f4f7334d6dc573f6cd719d658e96f60ae1bf9a54888",
+      "specification": {
+        "name": "Known open channel with 2 mm walls",
+        "kind": "custom",
+        "length": 80.0,
+        "width": 40.0,
+        "height": 60.0,
+        "thickness": 8.0,
+        "hole_diameter": 8.0,
+        "mesh_size": 7.0,
+        "features": [
+          {
+            "operation": "add",
+            "primitive": "box",
+            "origin": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "size": [
+              60.0,
+              24.0,
+              16.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              10.0
+            ],
+            "radius": 5.0
+          },
+          {
+            "operation": "cut",
+            "primitive": "box",
+            "origin": [
+              -1.0,
+              2.0,
+              2.0
+            ],
+            "size": [
+              62.0,
+              20.0,
+              15.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              10.0
+            ],
+            "radius": 5.0
+          }
+        ],
+        "step_id": null,
+        "stl_id": null,
+        "unit_scale": 1.0,
+        "feature_angle_deg": 40.0,
+        "accept_stl_preprocessing": false,
+        "provenance": "user_dimensions",
+        "assumptions": []
+      },
+      "original_model_id": "41856bd6f7c44038940e0bd1371f720d",
+      "cad_fine_response": {
+        "id": "a5e96348124748d19d16f49a7ac575e8",
+        "elements": 4493,
+        "dofs": 26823,
+        "element_order": 2,
+        "max_displacement_mm": 0.0002747252747252882,
+        "strain_energy_nmm": 0.013736263736264069,
+        "relative_residual": 5.201669997813202e-13,
+        "force_balance_error_n": 1.1759828078745017e-12,
+        "moment_balance_error_nmm": 1.627171833832623e-11,
+        "mesh_volume_mm3": 6239.999999999997,
+        "model_id": "272ede9685c94647a2be952980a9e376",
+        "geometry_sha256": "ff07d495c2e0505162eab3d1b9624e83c1444119ba3ceadc532324bb8fef08f0",
+        "mesh_sha256": "0fe0c870e1638f5e921668c69d289b3aeefb2c88a9fe5fee9d77d6e67440b060",
+        "volume_mm3": 6240.000000000002,
+        "bounds": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            60.0,
+            24.0,
+            16.0
+          ]
+        ],
+        "min_quality": 0.485279377220791,
+        "loaded_area_mm2": 103.99999999999999,
+        "setup": {
+          "model_id": "272ede9685c94647a2be952980a9e376",
+          "material": {
+            "name": "Synthetic validation material",
+            "young_mpa": 210000.0,
+            "poisson": 0.0,
+            "yield_mpa": 250.0,
+            "density_kg_m3": 7850.0
+          },
+          "fixed_faces": [
+            1
+          ],
+          "loads": [
+            {
+              "face_id": 10,
+              "vector": [
+                100.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+          "confirmed": true,
+          "reference_id": null,
+          "annotations": [],
+          "setup_proposal_id": null,
+          "conversation": [],
+          "print": {
+            "enabled": false,
+            "rotation_deg": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "infill_pattern": "gyroid",
+            "infill_density": 0.2,
+            "wall_count": 3,
+            "line_width_mm": 0.4,
+            "layer_height_mm": 0.2,
+            "top_layers": 4,
+            "bottom_layers": 4
+          }
+        },
+        "versions": {
+          "scikit-fem": "12.0.2",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "gmsh": "4.15.2"
+        },
+        "seconds": 3.401,
+        "mesh_volume_relative_error": 4.440892098500626e-16
+      }
+    },
+    {
+      "name": "perforated_plate",
+      "file": "perforated_plate.stl.gz",
+      "sha256": "247a8aaa03cd2413bff70382d0c0a2544386f1f94331fe7e4d35605deead47cf",
+      "specification": {
+        "name": "Known asymmetric two-bore plate",
+        "kind": "custom",
+        "length": 80.0,
+        "width": 40.0,
+        "height": 60.0,
+        "thickness": 8.0,
+        "hole_diameter": 8.0,
+        "mesh_size": 7.0,
+        "features": [
+          {
+            "operation": "add",
+            "primitive": "box",
+            "origin": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "size": [
+              60.0,
+              40.0,
+              6.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              10.0
+            ],
+            "radius": 5.0
+          },
+          {
+            "operation": "cut",
+            "primitive": "cylinder",
+            "origin": [
+              15.0,
+              12.0,
+              -1.0
+            ],
+            "size": [
+              10.0,
+              10.0,
+              10.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              8.0
+            ],
+            "radius": 3.0
+          },
+          {
+            "operation": "cut",
+            "primitive": "cylinder",
+            "origin": [
+              43.0,
+              27.0,
+              -1.0
+            ],
+            "size": [
+              10.0,
+              10.0,
+              10.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              8.0
+            ],
+            "radius": 5.0
+          }
+        ],
+        "step_id": null,
+        "stl_id": null,
+        "unit_scale": 1.0,
+        "feature_angle_deg": 40.0,
+        "accept_stl_preprocessing": false,
+        "provenance": "user_dimensions",
+        "assumptions": []
+      },
+      "original_model_id": "48d7529f8fdf4e38bdf5fb4992f2f11e",
+      "cad_fine_response": {
+        "id": "59eca6b1337f4aef87a13e2d5b93ab59",
+        "elements": 7087,
+        "dofs": 37503,
+        "element_order": 2,
+        "max_displacement_mm": 0.0001475000040504256,
+        "strain_energy_nmm": 0.006840066409616654,
+        "relative_residual": 6.021619888486074e-13,
+        "force_balance_error_n": 8.089755246434279e-12,
+        "moment_balance_error_nmm": 1.0385449531095618e-10,
+        "mesh_volume_mm3": 13778.015052774299,
+        "model_id": "c146da080f7243cda288491ccf10f413",
+        "geometry_sha256": "783403540fb1bb668986f331d698d901538d1f5d8e634b1a493f6cc95b9e99d0",
+        "mesh_sha256": "3fe5858dd6de8062b32a8ee5dc390e456711bed09fecf238209e06e6069dd588",
+        "volume_mm3": 13759.115098667682,
+        "bounds": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            60.0,
+            40.0,
+            6.0
+          ]
+        ],
+        "min_quality": 0.47720575465529746,
+        "loaded_area_mm2": 240.0,
+        "setup": {
+          "model_id": "c146da080f7243cda288491ccf10f413",
+          "material": {
+            "name": "Synthetic validation material",
+            "young_mpa": 210000.0,
+            "poisson": 0.0,
+            "yield_mpa": 250.0,
+            "density_kg_m3": 7850.0
+          },
+          "fixed_faces": [
+            1
+          ],
+          "loads": [
+            {
+              "face_id": 6,
+              "vector": [
+                100.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+          "confirmed": true,
+          "reference_id": null,
+          "annotations": [],
+          "setup_proposal_id": null,
+          "conversation": [],
+          "print": {
+            "enabled": false,
+            "rotation_deg": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "infill_pattern": "gyroid",
+            "infill_density": 0.2,
+            "wall_count": 3,
+            "line_width_mm": 0.4,
+            "layer_height_mm": 0.2,
+            "top_layers": 4,
+            "bottom_layers": 4
+          }
+        },
+        "versions": {
+          "scikit-fem": "12.0.2",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "gmsh": "4.15.2"
+        },
+        "seconds": 8.218,
+        "mesh_volume_relative_error": 0.001373631514169693
+      }
+    }
+  ]
+}

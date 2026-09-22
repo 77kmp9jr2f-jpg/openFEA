@@ -1,0 +1,1366 @@
+{
+  "created_at": "2026-09-22T07:42:20.016606+00:00",
+  "gates": {
+    "relative_volume_change": 0.01,
+    "relative_sample_distance": 0.0001,
+    "section_boundary_deviation_mm": 0.1,
+    "section_area_change": 0.02,
+    "axial_response_relative_difference": 0.05,
+    "relative_residual": 1e-07,
+    "relative_force_balance": 1e-07,
+    "relative_moment_balance": 1e-07
+  },
+  "scope": "Frozen piecewise planar surfaces of synthetic known CAD, from the prior axial import corpus. Dense fixtures are made by uniform 1-to-4 triangle subdivision, not by adding new CAD curvature. Surface samples and selected sections do not certify global Hausdorff error, self-intersections or arbitrary small-feature preservation. Axial CPU/P2 comparison only; no printed-material calibration.",
+  "data_directory": "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-validation-9s37wcyt",
+  "source_hashes": {
+    "backend/stl_io.py": "3aba9c4c223a94b9d635c13661dde4caf6518f46ec2a96ae3ebadc6e9193e4b8",
+    "backend/stl_fidelity.py": "af511f4e8fe4ef86dd37712863b778db8056db97a5c5c44b09a4a224117b5404",
+    "backend/geometry.py": "aa005749eae4e87df0eba49d1d0212762205b0bb2a6b122bbbc258efb492a073",
+    "requirements.txt": "84463f3eddd3f38c48252a5c1fb7f2711a691055f68894442aecd00611ce61be",
+    "scripts/validate_dense_stl.py": "f39f056987acab0dbdb95da9b6a80e3fa0f9b55c4a0c9066dffe60372bed57ba"
+  },
+  "solve_exercised": true,
+  "cases": [
+    {
+      "name": "tube",
+      "checks": [
+        {
+          "gate": "explicit preprocessing review required",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "closed single consistently wound boundary",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "boundary topology retained",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "volume change",
+          "value": 5.586748685845412e-08,
+          "limit": 0.01,
+          "passed": true
+        },
+        {
+          "gate": "sampled surface deviation / longest extent",
+          "value": 9.977791753526947e-05,
+          "limit": 0.0001,
+          "passed": true
+        },
+        {
+          "gate": "section 1: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 1: area",
+          "value": 2.6043551770715823e-06,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 1: sampled boundary distance",
+          "value": 0.00017039340171890385,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "section 10: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 10: area",
+          "value": 1.6969033223013241e-06,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 10: sampled boundary distance",
+          "value": 0.0003282159761247112,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "section 30: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 30: area",
+          "value": 4.616971164272954e-07,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 30: sampled boundary distance",
+          "value": 0.00017128212174988898,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "section 50: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 50: area",
+          "value": 2.280223015516114e-06,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 50: sampled boundary distance",
+          "value": 0.0002911289588106787,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "section 59: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 59: area",
+          "value": 5.855304399116079e-07,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 59: sampled boundary distance",
+          "value": 0.00024011095129278107,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "CAD agreement: max_displacement_mm",
+          "value": 0.0022558803527953364,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "CAD agreement: strain_energy_nmm",
+          "value": 0.00036411737950414746,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "residual",
+          "value": 2.1743497490049306e-09,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "force balance / 100 N",
+          "value": 2.888086045675521e-10,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "moment balance / 6000 N mm",
+          "value": 2.242414341195024e-11,
+          "limit": 1e-07,
+          "passed": true
+        }
+      ],
+      "source_triangles": 248320,
+      "frozen_source_sha256": "66beb3c0f8d4bc06b9b5ae0574b60272910a5f83484c131d859080d38415df1b",
+      "inspection": {
+        "id": "50848541af3141dba3f8fea98a99c9c5",
+        "name": "tube-dense.stl",
+        "bytes": 12416084,
+        "triangles": 7844,
+        "bounds": [
+          [
+            -7.0829866416488585e-09,
+            -10.0,
+            -10.0
+          ],
+          [
+            60.0,
+            10.0,
+            10.000020980834961
+          ]
+        ],
+        "extent_mm": [
+          60.00000000708299,
+          20.0,
+          20.00002098083496
+        ],
+        "surface_area_mm2": 6421.873857538029,
+        "signed_volume_mm3": 12064.786064193953,
+        "watertight": true,
+        "shells": 1,
+        "boundary_edges": 0,
+        "manifold_edges": 11766,
+        "nonmanifold_edges": 0,
+        "inconsistent_winding_edges": 0,
+        "degenerate_triangles": 0,
+        "euler_characteristic": 0,
+        "suggested_scale": 1.0,
+        "warnings": [
+          "CAD export had 248,320 triangles. OpenFEA reduced it to 7,844 triangles with topology, volume and sampled surface checks. Review the scaled dimensions and small features before meshing; unsampled surface regions are not certified."
+        ],
+        "source_triangles": 248320,
+        "source_inspection": {
+          "triangles": 248320,
+          "bounds": [
+            [
+              0.0,
+              -10.0,
+              -10.0
+            ],
+            [
+              60.0,
+              10.0,
+              10.0
+            ]
+          ],
+          "extent_mm": [
+            60.0,
+            20.0,
+            20.0
+          ],
+          "surface_area_mm2": 6421.8738015533745,
+          "signed_volume_mm3": 12064.785390164674,
+          "watertight": true,
+          "shells": 1,
+          "boundary_edges": 0,
+          "manifold_edges": 372480,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "euler_characteristic": 0,
+          "suggested_scale": 1.0,
+          "warnings": []
+        },
+        "source_sha256": "a428c7e4dcf5218f1a2928a6af1bc50ae9c65ef6ca46ebd89f7028e8a86fad4c",
+        "working_sha256": "18b712baa7931fbf50bcab5f0ccde4b1ff747a9ac6e894a76a28f6a9d90769bd",
+        "preprocessing": {
+          "changed": true,
+          "note": "CAD export had 248,320 triangles. OpenFEA reduced it to 7,844 triangles with topology, volume and sampled surface checks. Review the scaled dimensions and small features before meshing; unsampled surface regions are not certified.",
+          "vertex_distance_bound_source_units": 2.1447664442390524,
+          "vertex_distance_bound_mm": 2.1447664442390524,
+          "source_volume_units3": 12064.785390164718,
+          "working_volume_units3": 12064.786064193957,
+          "relative_volume_change": 5.586748685845412e-08,
+          "fidelity_scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified.",
+          "method": "quadric-v1",
+          "surface_samples": {
+            "max_sample_distance_source_units": 0.0059866750521161685,
+            "max_sample_distance_mm": 0.0059866750521161685,
+            "limit_source_units": 0.006,
+            "limit_mm": 0.006,
+            "source_to_working_source_units": 0.0059866750521161685,
+            "working_to_source_source_units": 0.002132297847605244,
+            "source_samples": 1738240,
+            "working_samples": 54908,
+            "relative_to_longest_extent": 9.977791753526947e-05,
+            "relative_limit": 0.0001,
+            "scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified.",
+            "reduction_mode": "target-count",
+            "coincidence_tolerance_source_units": 5.9999999999999995e-05,
+            "coincidence_tolerance_mm": 5.9999999999999995e-05,
+            "target_triangles": 8000
+          },
+          "relative_volume_limit": 0.01
+        }
+      },
+      "preprocessing_seconds": 27.326487416867167,
+      "sections": [
+        {
+          "station_mm": 1.0,
+          "source_holes": 1,
+          "working_holes": 1,
+          "boundary_deviation_mm": 0.00017039340171890385,
+          "relative_area_change": 2.6043551770715823e-06
+        },
+        {
+          "station_mm": 10.0,
+          "source_holes": 1,
+          "working_holes": 1,
+          "boundary_deviation_mm": 0.0003282159761247112,
+          "relative_area_change": 1.6969033223013241e-06
+        },
+        {
+          "station_mm": 30.0,
+          "source_holes": 1,
+          "working_holes": 1,
+          "boundary_deviation_mm": 0.00017128212174988898,
+          "relative_area_change": 4.616971164272954e-07
+        },
+        {
+          "station_mm": 50.0,
+          "source_holes": 1,
+          "working_holes": 1,
+          "boundary_deviation_mm": 0.0002911289588106787,
+          "relative_area_change": 2.280223015516114e-06
+        },
+        {
+          "station_mm": 59.0,
+          "source_holes": 1,
+          "working_holes": 1,
+          "boundary_deviation_mm": 0.00024011095129278107,
+          "relative_area_change": 5.855304399116079e-07
+        }
+      ],
+      "solve": {
+        "id": "0a647e426a3f4fd5aa8cb1d67391c700",
+        "elements": 14866,
+        "dofs": 84324,
+        "element_order": 2,
+        "versions": {
+          "scikit-fem": "12.0.2",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "gmsh": "4.15.2"
+        },
+        "seconds": 26.38,
+        "max_displacement_mm": 0.00014233836834545084,
+        "strain_energy_nmm": 0.007104584564007187,
+        "relative_residual": 2.1743497490049306e-09,
+        "force_balance_error_n": 2.8880860456755212e-08,
+        "moment_balance_error_nmm": 1.3454486047170144e-07,
+        "mesh_volume_mm3": 12064.78606419395,
+        "model_id": "f75b2897b0554b54b7df402d131d65e3",
+        "geometry_sha256": "341a1c3d03a4602d18d7364cb2341ce194fcb39521f898594d93a5455c643d5c",
+        "mesh_sha256": "ff73c2760be4596152c1983d9a55cd75dfe4af9154f3493684642f468bfd112e",
+        "volume_mm3": 12064.786064193953,
+        "bounds": [
+          [
+            -7.0829866416488585e-09,
+            -10.0,
+            -10.0
+          ],
+          [
+            60.0,
+            10.0,
+            10.000020980834961
+          ]
+        ],
+        "min_quality": 1.4071152771599055e-06,
+        "loaded_area_mm2": 201.09729727182963,
+        "setup": {
+          "model_id": "f75b2897b0554b54b7df402d131d65e3",
+          "material": {
+            "name": "Synthetic validation material",
+            "young_mpa": 210000.0,
+            "poisson": 0.0,
+            "yield_mpa": 250.0,
+            "density_kg_m3": 7850.0
+          },
+          "fixed_faces": [
+            5
+          ],
+          "loads": [
+            {
+              "face_id": 4,
+              "vector": [
+                100.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+          "confirmed": true,
+          "reference_id": null,
+          "annotations": [],
+          "setup_proposal_id": null,
+          "conversation": [],
+          "print": {
+            "enabled": false,
+            "rotation_deg": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "infill_pattern": "gyroid",
+            "infill_density": 0.2,
+            "wall_count": 3,
+            "line_width_mm": 0.4,
+            "layer_height_mm": 0.2,
+            "top_layers": 4,
+            "bottom_layers": 4
+          }
+        }
+      },
+      "cad_reference": {
+        "id": "cf4239023cd84316b163794bead2296e",
+        "elements": 4120,
+        "dofs": 24321,
+        "element_order": 2,
+        "max_displacement_mm": 0.00014266019267122386,
+        "strain_energy_nmm": 0.007107172409000436,
+        "relative_residual": 4.77379424633456e-13,
+        "force_balance_error_n": 9.78243352051477e-13,
+        "moment_balance_error_nmm": 4.589123530029247e-11,
+        "mesh_volume_mm3": 12060.59319276904,
+        "model_id": "800cd68e340842ceb3ec2715ec7ffe38",
+        "geometry_sha256": "5c3d8d3f67437b7500e062447f3d7057050289b433151e8fb4631a18ded6df02",
+        "mesh_sha256": "6ab16e53f32ce52a0768b1d29711a2b90c3ebf06f845db87d009237a6506a0e5",
+        "volume_mm3": 12063.715789784803,
+        "bounds": [
+          [
+            0.0,
+            -10.0,
+            -10.0
+          ],
+          [
+            60.0,
+            10.0,
+            10.0
+          ]
+        ],
+        "min_quality": 0.3287848275210409,
+        "loaded_area_mm2": 200.8975350526792,
+        "setup": {
+          "model_id": "800cd68e340842ceb3ec2715ec7ffe38",
+          "material": {
+            "name": "Synthetic validation material",
+            "young_mpa": 210000.0,
+            "poisson": 0.0,
+            "yield_mpa": 250.0,
+            "density_kg_m3": 7850.0
+          },
+          "fixed_faces": [
+            3
+          ],
+          "loads": [
+            {
+              "face_id": 2,
+              "vector": [
+                100.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+          "confirmed": true,
+          "reference_id": null,
+          "annotations": [],
+          "setup_proposal_id": null,
+          "conversation": [],
+          "print": {
+            "enabled": false,
+            "rotation_deg": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "infill_pattern": "gyroid",
+            "infill_density": 0.2,
+            "wall_count": 3,
+            "line_width_mm": 0.4,
+            "layer_height_mm": 0.2,
+            "top_layers": 4,
+            "bottom_layers": 4
+          }
+        },
+        "versions": {
+          "scikit-fem": "12.0.2",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "gmsh": "4.15.2"
+        },
+        "seconds": 3.528,
+        "mesh_volume_relative_error": 0.00025884205747028766
+      },
+      "seconds": 60.85668612504378,
+      "passed": true
+    },
+    {
+      "name": "thin_channel",
+      "checks": [
+        {
+          "gate": "explicit preprocessing review required",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "closed single consistently wound boundary",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "boundary topology retained",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "volume change",
+          "value": 0.0,
+          "limit": 0.01,
+          "passed": true
+        },
+        {
+          "gate": "sampled surface deviation / longest extent",
+          "value": 8.786902359765101e-05,
+          "limit": 0.0001,
+          "passed": true
+        },
+        {
+          "gate": "section 1: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 1: area",
+          "value": 2.220446049250313e-16,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 1: sampled boundary distance",
+          "value": 3.552713678800501e-15,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "section 10: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 10: area",
+          "value": 5.551115123125783e-16,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 10: sampled boundary distance",
+          "value": 3.552713678800501e-15,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "section 30: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 30: area",
+          "value": 0.0,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 30: sampled boundary distance",
+          "value": 3.552713678800501e-15,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "section 50: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 50: area",
+          "value": 5.551115123125783e-16,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 50: sampled boundary distance",
+          "value": 3.552713678800501e-15,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "section 59: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 59: area",
+          "value": 6.661338147750939e-16,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 59: sampled boundary distance",
+          "value": 5.329070518200751e-15,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "CAD agreement: max_displacement_mm",
+          "value": 7.993605777301127e-15,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "CAD agreement: strain_energy_nmm",
+          "value": 7.405187574249794e-14,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "residual",
+          "value": 6.285604587812727e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "force balance / 100 N",
+          "value": 3.651537936313978e-14,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "moment balance / 6000 N mm",
+          "value": 1.6938306056395146e-14,
+          "limit": 1e-07,
+          "passed": true
+        }
+      ],
+      "source_triangles": 267904,
+      "frozen_source_sha256": "2e25e129cade767aadca7f4f7334d6dc573f6cd719d658e96f60ae1bf9a54888",
+      "inspection": {
+        "id": "363a3b9498504ec3a3a3693138b86683",
+        "name": "thin_channel-dense.stl",
+        "bytes": 13395284,
+        "triangles": 34,
+        "bounds": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            60.0,
+            24.0,
+            16.0
+          ]
+        ],
+        "extent_mm": [
+          60.0,
+          24.0,
+          16.0
+        ],
+        "surface_area_mm2": 6688.0,
+        "signed_volume_mm3": 6240.0,
+        "watertight": true,
+        "shells": 1,
+        "boundary_edges": 0,
+        "manifold_edges": 51,
+        "nonmanifold_edges": 0,
+        "inconsistent_winding_edges": 0,
+        "degenerate_triangles": 0,
+        "euler_characteristic": 2,
+        "suggested_scale": 1.0,
+        "warnings": [
+          "CAD export had 267,904 triangles. OpenFEA reduced it to 34 triangles with topology, volume and sampled surface checks. Review the scaled dimensions and small features before meshing; unsampled surface regions are not certified."
+        ],
+        "source_triangles": 267904,
+        "source_inspection": {
+          "triangles": 267904,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.0,
+              24.0,
+              16.0
+            ]
+          ],
+          "extent_mm": [
+            60.0,
+            24.0,
+            16.0
+          ],
+          "surface_area_mm2": 6688.0,
+          "signed_volume_mm3": 6240.0,
+          "watertight": true,
+          "shells": 1,
+          "boundary_edges": 0,
+          "manifold_edges": 401856,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "euler_characteristic": 2,
+          "suggested_scale": 1.0,
+          "warnings": []
+        },
+        "source_sha256": "4a573be1c545e60adaa83ca1381de2501db25c4d8e1f048289b8f152698b66b5",
+        "working_sha256": "9c32fc52ac6e8f13b8566a2fc13b5f3054f01a2846c778c960b2ae298a620816",
+        "preprocessing": {
+          "changed": true,
+          "note": "CAD export had 267,904 triangles. OpenFEA reduced it to 34 triangles with topology, volume and sampled surface checks. Review the scaled dimensions and small features before meshing; unsampled surface regions are not certified.",
+          "vertex_distance_bound_source_units": 22.022531847524817,
+          "vertex_distance_bound_mm": 22.022531847524817,
+          "source_volume_units3": 6240.0,
+          "working_volume_units3": 6240.0,
+          "relative_volume_change": 0.0,
+          "fidelity_scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified.",
+          "method": "quadric-v1",
+          "surface_samples": {
+            "max_sample_distance_source_units": 0.005272141415859061,
+            "max_sample_distance_mm": 0.005272141415859061,
+            "limit_source_units": 0.006,
+            "limit_mm": 0.006,
+            "source_to_working_source_units": 0.005272141415859061,
+            "working_to_source_source_units": 0.0,
+            "source_samples": 1875328,
+            "working_samples": 238,
+            "relative_to_longest_extent": 8.786902359765101e-05,
+            "relative_limit": 0.0001,
+            "scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified.",
+            "reduction_mode": "lossless",
+            "coincidence_tolerance_source_units": 5.9999999999999995e-05,
+            "coincidence_tolerance_mm": 5.9999999999999995e-05
+          },
+          "relative_volume_limit": 0.01
+        }
+      },
+      "preprocessing_seconds": 11.010502124903724,
+      "sections": [
+        {
+          "station_mm": 1.0,
+          "source_holes": 0,
+          "working_holes": 0,
+          "boundary_deviation_mm": 3.552713678800501e-15,
+          "relative_area_change": 2.220446049250313e-16
+        },
+        {
+          "station_mm": 10.0,
+          "source_holes": 0,
+          "working_holes": 0,
+          "boundary_deviation_mm": 3.552713678800501e-15,
+          "relative_area_change": 5.551115123125783e-16
+        },
+        {
+          "station_mm": 30.0,
+          "source_holes": 0,
+          "working_holes": 0,
+          "boundary_deviation_mm": 3.552713678800501e-15,
+          "relative_area_change": 0.0
+        },
+        {
+          "station_mm": 50.0,
+          "source_holes": 0,
+          "working_holes": 0,
+          "boundary_deviation_mm": 3.552713678800501e-15,
+          "relative_area_change": 5.551115123125783e-16
+        },
+        {
+          "station_mm": 59.0,
+          "source_holes": 0,
+          "working_holes": 0,
+          "boundary_deviation_mm": 5.329070518200751e-15,
+          "relative_area_change": 6.661338147750939e-16
+        }
+      ],
+      "solve": {
+        "id": "6b378a3d178649eaa255361082179a6d",
+        "elements": 9041,
+        "dofs": 53172,
+        "element_order": 2,
+        "versions": {
+          "scikit-fem": "12.0.2",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "gmsh": "4.15.2"
+        },
+        "seconds": 6.12,
+        "max_displacement_mm": 0.00027472527472529045,
+        "strain_energy_nmm": 0.013736263736263053,
+        "relative_residual": 6.285604587812727e-13,
+        "force_balance_error_n": 3.651537936313978e-12,
+        "moment_balance_error_nmm": 1.0162983633837087e-10,
+        "mesh_volume_mm3": 6239.999999999998,
+        "model_id": "6c1e32d3fec4468f9a88aba45402061e",
+        "geometry_sha256": "63479b1fdfd7b861c47de6bda948f36161ab155e46666d6b9b023b58d5992d77",
+        "mesh_sha256": "a9000f507337644c07080138fadf655c837d7d71bc301a910dab93a1849fc93c",
+        "volume_mm3": 6240.0,
+        "bounds": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            60.00000000000001,
+            24.000000000000004,
+            16.0
+          ]
+        ],
+        "min_quality": 0.32095361299015246,
+        "loaded_area_mm2": 104.0,
+        "setup": {
+          "model_id": "6c1e32d3fec4468f9a88aba45402061e",
+          "material": {
+            "name": "Synthetic validation material",
+            "young_mpa": 210000.0,
+            "poisson": 0.0,
+            "yield_mpa": 250.0,
+            "density_kg_m3": 7850.0
+          },
+          "fixed_faces": [
+            5,
+            6
+          ],
+          "loads": [
+            {
+              "face_id": 2,
+              "vector": [
+                71.15384615384616,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "face_id": 3,
+              "vector": [
+                28.846153846153843,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+          "confirmed": true,
+          "reference_id": null,
+          "annotations": [],
+          "setup_proposal_id": null,
+          "conversation": [],
+          "print": {
+            "enabled": false,
+            "rotation_deg": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "infill_pattern": "gyroid",
+            "infill_density": 0.2,
+            "wall_count": 3,
+            "line_width_mm": 0.4,
+            "layer_height_mm": 0.2,
+            "top_layers": 4,
+            "bottom_layers": 4
+          }
+        }
+      },
+      "cad_reference": {
+        "id": "a5e96348124748d19d16f49a7ac575e8",
+        "elements": 4493,
+        "dofs": 26823,
+        "element_order": 2,
+        "max_displacement_mm": 0.0002747252747252882,
+        "strain_energy_nmm": 0.013736263736264069,
+        "relative_residual": 5.201669997813202e-13,
+        "force_balance_error_n": 1.1759828078745017e-12,
+        "moment_balance_error_nmm": 1.627171833832623e-11,
+        "mesh_volume_mm3": 6239.999999999997,
+        "model_id": "272ede9685c94647a2be952980a9e376",
+        "geometry_sha256": "ff07d495c2e0505162eab3d1b9624e83c1444119ba3ceadc532324bb8fef08f0",
+        "mesh_sha256": "0fe0c870e1638f5e921668c69d289b3aeefb2c88a9fe5fee9d77d6e67440b060",
+        "volume_mm3": 6240.000000000002,
+        "bounds": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            60.0,
+            24.0,
+            16.0
+          ]
+        ],
+        "min_quality": 0.485279377220791,
+        "loaded_area_mm2": 103.99999999999999,
+        "setup": {
+          "model_id": "272ede9685c94647a2be952980a9e376",
+          "material": {
+            "name": "Synthetic validation material",
+            "young_mpa": 210000.0,
+            "poisson": 0.0,
+            "yield_mpa": 250.0,
+            "density_kg_m3": 7850.0
+          },
+          "fixed_faces": [
+            1
+          ],
+          "loads": [
+            {
+              "face_id": 10,
+              "vector": [
+                100.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+          "confirmed": true,
+          "reference_id": null,
+          "annotations": [],
+          "setup_proposal_id": null,
+          "conversation": [],
+          "print": {
+            "enabled": false,
+            "rotation_deg": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "infill_pattern": "gyroid",
+            "infill_density": 0.2,
+            "wall_count": 3,
+            "line_width_mm": 0.4,
+            "layer_height_mm": 0.2,
+            "top_layers": 4,
+            "bottom_layers": 4
+          }
+        },
+        "versions": {
+          "scikit-fem": "12.0.2",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "gmsh": "4.15.2"
+        },
+        "seconds": 3.401,
+        "mesh_volume_relative_error": 4.440892098500626e-16
+      },
+      "seconds": 23.887061374960467,
+      "passed": true
+    },
+    {
+      "name": "perforated_plate",
+      "checks": [
+        {
+          "gate": "explicit preprocessing review required",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "closed single consistently wound boundary",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "boundary topology retained",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "volume change",
+          "value": 1.557046668460794e-09,
+          "limit": 0.01,
+          "passed": true
+        },
+        {
+          "gate": "sampled surface deviation / longest extent",
+          "value": 9.973675598298385e-05,
+          "limit": 0.0001,
+          "passed": true
+        },
+        {
+          "gate": "section 1: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 1: area",
+          "value": 4.264568698175708e-10,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 1: sampled boundary distance",
+          "value": 2.2357582105701265e-06,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "section 3: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 3: area",
+          "value": 1.6526922053117232e-09,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 3: sampled boundary distance",
+          "value": 2.2359202786264195e-06,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "section 5: hole count",
+          "value": 0.0,
+          "limit": 0,
+          "passed": true
+        },
+        {
+          "gate": "section 5: area",
+          "value": 8.629219561129275e-10,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "section 5: sampled boundary distance",
+          "value": 2.174056970820612e-06,
+          "limit": 0.1,
+          "passed": true
+        },
+        {
+          "gate": "CAD agreement: max_displacement_mm",
+          "value": 0.0029479094285318475,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "CAD agreement: strain_energy_nmm",
+          "value": 0.0016158375183690232,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "residual",
+          "value": 1.0045572643347778e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "force balance / 100 N",
+          "value": 6.858780813218234e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "moment balance / 6000 N mm",
+          "value": 2.0937565916508265e-13,
+          "limit": 1e-07,
+          "passed": true
+        }
+      ],
+      "source_triangles": 267008,
+      "frozen_source_sha256": "247a8aaa03cd2413bff70382d0c0a2544386f1f94331fe7e4d35605deead47cf",
+      "inspection": {
+        "id": "361b20a9a52d483b88ad0968e0a92986",
+        "name": "perforated_plate-dense.stl",
+        "bytes": 13350484,
+        "triangles": 14440,
+        "bounds": [
+          [
+            0.0,
+            0.0,
+            -4.554454147154274e-09
+          ],
+          [
+            60.0,
+            40.0,
+            6.0
+          ]
+        ],
+        "extent_mm": [
+          60.0,
+          40.0,
+          6.000000004554455
+        ],
+        "surface_area_mm2": 6092.811634169855,
+        "signed_volume_mm3": 13773.390810461346,
+        "watertight": true,
+        "shells": 1,
+        "boundary_edges": 0,
+        "manifold_edges": 21660,
+        "nonmanifold_edges": 0,
+        "inconsistent_winding_edges": 0,
+        "degenerate_triangles": 0,
+        "euler_characteristic": -2,
+        "suggested_scale": 1.0,
+        "warnings": [
+          "CAD export had 267,008 triangles. OpenFEA reduced it to 14,440 triangles with topology, volume and sampled surface checks. Review the scaled dimensions and small features before meshing; unsampled surface regions are not certified."
+        ],
+        "source_triangles": 267008,
+        "source_inspection": {
+          "triangles": 267008,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              60.0,
+              40.0,
+              6.0
+            ]
+          ],
+          "extent_mm": [
+            60.0,
+            40.0,
+            6.0
+          ],
+          "surface_area_mm2": 6092.811633559728,
+          "signed_volume_mm3": 13773.39083190717,
+          "watertight": true,
+          "shells": 1,
+          "boundary_edges": 0,
+          "manifold_edges": 400512,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "euler_characteristic": -2,
+          "suggested_scale": 1.0,
+          "warnings": []
+        },
+        "source_sha256": "bb8fa901cd0536796ae2de40f13fcfee6859d4abc32830e96690042acd9dc1fc",
+        "working_sha256": "1af3001d2cda3d7a3ee9862f9550ee489881590401a9d2fa01cfcd0697197e51",
+        "preprocessing": {
+          "changed": true,
+          "note": "CAD export had 267,008 triangles. OpenFEA reduced it to 14,440 triangles with topology, volume and sampled surface checks. Review the scaled dimensions and small features before meshing; unsampled surface regions are not certified.",
+          "vertex_distance_bound_source_units": 17.422261340485264,
+          "vertex_distance_bound_mm": 17.422261340485264,
+          "source_volume_units3": 13773.39083190717,
+          "working_volume_units3": 13773.390810461358,
+          "relative_volume_change": 1.557046668460794e-09,
+          "fidelity_scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified.",
+          "method": "quadric-v1",
+          "surface_samples": {
+            "max_sample_distance_source_units": 0.005984205358979031,
+            "max_sample_distance_mm": 0.005984205358979031,
+            "limit_source_units": 0.006,
+            "limit_mm": 0.006,
+            "source_to_working_source_units": 0.005984205358979031,
+            "working_to_source_source_units": 0.005376812192355301,
+            "source_samples": 1869056,
+            "working_samples": 101080,
+            "relative_to_longest_extent": 9.973675598298385e-05,
+            "relative_limit": 0.0001,
+            "scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified.",
+            "reduction_mode": "lossless",
+            "coincidence_tolerance_source_units": 5.9999999999999995e-05,
+            "coincidence_tolerance_mm": 5.9999999999999995e-05
+          },
+          "relative_volume_limit": 0.01
+        }
+      },
+      "preprocessing_seconds": 27.226435750024393,
+      "sections": [
+        {
+          "station_mm": 1.0,
+          "source_holes": 2,
+          "working_holes": 2,
+          "boundary_deviation_mm": 2.2357582105701265e-06,
+          "relative_area_change": 4.264568698175708e-10
+        },
+        {
+          "station_mm": 3.0,
+          "source_holes": 2,
+          "working_holes": 2,
+          "boundary_deviation_mm": 2.2359202786264195e-06,
+          "relative_area_change": 1.6526922053117232e-09
+        },
+        {
+          "station_mm": 5.0,
+          "source_holes": 2,
+          "working_holes": 2,
+          "boundary_deviation_mm": 2.174056970820612e-06,
+          "relative_area_change": 8.629219561129275e-10
+        }
+      ],
+      "solve": {
+        "id": "5fd55c1875554feb902bf286f0da2b36",
+        "elements": 31333,
+        "dofs": 157239,
+        "element_order": 2,
+        "versions": {
+          "scikit-fem": "12.0.2",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "gmsh": "4.15.2"
+        },
+        "seconds": 116.678,
+        "max_displacement_mm": 0.00014793482070307433,
+        "strain_energy_nmm": 0.006851118845549448,
+        "relative_residual": 1.0045572643347778e-12,
+        "force_balance_error_n": 6.858780813218233e-11,
+        "moment_balance_error_nmm": 1.256253954990496e-09,
+        "mesh_volume_mm3": 13775.076611077131,
+        "model_id": "dd25d6cb578c41da891d630a02374ef8",
+        "geometry_sha256": "c48f02b305c285483a6d5d623628a1a444352663dce2269632d3c00b26ca0aa2",
+        "mesh_sha256": "e8c69f29f937d7aed86caab106b1ab1ec063e4ae26e9e60e5c70638a520bd268",
+        "volume_mm3": 13773.390810461346,
+        "bounds": [
+          [
+            0.0,
+            0.0,
+            -4.047813447576728e-09
+          ],
+          [
+            60.0,
+            40.00000000000001,
+            6.000000000000001
+          ]
+        ],
+        "min_quality": 0.05292709121753463,
+        "loaded_area_mm2": 240.0,
+        "setup": {
+          "model_id": "dd25d6cb578c41da891d630a02374ef8",
+          "material": {
+            "name": "Synthetic validation material",
+            "young_mpa": 210000.0,
+            "poisson": 0.0,
+            "yield_mpa": 250.0,
+            "density_kg_m3": 7850.0
+          },
+          "fixed_faces": [
+            64
+          ],
+          "loads": [
+            {
+              "face_id": 66,
+              "vector": [
+                100.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+          "confirmed": true,
+          "reference_id": null,
+          "annotations": [],
+          "setup_proposal_id": null,
+          "conversation": [],
+          "print": {
+            "enabled": false,
+            "rotation_deg": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "infill_pattern": "gyroid",
+            "infill_density": 0.2,
+            "wall_count": 3,
+            "line_width_mm": 0.4,
+            "layer_height_mm": 0.2,
+            "top_layers": 4,
+            "bottom_layers": 4
+          }
+        }
+      },
+      "cad_reference": {
+        "id": "59eca6b1337f4aef87a13e2d5b93ab59",
+        "elements": 7087,
+        "dofs": 37503,
+        "element_order": 2,
+        "max_displacement_mm": 0.0001475000040504256,
+        "strain_energy_nmm": 0.006840066409616654,
+        "relative_residual": 6.021619888486074e-13,
+        "force_balance_error_n": 8.089755246434279e-12,
+        "moment_balance_error_nmm": 1.0385449531095618e-10,
+        "mesh_volume_mm3": 13778.015052774299,
+        "model_id": "c146da080f7243cda288491ccf10f413",
+        "geometry_sha256": "783403540fb1bb668986f331d698d901538d1f5d8e634b1a493f6cc95b9e99d0",
+        "mesh_sha256": "3fe5858dd6de8062b32a8ee5dc390e456711bed09fecf238209e06e6069dd588",
+        "volume_mm3": 13759.115098667682,
+        "bounds": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            60.0,
+            40.0,
+            6.0
+          ]
+        ],
+        "min_quality": 0.47720575465529746,
+        "loaded_area_mm2": 240.0,
+        "setup": {
+          "model_id": "c146da080f7243cda288491ccf10f413",
+          "material": {
+            "name": "Synthetic validation material",
+            "young_mpa": 210000.0,
+            "poisson": 0.0,
+            "yield_mpa": 250.0,
+            "density_kg_m3": 7850.0
+          },
+          "fixed_faces": [
+            1
+          ],
+          "loads": [
+            {
+              "face_id": 6,
+              "vector": [
+                100.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+          "confirmed": true,
+          "reference_id": null,
+          "annotations": [],
+          "setup_proposal_id": null,
+          "conversation": [],
+          "print": {
+            "enabled": false,
+            "rotation_deg": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "infill_pattern": "gyroid",
+            "infill_density": 0.2,
+            "wall_count": 3,
+            "line_width_mm": 0.4,
+            "layer_height_mm": 0.2,
+            "top_layers": 4,
+            "bottom_layers": 4
+          }
+        },
+        "versions": {
+          "scikit-fem": "12.0.2",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "gmsh": "4.15.2"
+        },
+        "seconds": 8.218,
+        "mesh_volume_relative_error": 0.001373631514169693
+      },
+      "seconds": 152.82377224997617,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

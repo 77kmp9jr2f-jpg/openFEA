@@ -1,0 +1,104 @@
+{
+  "passed": false,
+  "scope": "Guarded 40,000-target candidate passed surface checks, but meshing was stopped after more than three minutes in Gmsh classifySurfaces with forReparametrization=True. No tetrahedral or solve acceptance claim.",
+  "inspection": {
+    "id": "3589f41ad4274faeacdb481ea2b43859",
+    "name": "tube-dense.stl",
+    "bytes": 12416084,
+    "triangles": 39994,
+    "bounds": [
+      [
+        -0.0002054249052889645,
+        -10.0,
+        -10.0
+      ],
+      [
+        60.00043487548828,
+        10.0,
+        10.000025749206543
+      ]
+    ],
+    "extent_mm": [
+      60.00064030039357,
+      20.0,
+      20.000025749206543
+    ],
+    "surface_area_mm2": 6421.874013613827,
+    "signed_volume_mm3": 12064.788606375563,
+    "watertight": true,
+    "shells": 1,
+    "boundary_edges": 0,
+    "manifold_edges": 59991,
+    "nonmanifold_edges": 0,
+    "inconsistent_winding_edges": 0,
+    "degenerate_triangles": 0,
+    "euler_characteristic": 0,
+    "suggested_scale": 1.0,
+    "warnings": [
+      "CAD export had 248,320 triangles. OpenFEA reduced it to 39,994 triangles with topology, volume and sampled surface checks. Review the scaled dimensions and small features before meshing; unsampled surface regions are not certified."
+    ],
+    "source_triangles": 248320,
+    "source_inspection": {
+      "triangles": 248320,
+      "bounds": [
+        [
+          0.0,
+          -10.0,
+          -10.0
+        ],
+        [
+          60.0,
+          10.0,
+          10.0
+        ]
+      ],
+      "extent_mm": [
+        60.0,
+        20.0,
+        20.0
+      ],
+      "surface_area_mm2": 6421.8738015533745,
+      "signed_volume_mm3": 12064.785390164674,
+      "watertight": true,
+      "shells": 1,
+      "boundary_edges": 0,
+      "manifold_edges": 372480,
+      "nonmanifold_edges": 0,
+      "inconsistent_winding_edges": 0,
+      "degenerate_triangles": 0,
+      "euler_characteristic": 0,
+      "suggested_scale": 1.0,
+      "warnings": []
+    },
+    "source_sha256": "a428c7e4dcf5218f1a2928a6af1bc50ae9c65ef6ca46ebd89f7028e8a86fad4c",
+    "working_sha256": "56eea099d4cbb316ef96c941a7b2adb2d64e5131a7ae2e44afd21aad2c0aabe1",
+    "preprocessing": {
+      "changed": true,
+      "note": "CAD export had 248,320 triangles. OpenFEA reduced it to 39,994 triangles with topology, volume and sampled surface checks. Review the scaled dimensions and small features before meshing; unsampled surface regions are not certified.",
+      "vertex_distance_bound_source_units": 1.9832010843914412,
+      "vertex_distance_bound_mm": 1.9832010843914412,
+      "source_volume_units3": 12064.785390164676,
+      "working_volume_units3": 12064.788606375565,
+      "relative_volume_change": 2.665783754240412e-07,
+      "fidelity_scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified.",
+      "method": "quadric-v1",
+      "surface_samples": {
+        "max_sample_distance_source_units": 0.00599820820955588,
+        "max_sample_distance_mm": 0.00599820820955588,
+        "limit_source_units": 0.006,
+        "limit_mm": 0.006,
+        "source_to_working_source_units": 0.00599820820955588,
+        "working_to_source_source_units": 0.0037873483651713466,
+        "source_samples": 1738240,
+        "working_samples": 279958,
+        "relative_to_longest_extent": 9.997013682593133e-05,
+        "relative_limit": 0.0001,
+        "scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified.",
+        "reduction_mode": "target-count"
+      },
+      "relative_volume_limit": 0.01
+    }
+  },
+  "stack_evidence": "One-second native stack sample: all 616 main-thread samples under gmshModelMeshClassifySurfaces / gmsh::model::mesh::classifySurfaces.",
+  "data_directory": "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-validation-xt9sep7t"
+}

@@ -14,6 +14,8 @@ Prerequisites: Python 3.12+, Node.js 20.19+ or 22.12+, and a WebGPU-capable brow
 
 Open **http://127.0.0.1:8000**. The script creates a virtual environment and installs dependencies on first use, builds the frontend, then starts a server bound to loopback. Use `FEAR_PYTHON=/path/to/python3.12 ./scripts/start.sh` if your default Python is older. A compiler or OpenGL runtime may be needed for Gmsh on some platforms; macOS arm64 is the verified environment.
 
+After updating an existing checkout, refresh its pinned dependencies with `.venv/bin/python -m pip install -r requirements.txt` and `npm ci` before restarting. Dense STL reduction requires `fast-simplification` 0.2.0.
+
 For development, run the backend and frontend in separate terminals:
 
 ```sh
@@ -81,6 +83,8 @@ This server is intended for the local machine. It rejects foreign browser origin
 | [Gmsh](https://gmsh.info/doc/texinfo/) / OpenCASCADE | CAD booleans, STEP, meshing | GPL-2.0-or-later with Gmsh exception; OpenCASCADE LGPL-2.1 with exception |
 | [scikit-fem](https://github.com/kinnala/scikit-fem) | Finite-element assembly | BSD-3-Clause |
 | NumPy / SciPy | Numerical arrays and sparse solver | BSD-3-Clause |
+| [fast-simplification](https://pyvista.github.io/fast-simplification/) | Guarded dense-STL reduction | MIT |
+| Shapely | Print layer-contour geometry | BSD-3-Clause |
 | FastAPI / Uvicorn / Pydantic | Local API and validation | MIT / BSD-3-Clause / MIT |
 | React / Three.js / Vite / Lucide | Interface and 3D review | MIT / MIT / MIT / ISC |
 | Pillow / ReportLab | Reference processing and reports | HPND / BSD |

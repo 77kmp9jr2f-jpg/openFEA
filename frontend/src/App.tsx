@@ -209,6 +209,9 @@ export default function App() {
     setSpec((s) => ({
       ...s,
       ...patch,
+      ...(patch.unit_scale !== undefined && patch.unit_scale !== s.unit_scale
+        ? { accept_stl_preprocessing: false }
+        : {}),
       provenance: s.provenance === "demo" ? "user_dimensions" : s.provenance,
     }));
     invalidate();
@@ -1142,18 +1145,25 @@ export default function App() {
                           })
                         }
                       />
-                      I reviewed the simplified geometry: maximum original
-                      vertex distance to a working vertex{" "}
+                      I reviewed the simplified geometry:{" "}
+                      {stlInspect.preprocessing.surface_samples
+                        ? "sampled surface deviation at most "
+                        : "maximum original vertex distance to a working vertex "}
                       {format(
-                        (stlInspect.preprocessing.vertex_distance_bound_mm *
+                        ((stlInspect.preprocessing.surface_samples?.max_sample_distance_mm ??
+                          stlInspect.preprocessing.vertex_distance_bound_mm) *
                           spec.unit_scale) /
                           (stlInspect.scale || 1),
                       )}{" "}
-                      mm; volume change{" "}
+                      mm
+                      {stlInspect.preprocessing.surface_samples && (
+                        <> (limit {format(stlInspect.preprocessing.surface_samples.limit_mm *
+                          spec.unit_scale / (stlInspect.scale || 1))} mm)</>
+                      )}; volume change{" "}
                       {format(
                         100 * stlInspect.preprocessing.relative_volume_change,
                       )}
-                      %. Small features still require inspection.
+                      %. Unsampled regions and small features still require inspection.
                     </label>
                   )}
                   {stlInspect && (

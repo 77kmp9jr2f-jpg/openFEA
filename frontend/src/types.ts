@@ -63,6 +63,10 @@ export type StlInspect = {
     vertex_distance_bound_mm: number;
     relative_volume_change: number;
     fidelity_scope: string;
+    surface_samples?: {
+      max_sample_distance_mm: number;
+      limit_mm: number;
+    };
   };
 };
 export type Geometry = {

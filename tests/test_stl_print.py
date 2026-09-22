@@ -43,7 +43,7 @@ def _fine_box_triangles(divisions=90):
     return np.array(tris, float)
 
 
-def test_dense_cad_export_is_welded_to_a_workable_mesh(tmp_path):
+def test_dense_cad_export_is_reduced_with_measured_fidelity(tmp_path):
     from backend.stl_io import simplify_triangles, MAX_WORK_TRIANGLES
     dense = _fine_box_triangles(90)
     assert len(dense) > MAX_WORK_TRIANGLES
@@ -61,7 +61,10 @@ def test_dense_cad_export_is_welded_to_a_workable_mesh(tmp_path):
     assert restored['source_triangles'] == len(dense)
     assert restored['preprocessing']['changed']
     assert restored['preprocessing']['vertex_distance_bound_mm'] >= 0
-    assert any('welded' in warning for warning in restored['warnings'])
+    fidelity = restored['preprocessing']['surface_samples']
+    assert fidelity['max_sample_distance_mm'] <= fidelity['limit_mm']
+    assert restored['preprocessing']['relative_volume_change'] < 1e-6
+    assert any('reduced' in warning for warning in restored['warnings'])
     with pytest.raises(ValueError, match='review'):
         scaled_stl_path(meta['id'], 1)
     from backend.storage import read_json, write_json

@@ -2,6 +2,24 @@
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
 
+## Guarded dense-STL import — 2026-09-22
+
+The frozen tube, channel and two-bore plate surfaces were subdivided, written as binary STL, uploaded through the production reducer, explicitly accepted, meshed and solved with CPU/P2. All **69 declared checks pass**. Source topology is checked before reduction; accepted outputs preserve shell count, edge/winding validity and Euler characteristic, stay within 1% volume change, and bound the declared bidirectional surface samples within 0.01% of the longest dimension (0.006 mm here). This is a sample budget, not global Hausdorff certification. The selected-section checks retain their separate, predeclared 0.1 mm boundary / 2% area / unchanged hole-count gates.
+
+| Synthetic surface | Source → working triangles | Largest sampled section boundary difference | Axial displacement difference from CAD |
+|---|---:|---:|---:|
+| Tube | 248,320 → 7,844 | 0.000328 mm | 0.226% |
+| 2 mm open channel | 267,904 → 34 | < 1e-12 mm | < 1e-10% |
+| Two-bore plate | 267,008 → 14,440 | 0.00000224 mm | 0.295% |
+
+The corresponding quadratic systems have 84,324, 53,172 and 157,239 DOFs. All residual, force and moment gates pass. Measured import preprocessing took 11–27 seconds on this host; complete import/mesh/CPU checks took 24–153 seconds. The largest conservative sample-distance upper bound was 0.005987 mm; the maximum relative volume change was 0.00000559%. These bounds can exceed the true nearest-surface distance because any sufficiently close target triangle can establish the sample budget.
+
+Retained evidence: [final corpus](../evidence/dense-stl-validation.json), [frozen inputs](../tests/fixtures/dense-stl/README.md), and [distance-search review](../evidence/dense-stl-search-review.json). `python -m scripts.validate_dense_stl` reproduces the corpus in isolated storage. The `dense-stl-initial`, `dense-stl-first-pass`, `dense-stl-meshing-initial` and `dense-stl-quadric-initial` JSON files retain failed welding, incomplete reduction, the interrupted Gmsh parametrization attempt and intersecting reduced facets. Final cleanup merges near-coincident output vertices on a grid 100 times finer than the sample budget; validation runs after cleanup and binary precision conversion.
+
+The complete 98-test backend suite passed during integration; all 19 affected checks passed again after final meshing/cleanup changes. Five frontend regressions and the TypeScript/Vite build pass. The [browser record](../evidence/dense-stl-browser.json) covers real dense upload, rejection before preprocessing consent, scale-dependent limits with renewed consent, the accepted channel build and saved study; screenshots retain the model and review controls. The prior GPU study was restored afterward. The new dense-channel report archive validates all 27 manifest entries, preserves the exact original STL and fidelity module, and its extracted reproduction executes with identical full displacement values: [archive check](../evidence/dense-stl-archive.json).
+
+Historical welded uploads require re-upload before new meshing; existing models/results remain available. This corpus uses redundant tessellation of existing piecewise-planar CAD surfaces, not newly resolved curvature or representative industrial/freeform inputs. Stress convergence, self-intersection certification, other GPU/device acceptance and printed-material calibration remain separate work.
+
 ## STL source topology repair — 2026-09-22
 
 Two reproduced import defects are fixed. A dense two-shell input could lose its small component during welding and then pass inspection. A cube with one flipped triangle could mesh successfully while reporting 666,666.7 mm³ instead of its actual 1,000,000 mm³, corrupting volume-based mass. Small and dense inputs now share shell, degeneracy, edge and winding checks; source bytes are validated before simplification and again before meshing, including historical uploads. Globally inverted winding remains supported. Multiple boundary shells (including enclosed cavities) and self-intersection certification remain outside the supported scope.

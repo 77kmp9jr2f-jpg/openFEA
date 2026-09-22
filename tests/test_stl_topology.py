@@ -64,7 +64,7 @@ def test_dense_source_is_validated_before_simplifying(dense_box, box, tmp_path, 
     write_binary_stl(path, np.concatenate([dense_box, box * .00005 + 200]))
     def forbidden(*args):
         pytest.fail('Invalid source reached destructive simplification')
-    monkeypatch.setattr('backend.stl_io.simplify_triangles', forbidden)
+    monkeypatch.setattr('backend.stl_io._simplify_with_measurement', forbidden)
     with pytest.raises(ValueError, match='boundary shell'):
         store_stl(path.read_bytes(), path.name)
 

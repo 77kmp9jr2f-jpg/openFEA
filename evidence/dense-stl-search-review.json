@@ -1,0 +1,41 @@
+{
+  "search_cases": [
+    {
+      "offset": 0.0001,
+      "exact_max": 0.00010000000000000005,
+      "reported_bound": 0.019922559261049827,
+      "samples": 49,
+      "acceptance_matches": true,
+      "upper_bound_valid": true,
+      "all_samples": true
+    },
+    {
+      "offset": 0.1,
+      "exact_max": 0.10000000000000142,
+      "reported_bound": 0.08563890403607989,
+      "samples": 1,
+      "acceptance_matches": true
+    },
+    {
+      "offset": 1,
+      "exact_max": 1.0,
+      "reported_bound": 0.19848753653576903,
+      "samples": 1,
+      "acceptance_matches": true
+    },
+    {
+      "offset": 10,
+      "exact_max": 6.6072209849520895,
+      "reported_bound": 1.6855630729855875,
+      "samples": 1,
+      "acceptance_matches": true
+    }
+  ],
+  "fallback_fixture": {
+    "id": "5dab37007e784961a6e60ea57d78c0cb",
+    "tetrahedra": 5149,
+    "min_quality": 0.33783926113905244,
+    "volume_mm3": 7961.230762553571,
+    "inspection_volume": 7961.230762553571
+  }
+}

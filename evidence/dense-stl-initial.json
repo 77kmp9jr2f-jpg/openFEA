@@ -1,0 +1,121 @@
+{
+  "scope": "Dense redundant tessellation of known frozen CAD surfaces. Explicit exploratory corpus budgets, not a global surface certificate.",
+  "gates": {
+    "volume_change": 0.01,
+    "section_boundary_deviation_mm": 0.1,
+    "section_area_change": 0.02,
+    "section_holes_preserved": true
+  },
+  "cases": [
+    {
+      "name": "tube",
+      "source_triangles": 248320,
+      "error": "ValueError: This STL is too densely tessellated to simplify into a local mesh. Export a coarser CAD STL.",
+      "passed": false,
+      "seconds": 14.51325991586782
+    },
+    {
+      "name": "thin_channel",
+      "source_triangles": 267904,
+      "note": "CAD export had 267,904 triangles. OpenFEA welded vertices at 0.492 source units to 55,880 triangles. Review the scaled dimensions and preprocessing before meshing; small fillets, holes and thin walls may be altered.",
+      "working_triangles": 55880,
+      "preprocessing": {
+        "changed": true,
+        "note": "CAD export had 267,904 triangles. OpenFEA welded vertices at 0.492 source units to 55,880 triangles. Review the scaled dimensions and preprocessing before meshing; small fillets, holes and thin walls may be altered.",
+        "vertex_distance_bound_source_units": 0.35918302662128465,
+        "vertex_distance_bound_mm": 0.35918302662128465,
+        "source_volume_units3": 6240.000000000048,
+        "working_volume_units3": 6227.903612272598,
+        "relative_volume_change": 0.0019385236742707924,
+        "fidelity_scope": "Maximum original-vertex distance to a working vertex; not a full surface deviation or feature-preservation certificate."
+      },
+      "inspection": {
+        "triangles": 55880,
+        "bounds": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            60.0,
+            24.0,
+            16.0
+          ]
+        ],
+        "extent_mm": [
+          60.0,
+          24.0,
+          16.0
+        ],
+        "surface_area_mm2": 6629.12833727608,
+        "signed_volume_mm3": 6227.9036122726275,
+        "watertight": true,
+        "shells": 1,
+        "boundary_edges": 0,
+        "manifold_edges": 83820,
+        "nonmanifold_edges": 0,
+        "degenerate_triangles": 0,
+        "suggested_scale": 1.0,
+        "warnings": []
+      },
+      "sections": [
+        {
+          "station": 1.0,
+          "source_holes": 0,
+          "working_holes": 0,
+          "source_area": 104.0,
+          "working_area": 103.9354586657341,
+          "relative_area_change": 0.0006205897525567439,
+          "boundary_deviation_mm": 0.15483146663879094
+        },
+        {
+          "station": 10.0,
+          "source_holes": 0,
+          "working_holes": 0,
+          "source_area": 104.00000000000009,
+          "working_area": 103.8709949860276,
+          "relative_area_change": 0.001240432826658533,
+          "boundary_deviation_mm": 0.16100555541970993
+        },
+        {
+          "station": 30.0,
+          "source_holes": 0,
+          "working_holes": 0,
+          "source_area": 104.0,
+          "working_area": 103.88193649452269,
+          "relative_area_change": 0.0011352260142049042,
+          "boundary_deviation_mm": 0.16152404792850544
+        },
+        {
+          "station": 50.0,
+          "source_holes": 0,
+          "working_holes": 0,
+          "source_area": 104.00000000000004,
+          "working_area": 103.89139605127492,
+          "relative_area_change": 0.0010442687377415494,
+          "boundary_deviation_mm": 0.1626822587067899
+        },
+        {
+          "station": 59.0,
+          "source_holes": 0,
+          "working_holes": 0,
+          "source_area": 103.99999999999994,
+          "working_area": 103.92952941161244,
+          "relative_area_change": 0.0006776018114182936,
+          "boundary_deviation_mm": 0.15776119835915806
+        }
+      ],
+      "artifacts": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-probe-_26799yu/thin_channel",
+      "passed": false,
+      "seconds": 17.99336350010708
+    },
+    {
+      "name": "perforated_plate",
+      "source_triangles": 267008,
+      "error": "ValueError: This STL is too densely tessellated to simplify into a local mesh. Export a coarser CAD STL.",
+      "passed": false,
+      "seconds": 14.702957459026948
+    }
+  ]
+}

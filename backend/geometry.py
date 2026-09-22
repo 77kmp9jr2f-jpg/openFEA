@@ -60,16 +60,16 @@ def _make_stl_solid(spec: Geometry):
     path = scaled_stl_path(spec.stl_id, spec.unit_scale, spec.accept_stl_preprocessing)
     angle = spec.feature_angle_deg * math.pi / 180
     gmsh.option.setNumber('Mesh.AngleToleranceFacetOverlap', 0.2)
-    def classify_source():
+    inspect = read_json(resource('stls', spec.stl_id) / 'inspect.json')
+    reduced = inspect.get('preprocessing', {}).get('surface_samples', {})
+    retain_facets = inspect.get('triangles', 0) > 50000 or reduced.get('reduction_mode') == 'target-count'
+    def classify_source(for_parametrization):
         gmsh.merge(str(path))
-        gmsh.model.mesh.classifySurfaces(angle, True, True, math.pi)
-    classify_source()
-    inspect = {}
-    if spec.stl_id:
-        inspect = read_json(resource('stls', spec.stl_id) / 'inspect.json')
-    dense = inspect.get('source_triangles', inspect.get('triangles', 0)) > 50000
-    if dense:
-        # Parametrizing a dense CAD tessellation fails or remeshes with overlapping facets.
+        gmsh.model.mesh.classifySurfaces(angle, True, for_parametrization, math.pi)
+    classify_source(not retain_facets)
+    if retain_facets:
+        # The extra cuts for parametrization can stall on reduced skinny facets.
+        # Retain their independently checked boundary and mesh the volume inside.
         gmsh.model.mesh.createTopology()
     else:
         try:
@@ -80,7 +80,7 @@ def _make_stl_solid(spec: Geometry):
             # elements. Reload the immutable surface before topology fallback.
             gmsh.clear()
             gmsh.model.add('OpenFEA')
-            classify_source()
+            classify_source(False)
             gmsh.model.mesh.createTopology()
     surfaces = gmsh.model.getEntities(2)
     if len(surfaces) < 1:

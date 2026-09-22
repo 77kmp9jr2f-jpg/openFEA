@@ -1,0 +1,37 @@
+{
+  "scope": "Actual in-app browser upload, scaled preprocessing review, source acceptance, model build, save and prior-study restore. No GPU solve of this dense channel is claimed.",
+  "model_id": "4d195c6206b1491c8eae13e90e2bacc8",
+  "stl_id": "6f95f2c738854eca867a7818a41f41fd",
+  "source_triangles": 267904,
+  "working_triangles": 34,
+  "tetrahedra": 3787,
+  "min_quality": 0.4164459389507436,
+  "surface_samples": {
+    "max_sample_distance_source_units": 0.005272141415859061,
+    "max_sample_distance_mm": 0.005272141415859061,
+    "limit_source_units": 0.006,
+    "limit_mm": 0.006,
+    "source_to_working_source_units": 0.005272141415859061,
+    "working_to_source_source_units": 0.0,
+    "source_samples": 1875328,
+    "working_samples": 238,
+    "relative_to_longest_extent": 8.786902359765101e-05,
+    "relative_limit": 0.0001,
+    "scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified.",
+    "reduction_mode": "lossless",
+    "coincidence_tolerance_source_units": 5.9999999999999995e-05,
+    "coincidence_tolerance_mm": 5.9999999999999995e-05
+  },
+  "observations": {
+    "meshing_without_acceptance_rejected": true,
+    "unit_scale_2_showed_limit_mm": 0.012,
+    "unit_change_cleared_review": true,
+    "accepted_scale": 1,
+    "saved_study_visible": "thin_channel-dense 9/22/2026, 1:49:41 AM",
+    "restored_run_id": "12f9942450724ed1876b14254905a847"
+  },
+  "screenshots": {
+    "dense-stl-browser.png": "0213f341a9f850f19d7fd517feae5594d91452ebb199720fe92c5858148dcf27",
+    "dense-stl-model.png": "f4bb7ed2f35d709e1e10224a222b363fe9a660d82dab9955935b57f45c4e9fdd"
+  }
+}

@@ -3,6 +3,7 @@ import base64, io, json, time
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+from starlette.concurrency import run_in_threadpool
 from PIL import Image, ImageOps, UnidentifiedImageError
 from .storage import ROOT, DATA, identifier, resource, write_json, read_json
 from .schemas import Geometry, Analysis, AssistantRequest, ImageInput, Study, GPUSolution, SimulationContext, PrintPreviewRequest, ReadinessRequest
@@ -127,7 +128,7 @@ async def upload_stl(request: Request):
     if not content or len(content) > 80_000_000:
         raise ValueError('Upload an STL under 80 MB.')
     name = request.headers.get('x-filename', 'import.stl')[:160]
-    return store_stl(content, name)
+    return await run_in_threadpool(store_stl, content, name)
 
 @app.get('/api/stls/{sid}')
 def get_stl(sid: str, scale: float = 1.0):
