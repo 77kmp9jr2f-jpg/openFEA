@@ -1,0 +1,974 @@
+{
+  "created_at": "2026-09-22T06:21:23.545100+00:00",
+  "gates": {
+    "analytic_relative_error": 0.05,
+    "successive_refinement_change": 0.02,
+    "stl_relative_difference": 0.03,
+    "relative_residual": 1e-07,
+    "relative_force_balance": 1e-07,
+    "relative_moment_balance": 1e-07
+  },
+  "sources": {
+    "cantilever": "https://ocw.mit.edu/courses/1-050-solid-mechanics-fall-2004/fd4eff39aec922b8c07660006f40686e_pset04_11.pdf",
+    "circular_torsion": "https://ocw.mit.edu/courses/3-11-mechanics-of-materials-fall-1999/0e0845a9e3abe430080eaffb0c5015ba_MIT3_11F99_torsion.pdf"
+  },
+  "data_directory": "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-flexure-validation-s92dp9u5",
+  "fixtures": [
+    {
+      "name": "channel_bending",
+      "specification": {
+        "name": "Synthetic 160 mm channel, 2 mm walls",
+        "kind": "custom",
+        "length": 80.0,
+        "width": 40.0,
+        "height": 60.0,
+        "thickness": 8.0,
+        "hole_diameter": 8.0,
+        "mesh_size": 7.0,
+        "features": [
+          {
+            "operation": "add",
+            "primitive": "box",
+            "origin": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "size": [
+              160.0,
+              24.0,
+              16.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              10.0
+            ],
+            "radius": 5.0
+          },
+          {
+            "operation": "cut",
+            "primitive": "box",
+            "origin": [
+              -1.0,
+              2.0,
+              2.0
+            ],
+            "size": [
+              162.0,
+              20.0,
+              15.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              10.0
+            ],
+            "radius": 5.0
+          }
+        ],
+        "step_id": null,
+        "stl_id": null,
+        "unit_scale": 1.0,
+        "feature_angle_deg": 40.0,
+        "accept_stl_preprocessing": false,
+        "provenance": "user_dimensions",
+        "assumptions": []
+      },
+      "reference": {
+        "area_mm2": 104,
+        "centroid_z_mm": 5.3076923076923075,
+        "I_y_mm4": 2584.8205128205127,
+        "expected": 0.025152954602998254,
+        "metric": "mean_tip_z_mm",
+        "formula": "F L^3 / (3 E I_y); slender Euler-Bernoulli reference, not exact 3D clamping/shear."
+      },
+      "cases": {
+        "coarse": {
+          "id": "845ba3ecc0eb480f94525b3cb1d70de6",
+          "model_id": "d1c5bf8f12a248b68eb801e9f312eaef",
+          "elements": 2349,
+          "dofs": 13707,
+          "element_order": 2,
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 1.497,
+          "relative_residual": 5.350197827439851e-10,
+          "strain_energy_nmm": 0.12755963588931696,
+          "mesh_volume_mm3": 16639.999999999993,
+          "force_balance_error_n": 1.50233519224605e-10,
+          "moment_balance_error_nmm": 9.574283382411817e-09,
+          "model_sha256": "021353566103e0650c30933458bb834e282af2a95a1b3161937f53205fbf6bb7",
+          "mesh_sha256": "f507769e866b6d99595198862e20ea4ae449deec1342b0afa52eeb72acb98223",
+          "setup": {
+            "model_id": "d1c5bf8f12a248b68eb801e9f312eaef",
+            "material": {
+              "name": "Synthetic isotropic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.3,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              1
+            ],
+            "loads": [
+              {
+                "face_id": 10,
+                "vector": [
+                  0.0,
+                  0.0,
+                  -10.0
+                ]
+              }
+            ],
+            "notes": "Software validation only: supported uniform face forces, no print homogenization.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "metric": 0.025511927179295114
+        },
+        "medium": {
+          "id": "de82d7325d1642f7acd3ff082780c8ed",
+          "model_id": "1c8b28c1963e4776a504bc0007b3b2c0",
+          "elements": 4830,
+          "dofs": 28677,
+          "element_order": 2,
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 4.555,
+          "relative_residual": 5.561983889603716e-10,
+          "strain_energy_nmm": 0.1276785774216932,
+          "mesh_volume_mm3": 16639.999999999993,
+          "force_balance_error_n": 3.922133751679537e-10,
+          "moment_balance_error_nmm": 6.04884998853501e-08,
+          "model_sha256": "e38b9f6dd3591ad124b62d58a57e3a5cdd376804e32ee60980054cef57a6139a",
+          "mesh_sha256": "4f496491dd9cc5b1cbf0cceb47e2f5bc24e119e9e2d61d3155d2d712568200f4",
+          "setup": {
+            "model_id": "1c8b28c1963e4776a504bc0007b3b2c0",
+            "material": {
+              "name": "Synthetic isotropic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.3,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              1
+            ],
+            "loads": [
+              {
+                "face_id": 10,
+                "vector": [
+                  0.0,
+                  0.0,
+                  -10.0
+                ]
+              }
+            ],
+            "notes": "Software validation only: supported uniform face forces, no print homogenization.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "metric": 0.02553571548340948
+        },
+        "fine": {
+          "id": "3e866bb4e3ed4f13bf29daf56cbcd4d1",
+          "model_id": "8085dd7f2f894483b06f976accc1c664",
+          "elements": 11018,
+          "dofs": 65907,
+          "element_order": 2,
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 12.713,
+          "relative_residual": 8.270432418534286e-10,
+          "strain_energy_nmm": 0.12774835307990187,
+          "mesh_volume_mm3": 16639.999999999993,
+          "force_balance_error_n": 1.172946404157843e-09,
+          "moment_balance_error_nmm": 1.3994856796665035e-07,
+          "model_sha256": "b7de31d16303ce863202dc1d4135908496a609d51e4628c8eedd5360d107340b",
+          "mesh_sha256": "7178f6137daf8de502c31dae0e9f6953f965f1b5f90be83601bb189818d01528",
+          "setup": {
+            "model_id": "8085dd7f2f894483b06f976accc1c664",
+            "material": {
+              "name": "Synthetic isotropic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.3,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              1
+            ],
+            "loads": [
+              {
+                "face_id": 10,
+                "vector": [
+                  0.0,
+                  0.0,
+                  -10.0
+                ]
+              }
+            ],
+            "notes": "Software validation only: supported uniform face forces, no print homogenization.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "metric": 0.025549670617804002
+        },
+        "stl": {
+          "id": "2f739a249d664ac0a3b0ead12fcce7e0",
+          "model_id": "0ac3228820de4c008cfb72f87f4045a2",
+          "elements": 31891,
+          "dofs": 183120,
+          "element_order": 2,
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 42.67,
+          "relative_residual": 1.669068146623137e-09,
+          "strain_energy_nmm": 0.12778538121316593,
+          "mesh_volume_mm3": 16639.999999999993,
+          "force_balance_error_n": 2.536651713537607e-09,
+          "moment_balance_error_nmm": 2.931295315456871e-07,
+          "model_sha256": "39073152ca68dd4a77ea1597d9a39b9b48cd7f0acdd1e161964887637dacbd71",
+          "mesh_sha256": "581fde7a60a139bb71a9ce8a62274f786d3cc0ed9a2adab53758d6e93540c7fd",
+          "setup": {
+            "model_id": "0ac3228820de4c008cfb72f87f4045a2",
+            "material": {
+              "name": "Synthetic isotropic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.3,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              2
+            ],
+            "loads": [
+              {
+                "face_id": 19,
+                "vector": [
+                  0.0,
+                  0.0,
+                  -10.0
+                ]
+              }
+            ],
+            "notes": "Software validation only: supported uniform face forces, no print homogenization.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "metric": 0.025557076245815793
+        }
+      },
+      "checks": [
+        {
+          "gate": "coarse: analytic response",
+          "value": 0.014271586855806984,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "coarse: residual",
+          "value": 5.350197827439851e-10,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "coarse: force equilibrium / 20 N",
+          "value": 7.51167596123025e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "coarse: moment equilibrium",
+          "value": 5.9839271140073855e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "medium: analytic response",
+          "value": 0.015217332772731185,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "medium: residual",
+          "value": 5.561983889603716e-10,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "medium: force equilibrium / 20 N",
+          "value": 1.9610668758397687e-11,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "medium: moment equilibrium",
+          "value": 3.7805312428343814e-11,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "fine: analytic response",
+          "value": 0.015772143713027598,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "fine: residual",
+          "value": 8.270432418534286e-10,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "fine: force equilibrium / 20 N",
+          "value": 5.864732020789215e-11,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "fine: moment equilibrium",
+          "value": 8.746785497915648e-11,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl: analytic response",
+          "value": 0.01606656749459434,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "stl: residual",
+          "value": 1.669068146623137e-09,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl: force equilibrium / 20 N",
+          "value": 1.2683258567688035e-10,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "stl: moment equilibrium",
+          "value": 1.8320595721605442e-10,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "coarse to medium: response change",
+          "value": 0.0009315699076386519,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "medium to fine: response change",
+          "value": 0.000546196254475273,
+          "limit": 0.02,
+          "passed": true
+        },
+        {
+          "gate": "STL to fine CAD: response",
+          "value": 0.00028985219115229555,
+          "limit": 0.03,
+          "passed": true
+        }
+      ],
+      "stl_source": {
+        "inspection": {
+          "id": "541efa3d041d4842915f1ffeed642f66",
+          "name": "channel_bending.stl",
+          "bytes": 486228,
+          "triangles": 2952,
+          "bounds": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              160.0,
+              24.0,
+              16.0
+            ]
+          ],
+          "extent_mm": [
+            160.0,
+            24.0,
+            16.0
+          ],
+          "surface_area_mm2": 17488.0,
+          "signed_volume_mm3": 16639.999999999945,
+          "watertight": true,
+          "shells": 1,
+          "boundary_edges": 0,
+          "manifold_edges": 4428,
+          "nonmanifold_edges": 0,
+          "degenerate_triangles": 0,
+          "suggested_scale": 1.0,
+          "warnings": [],
+          "source_triangles": 2952,
+          "source_sha256": "5f9592f660a618c0642f25f9c6700d712f702e05e1a28d92294b4d4fe5789295",
+          "working_sha256": "5f9592f660a618c0642f25f9c6700d712f702e05e1a28d92294b4d4fe5789295",
+          "preprocessing": {
+            "changed": false,
+            "note": null,
+            "vertex_distance_bound_source_units": 0.0,
+            "vertex_distance_bound_mm": 0.0,
+            "source_volume_units3": 16639.999999999967,
+            "working_volume_units3": 16639.999999999967,
+            "relative_volume_change": 0.0,
+            "fidelity_scope": "Maximum original-vertex distance to a working vertex; not a full surface deviation or feature-preservation certificate."
+          }
+        },
+        "sha256": "5f9592f660a618c0642f25f9c6700d712f702e05e1a28d92294b4d4fe5789295"
+      },
+      "passed": true
+    },
+    {
+      "name": "tube_torsion",
+      "specification": {
+        "name": "Synthetic tube with torque loading bar",
+        "kind": "custom",
+        "length": 80.0,
+        "width": 40.0,
+        "height": 60.0,
+        "thickness": 8.0,
+        "hole_diameter": 8.0,
+        "mesh_size": 7.0,
+        "features": [
+          {
+            "operation": "add",
+            "primitive": "cylinder",
+            "origin": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "size": [
+              10.0,
+              10.0,
+              10.0
+            ],
+            "axis": [
+              120.0,
+              0.0,
+              0.0
+            ],
+            "radius": 6.0
+          },
+          {
+            "operation": "cut",
+            "primitive": "cylinder",
+            "origin": [
+              -1.0,
+              0.0,
+              0.0
+            ],
+            "size": [
+              10.0,
+              10.0,
+              10.0
+            ],
+            "axis": [
+              122.0,
+              0.0,
+              0.0
+            ],
+            "radius": 4.0
+          },
+          {
+            "operation": "add",
+            "primitive": "box",
+            "origin": [
+              110.0,
+              -10.0,
+              -2.0
+            ],
+            "size": [
+              10.0,
+              20.0,
+              4.0
+            ],
+            "axis": [
+              0.0,
+              0.0,
+              10.0
+            ],
+            "radius": 5.0
+          }
+        ],
+        "step_id": null,
+        "stl_id": null,
+        "unit_scale": 1.0,
+        "feature_angle_deg": 40.0,
+        "accept_stl_preprocessing": false,
+        "provenance": "user_dimensions",
+        "assumptions": []
+      },
+      "reference": {
+        "torque_nmm": 200,
+        "G_mpa": 80769.23076923077,
+        "J_mm4": 1633.6281798666923,
+        "expected": 1.5157613627799558e-06,
+        "metric": "twist_rate_rad_per_mm",
+        "formula": "d(theta)/dx = T/(G J); fit only X=24..84 mm, away from clamp and loading bar."
+      },
+      "cases": {
+        "coarse": {
+          "id": "2eec7150922c43e292f1e6602705f6c8",
+          "model_id": "ca3a8762aa764863967f0078b06ce8b1",
+          "elements": 5090,
+          "dofs": 29898,
+          "element_order": 2,
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 2.581,
+          "relative_residual": 5.358900788452398e-12,
+          "strain_energy_nmm": 0.01878114174678933,
+          "mesh_volume_mm3": 7961.113723374996,
+          "force_balance_error_n": 1.6436897998672226e-11,
+          "moment_balance_error_nmm": 1.544158702303139e-09,
+          "model_sha256": "01af7ae4c3477b6121d4ba79ac60e1478b4190ceed2a2fd6154505bffac4786b",
+          "mesh_sha256": "f49ba65d1d7459af8f75d0c4262b2b813e164a135facd992de89f63755b6e016",
+          "setup": {
+            "model_id": "ca3a8762aa764863967f0078b06ce8b1",
+            "material": {
+              "name": "Synthetic isotropic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.3,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              2
+            ],
+            "loads": [
+              {
+                "face_id": 12,
+                "vector": [
+                  0.0,
+                  0.0,
+                  10.0
+                ]
+              },
+              {
+                "face_id": 11,
+                "vector": [
+                  0.0,
+                  0.0,
+                  -10.0
+                ]
+              }
+            ],
+            "notes": "Software validation only: supported uniform face forces, no print homogenization.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "metric": 1.6187559896308716e-06,
+          "twist_fit_relative_residual": 0.0004551333681093008,
+          "twist_fit_nodes": 708
+        },
+        "medium": {
+          "id": "55c60d6694b64f4e8f06eb857e941a27",
+          "model_id": "4c749a82b1fb484f9a163f7212418775",
+          "elements": 5156,
+          "dofs": 30189,
+          "element_order": 2,
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 2.382,
+          "relative_residual": 6.5691367225229105e-12,
+          "strain_energy_nmm": 0.01878067929854062,
+          "mesh_volume_mm3": 7961.230762553568,
+          "force_balance_error_n": 1.6128426614786742e-11,
+          "moment_balance_error_nmm": 1.4588637213555088e-09,
+          "model_sha256": "19a8e2103a4a7ea950993d5437b151312d893754df23d7c2c3df85bdc734ae7f",
+          "mesh_sha256": "10f8fa9edfa64f0a8c2722ea7a25ec4ba29321d0808b4b7834573a333f603eaf",
+          "setup": {
+            "model_id": "4c749a82b1fb484f9a163f7212418775",
+            "material": {
+              "name": "Synthetic isotropic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.3,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              2
+            ],
+            "loads": [
+              {
+                "face_id": 12,
+                "vector": [
+                  0.0,
+                  0.0,
+                  10.0
+                ]
+              },
+              {
+                "face_id": 11,
+                "vector": [
+                  0.0,
+                  0.0,
+                  -10.0
+                ]
+              }
+            ],
+            "notes": "Software validation only: supported uniform face forces, no print homogenization.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "metric": 1.6184733393000038e-06,
+          "twist_fit_relative_residual": 0.00043715678227024144,
+          "twist_fit_nodes": 703
+        },
+        "fine": {
+          "id": "023575bb696a439585864470dfc1e750",
+          "model_id": "8b287eee9ad346a783da73c66254de0c",
+          "elements": 5979,
+          "dofs": 35190,
+          "element_order": 2,
+          "versions": {
+            "scikit-fem": "12.0.2",
+            "numpy": "2.5.3",
+            "scipy": "1.18.1",
+            "gmsh": "4.15.2"
+          },
+          "seconds": 2.843,
+          "relative_residual": 7.686273794589745e-12,
+          "strain_energy_nmm": 0.01830666900272651,
+          "mesh_volume_mm3": 8097.134210641311,
+          "force_balance_error_n": 2.0797096074442367e-11,
+          "moment_balance_error_nmm": 2.0739566356556545e-09,
+          "model_sha256": "6eb8d1a1a28958330a2c680cff5964c9ad9840b014fe1223ec257f4af5aa091b",
+          "mesh_sha256": "c87a88ad06ac7afefc10a6dc28b86703501abfcb6cc155e190a9e50d8360ed58",
+          "setup": {
+            "model_id": "8b287eee9ad346a783da73c66254de0c",
+            "material": {
+              "name": "Synthetic isotropic validation material",
+              "young_mpa": 210000.0,
+              "poisson": 0.3,
+              "yield_mpa": 250.0,
+              "density_kg_m3": 7850.0
+            },
+            "fixed_faces": [
+              2
+            ],
+            "loads": [
+              {
+                "face_id": 12,
+                "vector": [
+                  0.0,
+                  0.0,
+                  10.0
+                ]
+              },
+              {
+                "face_id": 11,
+                "vector": [
+                  0.0,
+                  0.0,
+                  -10.0
+                ]
+              }
+            ],
+            "notes": "Software validation only: supported uniform face forces, no print homogenization.",
+            "confirmed": true,
+            "reference_id": null,
+            "annotations": [],
+            "setup_proposal_id": null,
+            "conversation": [],
+            "print": {
+              "enabled": false,
+              "rotation_deg": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "infill_pattern": "gyroid",
+              "infill_density": 0.2,
+              "wall_count": 3,
+              "line_width_mm": 0.4,
+              "layer_height_mm": 0.2,
+              "top_layers": 4,
+              "bottom_layers": 4
+            }
+          },
+          "metric": 1.5732074479154123e-06,
+          "twist_fit_relative_residual": 0.00035117844310483175,
+          "twist_fit_nodes": 848
+        }
+      },
+      "checks": [
+        {
+          "gate": "coarse: analytic response",
+          "value": 0.06794910424555245,
+          "limit": 0.05,
+          "passed": false
+        },
+        {
+          "gate": "coarse: residual",
+          "value": 5.358900788452398e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "coarse: force equilibrium / 20 N",
+          "value": 8.218448999336113e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "coarse: moment equilibrium",
+          "value": 7.720793511515695e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "medium: analytic response",
+          "value": 0.06776263008292482,
+          "limit": 0.05,
+          "passed": false
+        },
+        {
+          "gate": "medium: residual",
+          "value": 6.5691367225229105e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "medium: force equilibrium / 20 N",
+          "value": 8.064213307393371e-13,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "medium: moment equilibrium",
+          "value": 7.294318606777545e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "fine: analytic response",
+          "value": 0.03789916179819919,
+          "limit": 0.05,
+          "passed": true
+        },
+        {
+          "gate": "fine: residual",
+          "value": 7.686273794589745e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "fine: force equilibrium / 20 N",
+          "value": 1.0398548037221183e-12,
+          "limit": 1e-07,
+          "passed": true
+        },
+        {
+          "gate": "fine: moment equilibrium",
+          "value": 1.0369783178278272e-11,
+          "limit": 1e-07,
+          "passed": true
+        }
+      ],
+      "stl_source": {
+        "inspection": {
+          "id": "ea1b2075c61a441daeac3e636ac01884",
+          "name": "tube_torsion.stl",
+          "bytes": 816437,
+          "triangles": 3164,
+          "bounds": [
+            [
+              0.0,
+              -10.0,
+              -6.0
+            ],
+            [
+              120.0,
+              10.0,
+              6.0
+            ]
+          ],
+          "extent_mm": [
+            120.0,
+            20.0,
+            12.0
+          ],
+          "surface_area_mm2": 7956.551255182478,
+          "signed_volume_mm3": 7961.230762553533,
+          "watertight": true,
+          "shells": 1,
+          "boundary_edges": 0,
+          "manifold_edges": 4746,
+          "nonmanifold_edges": 0,
+          "degenerate_triangles": 0,
+          "suggested_scale": 1.0,
+          "warnings": [],
+          "source_triangles": 3164,
+          "source_sha256": "1f51a8109ca1a7c9a7378e745d149ff21fc791dfe53124b27823ff07957e363e",
+          "working_sha256": "1f51a8109ca1a7c9a7378e745d149ff21fc791dfe53124b27823ff07957e363e",
+          "preprocessing": {
+            "changed": false,
+            "note": null,
+            "vertex_distance_bound_source_units": 0.0,
+            "vertex_distance_bound_mm": 0.0,
+            "source_volume_units3": 7961.23076255357,
+            "working_volume_units3": 7961.23076255357,
+            "relative_volume_change": 0.0,
+            "fidelity_scope": "Maximum original-vertex distance to a working vertex; not a full surface deviation or feature-preservation certificate."
+          }
+        },
+        "sha256": "1f51a8109ca1a7c9a7378e745d149ff21fc791dfe53124b27823ff07957e363e"
+      },
+      "error": "ValueError: Mesh must contain 1\u2013200,000 tetrahedra. Increase mesh size if too dense.",
+      "passed": false
+    }
+  ],
+  "passed": false,
+  "scope": "Synthetic isotropic CPU P2; three CAD mesh levels and fixed-source STL import. No stress, asymptotic convergence, print calibration or GPU claim.",
+  "source_hashes": {
+    "backend/geometry.py": "94aa0a59525ac549e6d60378124674825651e664e012bb9e68f02579d086cbfd",
+    "backend/solver.py": "200126879092027e859e60fe77250fb9112a2fb2a2350b8b9b68bfe3a1a5975c",
+    "backend/stl_io.py": "e8309d13036c14d51a2d38db038adecce49bccb7ac7dd7f5a2e83b7c127db4f8",
+    "backend/schemas.py": "d6105a4fec514de5436f21a2a606e76ec5d4598b4a2b9e8e49c9b09ed30b6825",
+    "requirements.txt": "14f31b3b9f7ac3ed013226f0885fefddae288a9059d62df05b7d39121aaee704"
+  }
+}

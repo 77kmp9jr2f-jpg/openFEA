@@ -35,6 +35,8 @@ Currently implemented analysis scope: one connected solid; small-strain static e
 - [x] Run numerical/API/build checks and the real browser conversation/GPU/save/report path, review the integration, commit and merge into local main. Source `1a6e8d7`, research `087abcb`, evidence `5bfa601`; the merge preserves that verified tree without conflicts.
 - [x] Complete the image-to-mesh research assessment and the first known-CAD import/refinement corpus: tube, open channel and perforated plate through CAD, STEP and STL. All 15 CPU/P2 cases and 94 predefined gates pass; this is axial validation with two mesh levels, not general convergence or physical calibration.
 - [x] Gate readiness using actual quadratic DOFs, preserve browser autosave through startup outages, restore studies atomically and provide a retry after readiness failures. Browser recovery checks and the dense historical-model capacity gate passed.
+- [x] Repair STL meshing after partial surface parameterization; extend numerical evidence with channel bending and tube torsion at three CAD levels plus frozen STL imports. All eight cases and 38 response/refinement/equilibrium gates pass; initial failures are retained.
+- [x] Replace bounding-box print fractions with actual layer-contour perimeter/skin/core accounting. Compare three synthetic inputs with OrcaSlicer deposition; preserve historical reproduction and disclose method changes. Verify actual GPU/CPU parity, report reproduction and saved comparison reload. Stiffness remains globally homogenized and uncalibrated.
 
 - First coupon analysis on CPU with trust guidance: shipped on `print-stl-workspace` (`56f0faa`). See [MAKING-FEA-COMMON.md](MAKING-FEA-COMMON.md).
 - Own-part + agent path: machine-readable readiness, documented `/api/agent` contract, residual/confirm gates, same guidance and hashes. See [AGENT.md](AGENT.md).
@@ -45,8 +47,8 @@ Currently implemented analysis scope: one connected solid; small-strain static e
 
 ## Next acceptance items
 
-1. Extend the passing curved/2 mm channel/perforated import corpus with thin-wall bending, torsion, finer mesh levels and dense-STL simplification fidelity. Preserve an explicit accuracy budget when preprocessing alters a surface. Current axial tests do not establish those capabilities.
-2. Compare equivalent-solid mass with slicer filament usage, then calibrate stiffness against measured printed coupons in multiple orientations. Keep illustrative pattern factors labelled until that evidence exists.
+1. Validate dense-STL simplification fidelity on curved, thin-wall and perforated inputs with an explicit accuracy budget for altered surfaces. Axial, channel-bending and tube-torsion response checks now pass, but they do not exercise dense preprocessing or establish general convergence.
+2. Broaden the three-case slicer usage comparison (current differences +1.3% to +7.0%) across orientation, wall thickness and printer profiles; then calibrate stiffness against measured coupons in multiple orientations. Keep nominal bead-envelope limits, globally homogenized stiffness and illustrative pattern factors explicit. Spatial wall/infill mechanics need separate validation before adoption.
 3. Exercise another GPU/browser, device loss and larger quadratic systems. The 500,000-DOF request contract is covered; a real solve at that limit is not established.
 4. Execute the proposed image-to-3D benchmark on known CAD after selecting providers and an explicit spending budget. The research report is complete; no assets or paid trials were generated.
 5. Run updated Linux CI after an explicitly authorized push. Keep Sites hosting in planning until service isolation, hosted authentication and persistence are implemented and separately approved for release.
