@@ -53,6 +53,7 @@ def _simplify_with_measurement(triangles):
     topology, volume and sampled-distance checks determine acceptance.
     """
     import fast_simplification
+    from .stl_fidelity import SURFACE_RELATIVE_LIMIT
 
     tris = _as_triangles(triangles)
     if len(tris) <= MAX_WORK_TRIANGLES:
@@ -62,20 +63,26 @@ def _simplify_with_measurement(triangles):
     # Match inspection's coincidence tolerance without spatial grid averaging.
     _, first, inverse = np.unique(np.round(tris.reshape(-1, 3), 7), axis=0,
                                   return_index=True, return_inverse=True)
-    coincidence = float(np.ptp(tris.reshape(-1, 3), axis=0).max()) * 1e-6
+    surface_budget = float(np.ptp(tris.reshape(-1, 3), axis=0).max()) * SURFACE_RELATIVE_LIMIT
     failures = []
     for mode, options in (('lossless', {'lossless': True}),
                           ('target-count', {'target_count': min(8000, MAX_WORK_TRIANGLES), 'agg': 3}),
                           ('target-count', {'target_count': min(40000, MAX_WORK_TRIANGLES), 'agg': 3})):
         try:
+            # Keep the established numerical cleanup for lossless output.
+            # Count-targeted output additionally needs true short-edge handling:
+            # grid cells alone leave near-coincident endpoints across boundaries.
+            coincidence = surface_budget / (100 if mode == 'lossless' else 10)
             # The native wrapper uses shared mutable buffers; copy under lock.
             with _SIMPLIFIER_LOCK:
                 points, faces = fast_simplification.simplify(tris.reshape(-1, 3)[first],
                     inverse.reshape(-1, 3), **options)
                 candidate = points[faces].astype(np.float32).astype(np.float64)
-            candidate = _clean_reduced(candidate, coincidence)
+            candidate = _clean_reduced(candidate, coincidence, grid_cleanup=mode == 'lossless')
             measurement = _check_reduction(tris, source, candidate)
             measurement['reduction_mode'] = mode
+            measurement['coincidence_method'] = ('grid-v1' if mode == 'lossless'
+                                                  else 'bounded-short-edge-components-v1')
             measurement['coincidence_tolerance_source_units'] = coincidence
             measurement['coincidence_tolerance_mm'] = coincidence
             if mode == 'target-count':
@@ -90,24 +97,51 @@ def _simplify_with_measurement(triangles):
                      + ' Export a coarser CAD STL.')
 
 
-def _clean_reduced(candidate, coincidence=None):
+def _clean_reduced(candidate, coincidence=None, *, grid_cleanup=False):
     # Validate actual binary-STL precision. Remove only collapsed/zero-area
     # output faces, then independently check the entire remaining boundary.
-    # Native quadric reduction leaves near-coincident vertices on skinny faces.
-    # Merge at 1/100 of the surface budget; the complete result still has to
-    # pass the original topology, volume and bidirectional sample gates.
-    if coincidence:
+    # Count-targeted quadric reduction leaves short edges across grid cells.
+    # Its cleanup uses mesh edges and bounded component movement. Lossless
+    # output retains the finer established grid; both reject face reversals
+    # and pass the original independent topology and surface-fidelity gates.
+    original_normals = np.cross(candidate[:, 1]-candidate[:, 0], candidate[:, 2]-candidate[:, 0])
+    if coincidence and grid_cleanup:
+        # Preserve the existing lossless path, including incidence-weighted
+        # centers. Its finer grid passed the retained CAD/STEP/STL corpus.
         _, inverse = np.unique(np.round(candidate.reshape(-1, 3) / coincidence),
                                axis=0, return_inverse=True)
         vertices = np.zeros((int(inverse.max())+1, 3))
         np.add.at(vertices, inverse, candidate.reshape(-1, 3))
         vertices /= np.bincount(inverse)[:, None]
         candidate = vertices[inverse.reshape(-1, 3)].astype(np.float32).astype(np.float64)
+    elif coincidence:
+        from scipy.sparse import coo_matrix
+        from scipy.sparse.csgraph import connected_components
+        vertices, inverse = np.unique(candidate.reshape(-1, 3), axis=0, return_inverse=True)
+        faces = inverse.reshape(-1, 3)
+        edges = np.concatenate([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]])
+        short = np.linalg.norm(vertices[edges[:, 1]] - vertices[edges[:, 0]], axis=1) <= coincidence
+        edges = edges[short]
+        count, groups = connected_components(coo_matrix(
+            (np.ones(len(edges)), (edges[:, 0], edges[:, 1])),
+            shape=(len(vertices), len(vertices))), directed=False)
+        centers = np.zeros((count, 3))
+        np.add.at(centers, groups, vertices)
+        centers /= np.bincount(groups)[:, None]
+        merged = centers[groups].astype(np.float32).astype(np.float64)
+        # A chain of short edges can span an arbitrarily large distance. Leave
+        # the entire component unchanged if any vertex would move too far.
+        too_far = np.unique(groups[np.linalg.norm(merged - vertices, axis=1) > coincidence])
+        preserve = np.isin(groups, too_far)
+        merged[preserve] = vertices[preserve]
+        candidate = merged[faces]
     _, ids = np.unique(np.round(candidate.reshape(-1, 3), 7), axis=0, return_inverse=True)
     f = ids.reshape(-1, 3)
+    normals = np.cross(candidate[:, 1]-candidate[:, 0], candidate[:, 2]-candidate[:, 0])
     keep = ((f[:, 0] != f[:, 1]) & (f[:, 1] != f[:, 2]) & (f[:, 2] != f[:, 0]) &
-            (np.linalg.norm(np.cross(candidate[:, 1]-candidate[:, 0],
-                                     candidate[:, 2]-candidate[:, 0]), axis=1) >= 2e-16))
+            (np.linalg.norm(normals, axis=1) >= 2e-16))
+    if np.any(np.einsum('ij,ij->i', normals[keep], original_normals[keep]) <= 0):
+        raise ValueError('Short-edge cleanup reversed a retained surface triangle.')
     return candidate[keep]
 
 

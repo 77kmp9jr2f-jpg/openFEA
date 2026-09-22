@@ -1,0 +1,96 @@
+{
+  "input": {
+    "study_id": "ef659369a1214b63bc6d6a07095c3b14",
+    "model_id": "311a66e496cc43baad571b1292df2d8e",
+    "source": "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-validation-g7syn7k9",
+    "cpu_run_id": "7b6015ee175247ca89a362873ee585f0",
+    "files": {
+      "models/311a66e496cc43baad571b1292df2d8e/model.json": "227f2dd04534ce84f19ae362df001843aa938374a0ce44c9f909c8defc7102e1",
+      "models/311a66e496cc43baad571b1292df2d8e/stl-provenance.json": "f4a6214b0ac8e917e39b5786d9461ca651cd8c75374e6ef4bc39991f171f5bd0",
+      "models/311a66e496cc43baad571b1292df2d8e/working.stl": "7ba068b52317aef74a6f45cbccc967a07809c4f14daf61ba0d18203ba1af83eb",
+      "models/311a66e496cc43baad571b1292df2d8e/model.stl": "4dcf44894b0ee3f80b6f618ee8bcfa473239da9b9d0517cb8861d61541d9ff61",
+      "models/311a66e496cc43baad571b1292df2d8e/mesh.msh": "d26dea321aeeb7e56fe54ebd0f5bbb3565eefabcc3a9c8e7d01584bbfc83e964",
+      "models/311a66e496cc43baad571b1292df2d8e/mesh.npz": "b1fb70c9e4422b3faeb626737f63a2fa47a04b92636031051ae08f1f46b41837",
+      "models/311a66e496cc43baad571b1292df2d8e/source.stl": "a428c7e4dcf5218f1a2928a6af1bc50ae9c65ef6ca46ebd89f7028e8a86fad4c",
+      "stls/56f733155dbb4140b4bc7800ac0a5780/unit.stl": "7ba068b52317aef74a6f45cbccc967a07809c4f14daf61ba0d18203ba1af83eb",
+      "stls/56f733155dbb4140b4bc7800ac0a5780/scaled-1.stl": "7ba068b52317aef74a6f45cbccc967a07809c4f14daf61ba0d18203ba1af83eb",
+      "stls/56f733155dbb4140b4bc7800ac0a5780/inspect.json": "722fa629c82fc1484ae138157696c09f205c1a89f3cac3d1cf71ea3088224c8f",
+      "stls/56f733155dbb4140b4bc7800ac0a5780/source.stl": "a428c7e4dcf5218f1a2928a6af1bc50ae9c65ef6ca46ebd89f7028e8a86fad4c"
+    }
+  },
+  "gpu_run_id": "9e62c71c8ec847d4aec9c2c1efe2cda5",
+  "cpu_run_id": "7b6015ee175247ca89a362873ee585f0",
+  "comparison_reference": "evidence/dense-stl-short-edge-validation.json",
+  "device": {
+    "backend": "webgpu",
+    "device": "apple \u00b7 metal-3",
+    "precision": "GPU float32 with browser float64 iterative refinement",
+    "method": "WebGPU conjugate gradient, symmetric Jacobi scaling",
+    "iterations": 12000,
+    "refinements": 5,
+    "gpu_seconds": 13.411400000095368,
+    "device_source": "Browser-reported adapter; numerical residual independently verified on server"
+  },
+  "dofs": 82491,
+  "elements": 14724,
+  "gpu_seconds_with_verification": 18.368,
+  "cpu_seconds": 24.798,
+  "gpu_relative_residual": 7.082362526273271e-09,
+  "cpu_relative_residual": 1.5733624231643667e-11,
+  "displacement_relative_l2_error": 3.781127322687543e-09,
+  "peak_stress_relative_error": 1.491009538057142e-09,
+  "max_displacement_mm": 0.00014235017592635835,
+  "original_source_sha256": "a428c7e4dcf5218f1a2928a6af1bc50ae9c65ef6ca46ebd89f7028e8a86fad4c",
+  "old_model_id": "f75b2897b0554b54b7df402d131d65e3",
+  "old_min_quality": 1.4071152771599055e-06,
+  "new_min_quality": 0.00016501700928183756,
+  "quality_ratio": 117.27326961789849,
+  "mesh_sha256": "d26dea321aeeb7e56fe54ebd0f5bbb3565eefabcc3a9c8e7d01584bbfc83e964",
+  "identical_setup_and_mesh_for_cpu_gpu": true,
+  "same_source_stl_as_failed_gpu_case": true,
+  "scope": "Actual GPU execution on a freshly reduced and remeshed synthetic tube. Compared with its retained CPU solution; not general mesh-quality or physical acceptance. Old immutable studies are unchanged.",
+  "file_hashes": {
+    "data/runs/9e62c71c8ec847d4aec9c2c1efe2cda5/result.json": "4f56e300b7355690bb4d47ff42fb430479e18f6e4cc9fc829e3ad7ff50652d87",
+    "data/runs/9e62c71c8ec847d4aec9c2c1efe2cda5/solution.npz": "942cc770815f999601915400c8ceaed52ee0b03e792cde74bbbd2399a4528bb4",
+    "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-validation-g7syn7k9/runs/7b6015ee175247ca89a362873ee585f0/result.json": "5fe9b82b4f1f718ed3228b8e58a06fa9865ae2c8f99fb3e1c7be72ff5fc41f06",
+    "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-validation-g7syn7k9/runs/7b6015ee175247ca89a362873ee585f0/solution.npz": "4960ca84ec493708d90d2f6bfb0ca91f0eb5c3659f5f2b31151ab41952543533"
+  },
+  "gates": {
+    "relative_displacement_lt_1e-5": true,
+    "relative_stress_lt_1e-4": true,
+    "residual_lt_1e-7": true
+  },
+  "final_code_recheck": {
+    "corpus_file": "evidence/dense-stl-short-edge-validation.json",
+    "data_directory": "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-validation-le0qziw7",
+    "model_id": "1658d61b7c854681a257d392745d3084",
+    "cpu_run_id": "729f7543e2bc43bb8c6a286789dcf66c",
+    "identical_working_stl_and_tetrahedral_mesh": true,
+    "verified_hashes": {
+      "working.stl": "7ba068b52317aef74a6f45cbccc967a07809c4f14daf61ba0d18203ba1af83eb",
+      "mesh.msh": "d26dea321aeeb7e56fe54ebd0f5bbb3565eefabcc3a9c8e7d01584bbfc83e964",
+      "source.stl": "a428c7e4dcf5218f1a2928a6af1bc50ae9c65ef6ca46ebd89f7028e8a86fad4c"
+    },
+    "source_hashes": {
+      "backend/stl_io.py": "d134b9b33f2df47f5a0c9a615172d793bcf425e2d25b38cb28c374939d7c29df",
+      "backend/stl_fidelity.py": "af511f4e8fe4ef86dd37712863b778db8056db97a5c5c44b09a4a224117b5404",
+      "backend/geometry.py": "aa005749eae4e87df0eba49d1d0212762205b0bb2a6b122bbbc258efb492a073",
+      "requirements.txt": "84463f3eddd3f38c48252a5c1fb7f2711a691055f68894442aecd00611ce61be",
+      "scripts/validate_dense_stl.py": "f39f056987acab0dbdb95da9b6a80e3fa0f9b55c4a0c9066dffe60372bed57ba"
+    },
+    "source_comment_reconciliation": {
+      "file": "backend/stl_io.py",
+      "tested_sha256": "d134b9b33f2df47f5a0c9a615172d793bcf425e2d25b38cb28c374939d7c29df",
+      "final_sha256": "42a4060fb3ec153978573c0b13204d05ef6742d4b2fa9c3986b7bb4c01c70e6c",
+      "note": "Only the four-line cleanup comment was clarified while the final corpus ran. Replacing the final comment with its preceding text reproduces the recorded tested hash; executable code is unchanged."
+    },
+    "note": "Final production strategy and face-reversal guard produce byte-identical tube working geometry and mesh to the actual GPU run. The final three-case corpus passes all 69 original gates."
+  },
+  "browser_verification": {
+    "completed_study_id": "ae59a3cdab014aa2bed91fe0c03da7e1",
+    "reload_restored_same_result": true,
+    "report_href": "/api/runs/9e62c71c8ec847d4aec9c2c1efe2cda5/report/pdf",
+    "screenshot": "evidence/short-edge-gpu-result.png",
+    "screenshot_sha256": "db42977540df39ee0f97553737d7f29cc0b8910e146f820e23f2217e6379b905"
+  }
+}

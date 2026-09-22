@@ -1,0 +1,317 @@
+{
+  "source_model_id": "f75b2897b0554b54b7df402d131d65e3",
+  "source_mesh_sha256": "ff73c2760be4596152c1983d9a55cd75dfe4af9154f3493684642f468bfd112e",
+  "scope": "Exploratory diagnosis before the production repair. Sequential volume optimizers are not independent trials and are not adopted. Surface probes start from the historical working STL; final production validation starts from the original uploaded STL.",
+  "volume_optimizer_sequence": [
+    {
+      "method": "original",
+      "tets": 14866,
+      "quality_quantiles": [
+        1.4071152774319134e-06,
+        1.0335218780877465e-05,
+        9.241467446674705e-05,
+        0.07838305204016605,
+        0.6496867610279737
+      ],
+      "below_1e-3": 488
+    },
+    {
+      "tets": 29550,
+      "quality_quantiles": [
+        1.4071152774319134e-06,
+        9.831796760069728e-06,
+        9.238852377849391e-05,
+        0.07972536617815926,
+        0.6565382484114878
+      ],
+      "below_1e-3": 975,
+      "method": "Netgen",
+      "seconds": 0.5593553329817951,
+      "boundary_nodes_identical": true
+    },
+    {
+      "tets": 29550,
+      "quality_quantiles": [
+        -0.12018950028518939,
+        1.0550871428993987e-05,
+        8.80567513195211e-05,
+        0.0828336799118563,
+        0.6661304784939244
+      ],
+      "below_1e-3": 989,
+      "method": "Relocate3D",
+      "seconds": 0.13189266715198755,
+      "boundary_nodes_identical": true
+    },
+    {
+      "tets": 30011,
+      "quality_quantiles": [
+        1.4071152774319134e-06,
+        1.4615253771566076e-05,
+        8.51715887850701e-05,
+        0.07329418980574293,
+        0.6589450057565811
+      ],
+      "below_1e-3": 1041,
+      "method": "Gmsh",
+      "seconds": 0.21690537501126528,
+      "boundary_nodes_identical": true
+    }
+  ],
+  "surface_cleanup_probes": [
+    {
+      "radius": 6e-05,
+      "pairs": 51,
+      "triangles": 7746,
+      "quality_quantiles": [
+        4.216215863163688e-06,
+        4.78302804861138e-05,
+        0.00010971457328929803,
+        0.002841801782113471,
+        0.7385263678330483
+      ],
+      "inspection": {
+        "triangles": 7746,
+        "bounds": [
+          [
+            -7.0829866416488585e-09,
+            -10.0,
+            -10.0
+          ],
+          [
+            60.0,
+            10.0,
+            10.000020980834961
+          ]
+        ],
+        "extent_mm": [
+          60.00000000708299,
+          20.0,
+          20.00002098083496
+        ],
+        "surface_area_mm2": 6421.873854534196,
+        "signed_volume_mm3": 12064.78606662982,
+        "watertight": true,
+        "shells": 1,
+        "boundary_edges": 0,
+        "manifold_edges": 11619,
+        "nonmanifold_edges": 0,
+        "inconsistent_winding_edges": 0,
+        "degenerate_triangles": 0,
+        "euler_characteristic": 0,
+        "suggested_scale": 1.0,
+        "warnings": []
+      },
+      "fidelity": {
+        "max_sample_distance_source_units": 0.0059866750521161685,
+        "max_sample_distance_mm": 0.0059866750521161685,
+        "limit_source_units": 0.006,
+        "limit_mm": 0.006,
+        "source_to_working_source_units": 0.0059866750521161685,
+        "working_to_source_source_units": 0.002132297847605244,
+        "source_samples": 1738240,
+        "working_samples": 54222,
+        "relative_to_longest_extent": 9.977791753526947e-05,
+        "relative_limit": 0.0001,
+        "scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified."
+      },
+      "seconds": 20.64522441686131
+    },
+    {
+      "radius": 0.0006,
+      "pairs": 214,
+      "triangles": 7442,
+      "quality_quantiles": [
+        0.00013557260096729568,
+        0.00040026182641465525,
+        0.001335343929082208,
+        0.14272292036142745,
+        0.7640111572065544
+      ],
+      "inspection": {
+        "triangles": 7442,
+        "bounds": [
+          [
+            -7.0829866416488585e-09,
+            -10.0,
+            -10.0
+          ],
+          [
+            60.0,
+            10.0,
+            10.000020980834961
+          ]
+        ],
+        "extent_mm": [
+          60.00000000708299,
+          20.0,
+          20.00002098083496
+        ],
+        "surface_area_mm2": 6421.873747699588,
+        "signed_volume_mm3": 12064.786061101926,
+        "watertight": true,
+        "shells": 1,
+        "boundary_edges": 0,
+        "manifold_edges": 11163,
+        "nonmanifold_edges": 0,
+        "inconsistent_winding_edges": 0,
+        "degenerate_triangles": 0,
+        "euler_characteristic": 0,
+        "suggested_scale": 1.0,
+        "warnings": []
+      },
+      "fidelity": {
+        "max_sample_distance_source_units": 0.0059866750521161685,
+        "max_sample_distance_mm": 0.0059866750521161685,
+        "limit_source_units": 0.006,
+        "limit_mm": 0.006,
+        "source_to_working_source_units": 0.0059866750521161685,
+        "working_to_source_source_units": 0.002132297847605244,
+        "source_samples": 1738240,
+        "working_samples": 52094,
+        "relative_to_longest_extent": 9.977791753526947e-05,
+        "relative_limit": 0.0001,
+        "scope": "Upper bound on nearest-triangle distance at vertices, edge midpoints and face centroids in both directions; accepted reductions sample every face. Triangle-size groups and enclosing-radius queries bound the candidate search. Unsampled surface regions and small-feature preservation are not certified."
+      },
+      "seconds": 20.575799375073984
+    }
+  ],
+  "probe_meshing": [
+    {
+      "radius": 6e-05,
+      "model_id": "db42d806e32f49ffbac0e46137000377",
+      "tetrahedra": 14786,
+      "min_quality": 5.1626793476710215e-06,
+      "mesh_sha256": "c94f7bef4305613beccc861eaab62d5912d7880151e72dcd8c1381a18d40b18c",
+      "data_directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-mesh-recovery-1w4t1gjk"
+    },
+    {
+      "radius": 0.0006,
+      "model_id": "3c2b7a35d1d1413b87722167d1759efd",
+      "tetrahedra": 14726,
+      "min_quality": 0.00016501700927383896,
+      "mesh_sha256": "4ca7e0f1ec1d0def42dc7c13aa9818a6e848495f208e36ad9f31b4dc60d5e1c8",
+      "data_directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-mesh-recovery-1w4t1gjk"
+    }
+  ],
+  "conclusion": "Volume-only optimization left the minimum quality essentially unchanged; Relocate3D introduced inversion in this sequence. Connected short-edge cleanup is tested in production with bounded vertex movement and unchanged topology/surface/volume gates.",
+  "plate_retained_facet_probe": {
+    "method": "prototype retain checked surface facets, without parametrization",
+    "model_id": "e4b2ba02b40d43cf9c8ca6e511589008",
+    "tets": 21167,
+    "min_quality": 0.060599197806523585,
+    "data_directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-plate-recovery-_8ygntwq",
+    "source_surface_quality": [
+      0.07747112116237419,
+      0.08295836878819149,
+      0.10816944253966056,
+      0.9774517493307605
+    ],
+    "solve": {
+      "id": "33aea5ecb36d4f78bfaf9987ba7382d9",
+      "elements": 21167,
+      "dofs": 132732,
+      "element_order": 2,
+      "versions": {
+        "scikit-fem": "12.0.2",
+        "numpy": "2.5.3",
+        "scipy": "1.18.1",
+        "gmsh": "4.15.2"
+      },
+      "seconds": 38.343,
+      "max_displacement_mm": 0.0001383911726813348,
+      "strain_energy_nmm": 0.006718666247830777,
+      "relative_residual": 3.4046770699807506e-13,
+      "force_balance_error_n": 7.239605163771959e-11,
+      "moment_balance_error_nmm": 1.5386539242725148e-09,
+      "mesh_volume_mm3": 13773.390815311823,
+      "model_id": "e4b2ba02b40d43cf9c8ca6e511589008",
+      "geometry_sha256": "f1d85f59bcba33c537dd1966a675e940787bf24c2dd1bee6afdf9cc09557e340",
+      "mesh_sha256": "bd719853e28def674e1a4c3f78a552cba7bef21153b84296b482fc44afac9609",
+      "volume_mm3": 13773.390815311832,
+      "bounds": [
+        [
+          0.0,
+          0.0,
+          -4.554454147154274e-09
+        ],
+        [
+          60.0,
+          40.0,
+          6.0
+        ]
+      ],
+      "min_quality": 0.060599197806523585,
+      "loaded_area_mm2": 240.0,
+      "setup": {
+        "model_id": "e4b2ba02b40d43cf9c8ca6e511589008",
+        "material": {
+          "name": "Synthetic validation material",
+          "young_mpa": 210000.0,
+          "poisson": 0.0,
+          "yield_mpa": 250.0,
+          "density_kg_m3": 7850.0
+        },
+        "fixed_faces": [
+          8
+        ],
+        "loads": [
+          {
+            "face_id": 9,
+            "vector": [
+              100.0,
+              0.0,
+              0.0
+            ]
+          }
+        ],
+        "notes": "Known-CAD import validation. Synthetic dimensions and inputs; isotropic solid, no print calibration.",
+        "confirmed": true,
+        "reference_id": null,
+        "annotations": [],
+        "setup_proposal_id": null,
+        "conversation": [],
+        "print": {
+          "enabled": false,
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "infill_pattern": "gyroid",
+          "infill_density": 0.2,
+          "wall_count": 3,
+          "line_width_mm": 0.4,
+          "layer_height_mm": 0.2,
+          "top_layers": 4,
+          "bottom_layers": 4
+        }
+      }
+    },
+    "relative_displacement_error_vs_cad": 0.06175478724717043,
+    "adopted": false,
+    "reason": "Although algebra and element quality passed, displacement deviated beyond the existing 5% CAD gate."
+  },
+  "local_fold_review": {
+    "source": "independent read-only review; reproduced in tests/test_stl_cleanup.py",
+    "source_extent_mm": 20,
+    "cleanup_radius_mm": 0.0002,
+    "retained_cap_area_before_mm2": 1e-05,
+    "retained_cap_area_after_mm2": -3e-05,
+    "relative_volume_change": 2.1e-06,
+    "surface_sample_distance_mm": 8e-05,
+    "surface_budget_mm": 0.002,
+    "prior_acceptance": "Watertight/Euler/volume/sample-distance checks passed despite a new local fold.",
+    "repair": "Reject cleanup candidate if any retained triangle reverses its old/new normal; regression failed before repair and passed afterward."
+  },
+  "final_strategy": {
+    "lossless": "Preserve established spatial grid at surface budget / 100.",
+    "target_count": "Bounded short-edge components at surface budget / 10.",
+    "both": "Reject any retained face whose old/new normal dot product is nonpositive, then retain existing independent fidelity gates.",
+    "all_69_final_corpus_gates_pass": true,
+    "full_backend_suite": "103 passed; two existing dependency deprecation warnings.",
+    "independent_final_review": "Five cleanup regressions passed independently; no remaining concrete correctness defect found. Source hash discrepancy reconciled as a four-line comment-only edit, preserving original executed hash.",
+    "geometry_py_changed": false,
+    "historical_models_mutated": false
+  }
+}
