@@ -82,6 +82,8 @@ An isolated OrcaSlicer 2.4.2 comparison used the same input surfaces, 0.2 mm lay
 
 This exploratory comparison supports removing the box approximation for hollow/thin geometry. It does not establish a universal error bound or physical mass. The tube still differs by 7%; its slicer uses gap fill and bead geometry that the nominal envelope does not resolve. The saved G-code omits machine startup operations and is for measurement only, not printing. Stiffness calibration still requires measured coupons in multiple orientations.
 
+The expanded [orientation/wall/profile matrix](SLICER-MATRIX.md) records 30 cases: 27 measured differences range from -14.37% to +7.09%, while three oblique cases were rejected by the slicer and have no mass comparison. Some orientation rankings disagree. Estimated filament covers the part only, excluding supports, adhesion and purge; check usage and orientation trends with the intended slicer profile. Print-frame rotation does not verify bed contact, overhangs or printability. These limits appear in current preview assumptions and new reports.
+
 ## Compare two print configs
 
 Pin a completed run. Change orientation, walls, or infill. Confirm and solve again. Results show a side-by-side table (displacement, peak von Mises, filament mass, solid fraction, effective E, print settings and volume method). `GET /api/runs/{a}/compare/{b}` is the same payload. The API returns `same_analysis_context` and `context_differences` across model, mesh, interpolation, material, supports, loads and print volume method. Changed conditions are disclosed; their effects cannot be attributed to print settings alone. Pins survive browser and saved-study reload.

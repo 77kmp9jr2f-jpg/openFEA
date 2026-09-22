@@ -30,7 +30,9 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def prepare_profiles(source, target):
+def prepare_profiles(source, target, *, settings=None,
+                     machine_profile='Bambu Lab X1 Carbon 0.4 nozzle',
+                     process_profile='0.20mm Standard @BBL X1C'):
     paths = {p.stem: p for p in source.rglob('*.json')}
     hashes = {}
     def flatten(name):
@@ -39,17 +41,22 @@ def prepare_profiles(source, target):
         data = json.loads(path.read_text())
         return {**(flatten(data['inherits']) if data.get('inherits') else {}), **data}
     for kind, name, overrides in [
-        ('machine', 'Bambu Lab X1 Carbon 0.4 nozzle', MACHINE_OVERRIDES),
-        ('process', '0.20mm Standard @BBL X1C', PROCESS_OVERRIDES),
+        ('machine', machine_profile, MACHINE_OVERRIDES),
+        ('process', process_profile, PROCESS_OVERRIDES),
         ('filament', 'Generic PLA', FILAMENT_OVERRIDES),
     ]:
         data = flatten(name)
         data.pop('inherits', None)
         data.update(overrides)
         if kind == 'process':
+            if settings is not None:
+                data.update(wall_loops=str(settings.wall_count), layer_height=str(settings.layer_height_mm),
+                    initial_layer_print_height=str(settings.layer_height_mm), top_shell_layers=str(settings.top_layers),
+                    bottom_shell_layers=str(settings.bottom_layers), sparse_infill_density=f'{100*settings.infill_density:g}%',
+                    sparse_infill_pattern=settings.infill_pattern)
             for key in data:
                 if 'line_width' in key:
-                    data[key] = '0.4'
+                    data[key] = str(settings.line_width_mm) if settings is not None else '0.4'
         (target/f'{kind}.json').write_text(json.dumps(data, indent=2)+'\n')
     return hashes
 

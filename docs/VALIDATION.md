@@ -2,6 +2,14 @@
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
 
+## Print-usage matrix and scope guidance — 2026-09-22
+
+The [30-case slicer matrix](SLICER-MATRIX.md) exercises three frozen geometries across orientation, wall count, infill and two X1 Carbon nozzle/layer profiles. **27 cases produced verified model-only deposition measurements**; their OpenFEA/slicer mass differences range from **-14.37% to +7.09%**. Three oblique cases failed in OrcaSlicer with exit 156 and generic `Errors`; their source/log evidence is preserved, with no fabricated comparison or bypass. The recorded range is exploratory, not an acceptance threshold. Orientation rankings can differ, and printed stiffness is not established by deposition agreement.
+
+All 171 retained compressed/uncompressed artifact hashes, effective settings, saved placement transforms and extrusion-role sums were independently rechecked. Automatic arrangement had rotated an initial probe; the final runner prepositions geometry, disables arrangement/orientation and rejects non-translation transforms. Independent review also prompted separate artifact directories and persistent placement XML. Existing default profile outputs are byte-identical. Full method, table and limitations are in the linked report; evidence is `slicer-matrix.json`, `slicer-matrix-review.json` and `slicer-matrix-artifacts/`.
+
+Print preview and new result assumptions now explicitly exclude support, adhesion and purge from usage estimates and distinguish material-frame orientation from bed-contact/overhang/printability checks. All **16 affected print tests pass**, including current and historical archive subprocess reproduction. Fresh CPU run `5759744043d24a55ae054cdb510f02be` on the preserved coupon gives 0.0995654 mm displacement, 2.51677 g nominal filament and residual 1.897e-11; all four exported PDF pages were rendered and visually inspected with the added guidance present and no overflow. The production browser displays the same new preview guidance. Numerical model behavior and historical results are unchanged.
+
 ## Short-edge reduction and tube GPU recovery — 2026-09-22
 
 Count-targeted STL reduction now merges vertices connected by short mesh edges, rather than relying on spatial-grid placement. Its radius is one tenth of the existing surface-sample budget; a connected component stays intact if any vertex would move farther. Nearby vertices on unrelated edges are not welded by this path. Lossless reduction retains the established finer grid at one hundredth of the budget. Both paths reject a candidate when cleanup reverses a retained surface triangle, then apply the unchanged independent topology, volume and sampled-distance checks. This guard prevents newly introduced local folds; it does not certify absence of all self-intersections.

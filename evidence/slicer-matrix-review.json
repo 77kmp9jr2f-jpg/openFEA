@@ -1,0 +1,48 @@
+{
+  "source_record": "evidence/slicer-matrix.json",
+  "source_record_sha256": "ebe8e4338ba6ce6254c52e49a368b709c2b363c0acd4d9cca59a20efa53d5e05",
+  "completed_cases": 30,
+  "measured_cases": 27,
+  "failed_cases": [
+    "box-oblique",
+    "channel-oblique",
+    "tube-oblique"
+  ],
+  "mass_difference_range_percent": [
+    -14.37317709532503,
+    7.093211984053127
+  ],
+  "artifact_entries_verified": 171,
+  "effective_settings_and_saved_placement_rechecked": true,
+  "uncompressed_hashes_and_role_deposition_rechecked": true,
+  "existing_default_profiles_byte_identical": true,
+  "scope": "Independent artifact/hash/settings/placement/deposition checks; 27 measured cases are not a universal accuracy bound. The three oblique slicer failures retain their inputs and diagnostic logs; their cause is not established by the generic CLI error.",
+  "fresh_cpu_report_check": {
+    "run_id": "5759744043d24a55ae054cdb510f02be",
+    "baseline_run_id": "12f9942450724ed1876b14254905a847",
+    "max_displacement_mm": 0.09956538701693168,
+    "filament_mass_g": 2.5167733773649217,
+    "relative_residual": 1.8970518574898987e-11,
+    "pdf_path": "/Users/zach/FEA-R/data/runs/5759744043d24a55ae054cdb510f02be/report.pdf",
+    "pdf_sha256": "fbe1f3a0049ecd7e248f87ad7aa3eab9fd19187683717fd469f5bd88f9e2021f",
+    "added_assumptions": [
+      "Additional raster-scale anisotropy, local voids, bonding defects and moisture are not modelled.",
+      "Estimated filament covers the part only; supports, adhesion and purge are excluded. Check usage and orientation trends in your slicer.",
+      "Print orientation defines the material frame; it does not check bed contact, overhangs or whether the part can be printed in that orientation.",
+      "Layer contours use nominal line width and layer height; bead overlap, variable extrusion widths, gap fill and toolpaths are not modeled."
+    ],
+    "pages_visually_checked": 4,
+    "new_assumptions_visible_without_overflow": true
+  },
+  "affected_tests": "16 passed, with two existing dependency deprecation warnings.",
+  "orientation_source_note": {
+    "url": "https://raw.githubusercontent.com/OrcaSlicer/OrcaSlicer/v2.4.2/src/OrcaSlicer.cpp",
+    "observation": "CLI initializes allow_rotations to true. The new matrix disables arrange/orient and verifies saved placement; no conclusion about the generic oblique failure is drawn from this source."
+  },
+  "browser_verification": {
+    "study": "print-coupon",
+    "model_id": "9737ceeb435f40c6855ecef6bacf518a",
+    "new_usage_and_orientation_assumptions_visible": true,
+    "restored_original_gpu_report": "/api/runs/12f9942450724ed1876b14254905a847/report/pdf"
+  }
+}

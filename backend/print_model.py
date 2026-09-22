@@ -74,6 +74,8 @@ def homogenize(bounds, material: Material, settings: PrintSettings, *, regions=N
         pattern_note,
         'Filament modulus, strength and density remain user inputs. No printed-specimen calibration is claimed.',
         'Additional raster-scale anisotropy, local voids, bonding defects and moisture are not modelled.',
+        'Estimated filament covers the part only; supports, adhesion and purge are excluded. Check usage and orientation trends in your slicer.',
+        'Print orientation defines the material frame; it does not check bed contact, overhangs or whether the part can be printed in that orientation.',
     ]
     if regions is not None:
         assumptions.append('Layer contours use nominal line width and layer height; bead overlap, variable extrusion widths, gap fill and toolpaths are not modeled.')
