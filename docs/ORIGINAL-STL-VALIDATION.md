@@ -81,3 +81,29 @@ identity. Its earlier coarse-welded geometry does not satisfy the current
 re-upload acceptance path. Supported ingestion of this original part, independent
 tiny-feature ground truth, broader original/freeform inputs and stress
 convergence remain open work.
+
+## Independent Blender probes — 2026-09-22
+
+Blender 5.1.1 provides an independent reduction implementation. Its
+[collapse modifier](https://docs.blender.org/manual/es/5.1/modeling/modifiers/generate/decimate.html)
+was evaluated in a fresh background process against the exact original STL
+vertices, with no axis conversion or scaling. At 79,998 triangles it remains
+watertight, keeps Euler characteristic −132 and changes volume by 0.1374%, but
+fails the unchanged 0.0345-source-unit surface gate: the first failing samples
+give conservative distances of 0.0386203 forward and 0.0402268 reverse. As with
+the earlier rejected probes, these are early rejection measurements, not global
+maximum distances. The candidate was not adopted, meshed or solved.
+
+A separate planar-only dissolution at 0.1° leaves 1,419,732 triangles, still far
+over the 80,000 limit. It is rejected on count; no surface-fidelity acceptance is
+claimed for it. This result does not justify a larger planar angle or relaxed
+geometry checks. Neither probe changes the original upload or production reducer.
+
+The first sandboxed Blender launch failed during Metal initialization before the
+diagnostic script ran. The same collapse command completed with desktop graphics
+access; this launch failure is retained separately from the geometry verdict.
+[Probe settings, measurements and hashes](../evidence/original-stl-blender-probes.json)
+include the exact disposable scripts as compressed execution artifacts. Candidate
+STLs stay in temporary local storage, because they derive from the private source
+and are rejected geometry. These two configurations failed; other settings or methods remain unassessed.
+Supported ingestion remains open, with original source CAD preferred when available.

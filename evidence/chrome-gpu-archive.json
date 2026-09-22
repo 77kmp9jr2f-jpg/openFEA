@@ -1,0 +1,31 @@
+{
+  "run_id": "3dedaa808aba4a4d876aea8847846535",
+  "archive_path": "/Users/zach/FEA-R/data/runs/3dedaa808aba4a4d876aea8847846535/report.zip",
+  "archive_sha256": "9a6147b1a82b7d126fc6bf03c6fcc726449c287e50995cf5e0d25180fa0b266a",
+  "reproduction_directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-chrome-archive-cwy61kar",
+  "scope": "Export integrity and actual CPU reproduction of this Chrome GPU run on the original mesh. No remeshing, physical or material validation.",
+  "manifest_entries_verified": 27,
+  "exit_code": 0,
+  "stdout": "{\n  \"id\": \"8e667c3562b747229983638c09cf4b49\",\n  \"peak_von_mises_mpa\": 2.247795662216769,\n  \"max_displacement_mm\": 0.00014793482070307433,\n  \"force_balance_error_n\": 6.858780813218233e-11\n}\n",
+  "stderr": "Transforming over 1000 vertices to C_CONTIGUOUS.\nTransforming over 1000 elements to C_CONTIGUOUS.\n",
+  "elapsed_seconds": 116.62266841600649,
+  "reproduced_run_id": "8e667c3562b747229983638c09cf4b49",
+  "identical_setup_and_mesh": true,
+  "relative_displacement_error": 1.0884829581151268e-09,
+  "relative_peak_stress_error": 1.128625082280621e-09,
+  "reproduced_relative_residual": 1.0045572643347778e-12,
+  "reproduced_dofs": 157239,
+  "accepted": true,
+  "reproduced_hashes": {
+    "result.json": "bc2a820ff0328463d40e520e3efdcb09492c534c923f5229a065368869ca4169",
+    "solution.npz": "a9b103910b130d4a856748b75e4049da1e99a4686e7b09760ec8fa630cd73ae4"
+  },
+  "independent_review": {
+    "reviewer": "print_mechanics_review; read-only",
+    "archive_hash_and_all_27_manifest_entries_verified": true,
+    "reproduced_setup_mesh_P2_order_and_coordinates_match": true,
+    "full_displacement_comparison_matches": true,
+    "reproduced_relative_residual_matches": true,
+    "actionable_findings": []
+  }
+}

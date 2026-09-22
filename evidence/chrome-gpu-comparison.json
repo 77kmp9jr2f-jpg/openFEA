@@ -1,0 +1,77 @@
+{
+  "created_at": "2026-09-22T10:18:51.394524+00:00",
+  "scope": "Real Chrome WebGPU versus existing CPU and in-app-browser results on identical mesh, setup and Apple hardware. No other GPU, physical driver loss, material or stress-convergence acceptance.",
+  "browser": "Google Chrome 154.0.8037.17",
+  "run_id": "3dedaa808aba4a4d876aea8847846535",
+  "cpu_run_id": "5fd55c1875554feb902bf286f0da2b36",
+  "in_app_browser_run_id": "2830d44d7b9444dcaf618d24ca7bbf8a",
+  "cpu_reference_directory": "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-validation-9s37wcyt/runs/5fd55c1875554feb902bf286f0da2b36",
+  "model_id": "dd25d6cb578c41da891d630a02374ef8",
+  "mesh_sha256": "e8c69f29f937d7aed86caab106b1ab1ec063e4ae26e9e60e5c70638a520bd268",
+  "identical_setup": true,
+  "identical_dof_coordinates": true,
+  "element_order": 2,
+  "dofs": 157239,
+  "elements": 31333,
+  "execution": {
+    "backend": "webgpu",
+    "device": "apple \u00b7 metal-3",
+    "precision": "GPU float32 with browser float64 iterative refinement",
+    "method": "WebGPU conjugate gradient, symmetric Jacobi scaling",
+    "iterations": 7200,
+    "refinements": 3,
+    "gpu_seconds": 16.145,
+    "device_source": "Browser-reported adapter; numerical residual independently verified on server"
+  },
+  "seconds": 25.553,
+  "relative_displacement_error_vs_cpu": 1.0884829581151268e-09,
+  "relative_displacement_error_vs_in_app_browser": 0.0,
+  "relative_peak_stress_error_vs_cpu": 1.128625082280621e-09,
+  "relative_residual": 1.389799603735738e-09,
+  "force_balance_error_n": 1.4686969679592691e-08,
+  "moment_balance_error_nmm": 6.220277732923075e-07,
+  "gates": {
+    "relative_displacement_lt_1e-5": true,
+    "relative_stress_lt_1e-4": true,
+    "relative_residual_lt_1e-7": true
+  },
+  "hashes": {
+    "data/runs/3dedaa808aba4a4d876aea8847846535/result.json": "f5b5456ef2a692eed260abebbb713178466cc37b52171d2bb478f57e71c1115a",
+    "data/runs/3dedaa808aba4a4d876aea8847846535/solution.npz": "bf9cac93dac3d44399e5d25931cbbb00856d9d441b77244280bb37e93b5f8056",
+    "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-validation-9s37wcyt/runs/5fd55c1875554feb902bf286f0da2b36/result.json": "6b06e58d4e46db14f1a9ef7ad577d1d693a23fd5135e8634dac42b83fcca5239",
+    "/private/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-dense-validation-9s37wcyt/runs/5fd55c1875554feb902bf286f0da2b36/solution.npz": "a9b103910b130d4a856748b75e4049da1e99a4686e7b09760ec8fa630cd73ae4",
+    "data/runs/2830d44d7b9444dcaf618d24ca7bbf8a/result.json": "930ffdf419bc3a1bf23685f4d91d23f476cbc2f0494b11695260f2a0336c19fe",
+    "data/runs/2830d44d7b9444dcaf618d24ca7bbf8a/solution.npz": "bf9cac93dac3d44399e5d25931cbbb00856d9d441b77244280bb37e93b5f8056"
+  },
+  "source_hashes": {
+    "backend/solver.py": "2135209339ad2755be7570aaf7be68a080e7bf6dc0a4eaddaf138f2e1094a8a9",
+    "frontend/src/gpu.ts": "c10810815649211225d8f303f37ddbcab89768ae088f1dce962a6773144aa08c",
+    "frontend/src/App.tsx": "8b3a9b7c98ac95dd733cd35c883e0bcb675081ac8d7d87a64e41ca4bf4d589d3",
+    "backend/report.py": "7999546811f39d69c695e1fe02a82b98302bdf4f4580f9447569879b3dec239e"
+  },
+  "browser_console_errors": [],
+  "study_id": "a1a98b62beab42619fa57f3b043a5dba",
+  "study_sha256": "989655614b1930bc93e7f85e6dd3b052e8c027a94647c38a123ba0d1bf0fd85b",
+  "browser_verification": {
+    "reviewed_setup": "E=210000 MPa, nu=0, fixed face 64 at X=0, total load [100,0,0] N on face 66 at X=60, print disabled; explicitly chose GPU and confirmed before Run.",
+    "saved_study_id": "a1a98b62beab42619fa57f3b043a5dba",
+    "reload_restores_result": true,
+    "reload_action": "Reload, wait for workspace restore, then open Results. Active section defaults to Model and confirmation resets; the completed run is retained.",
+    "report_href": "/api/runs/3dedaa808aba4a4d876aea8847846535/report/pdf",
+    "screenshots": {
+      "evidence/chrome-gpu-plate-result.png": "4e8fc24772b85d5dd913b520f6b41ff91788a1a06b491549206c6ca4efe788d0",
+      "evidence/chrome-gpu-plate-checks.png": "ed5abefeb30e4b945ecfcbd6cc9344cee836d6c43490be7612e7ea5865eb5a43"
+    },
+    "screenshots_visually_inspected": true,
+    "original_completed_study_sha256": "219cd4e093335cca99e025aecf9b9740aec607c720c4e24efa406092b4104971"
+  },
+  "independent_review": {
+    "reviewer": "print_mechanics_review; read-only",
+    "all_result_solution_and_source_hashes_verified": true,
+    "same_setup_model_mesh_P2_order_and_dof_coordinates": true,
+    "actual_mesh_file_hash_verified": true,
+    "maximum_absolute_displacement_difference_mm": 1.4066278533963923e-13,
+    "full_vector_and_stress_comparisons_match_record": true,
+    "actionable_findings": []
+  }
+}
