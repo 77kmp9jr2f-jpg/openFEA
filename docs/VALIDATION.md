@@ -2,6 +2,14 @@
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
 
+## First-layer guidance and supported slicer comparison — 2026-09-22
+
+The three unsupported oblique slicer failures reproduce with detailed logs. Source inspection and controlled probes narrow the cause to an empty first printable layer: removing box elephant-foot compensation alone still fails, while enabling automatic tree supports with otherwise identical profiles/input STLs lets all three complete. Part and support deposition are measured separately; model-only estimate differences are −8.31% (box), +4.64% (channel), and −0.44% (tube). The combined extrusion totals reconcile within 0.00469 mm, and all 27 final artifacts pass compressed/uncompressed hash checks. The initial supported probe's macOS graphics-initialization abort is retained; only complete desktop-enabled exports are accepted. See the [full method and evidence](SLICER-MATRIX.md#oblique-diagnosis-and-separate-support-comparison).
+
+Preview and new reports now advise slicer review when the first model-layer midsection has no positive-area region after a half-line-width inward offset. This is a nominal footprint diagnostic, not proof of first-layer toolpaths, adhesion or printability, and not an FEA readiness gate. Independent current-versus-prior checks on six frozen cases retain identical preexisting region values, full stiffness matrices and usage results. All **23 affected tests pass** with the two known dependency warnings, including an oblique CPU/P2 solve whose warning appears in preview, archived JSON, HTML and the executed reproduction. Historical print-method reproduction also passes.
+
+The production browser displays the warning for the preserved coupon's [30,45,20]° print frame; the [inspected screenshot](../evidence/print-first-layer-warning.png) shows it with unchanged 2.52 g usage. The completed GPU result and comparison are restored afterward, and the original saved-study hash is unchanged. No new GPU execution or physical-print claim is made for this guidance change.
+
 ## Original large STL rejection — 2026-09-22
 
 The preserved 1,441,642-triangle `biscuit-blockerv4.stl` was reprocessed in isolated temporary storage. Its original boundary passes shell, edge, winding and degeneracy checks, but the production reducer stops at 317,596 triangles after conservative count-targeted cleanup, above the 80,000 limit. Three experimental 80,000-target candidates retain topology and volume but fail the unchanged 0.0345-source-unit surface budget. Stronger aggression and coordinate normalization were **not adopted**. No mesh or solve was accepted, and the source hash is unchanged. The [assessment](ORIGINAL-STL-VALIDATION.md) and linked measurements retain the failures and their scope.

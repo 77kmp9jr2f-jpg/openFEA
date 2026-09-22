@@ -1,0 +1,148 @@
+{
+  "source_directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-ui_xgdeq/box-oblique",
+  "directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-oblique-probes-r_2yrk6e",
+  "cases": [
+    {
+      "name": "support-enabled",
+      "changes": {
+        "enable_support": "1"
+      },
+      "exit_code": -6,
+      "stdout": "",
+      "gcode_exists": true,
+      "accepted_measurement": false,
+      "profile_differences": {
+        "machine.json": {},
+        "process.json": {
+          "enable_support": [
+            "0",
+            "1"
+          ]
+        },
+        "filament.json": {}
+      },
+      "input_matches_baseline": true,
+      "artifacts": [
+        {
+          "path": "evidence/slicer-oblique-probes-artifacts/support-enabled.process.json.gz",
+          "sha256": "d345b28b1bec8c937da0d7772fe4ce3f3a1afe039ac8e109e75f20827d84e477",
+          "uncompressed_sha256": "59825f0e582cc8b1fe593c334dbec36a9fe314630c4f5a4f2618202d20df82cb"
+        },
+        {
+          "path": "evidence/slicer-oblique-probes-artifacts/support-enabled.diagnostic.log.gz",
+          "sha256": "92ae542e1788e75782fae5e2577e206d327b7e01905a054040b5d0f0152a69b2",
+          "uncompressed_sha256": "6311269d69c3905f79ee3cd4e4c7cc828e84ba5d6970664f22971f01b1e8f0b0"
+        },
+        {
+          "path": "evidence/slicer-oblique-probes-artifacts/support-enabled.slicer.log.gz",
+          "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+          "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "name": "no-elephant-foot",
+      "changes": {
+        "elefant_foot_compensation": "0"
+      },
+      "exit_code": 156,
+      "stdout": "Errors\nrun found error, exit\n",
+      "gcode_exists": false,
+      "accepted_measurement": false,
+      "profile_differences": {
+        "machine.json": {},
+        "process.json": {
+          "elefant_foot_compensation": [
+            "0.15",
+            "0"
+          ]
+        },
+        "filament.json": {}
+      },
+      "input_matches_baseline": true,
+      "artifacts": [
+        {
+          "path": "evidence/slicer-oblique-probes-artifacts/no-elephant-foot.process.json.gz",
+          "sha256": "f3975c8bae2e297647245870e79928c9ec61ac198353496ae5496099acaad699",
+          "uncompressed_sha256": "4c49c775b16304a6a48383bdc11014bb4005fe6105208190ce4e16f33aca32a4"
+        },
+        {
+          "path": "evidence/slicer-oblique-probes-artifacts/no-elephant-foot.diagnostic.log.gz",
+          "sha256": "2d35748ab1658f48ec711caf58a655e9546cd5c56f89bf87ca76f3dfb2ef4a4c",
+          "uncompressed_sha256": "c89ff5d38b3185bb4819a10a52e5a8381a6c5dd3fc41786b31d39cf845d54f58"
+        },
+        {
+          "path": "evidence/slicer-oblique-probes-artifacts/no-elephant-foot.slicer.log.gz",
+          "sha256": "375f331c4b57f4b10f39f14a000fafdd6a50176e118850121379ef836aa61474",
+          "uncompressed_sha256": "027fc05bd55b619931c8a427332f04fb35a9e53ccc913df29cc4835bd31faec1"
+        }
+      ]
+    }
+  ],
+  "baseline_artifacts": {
+    "input.stl": {
+      "path": "evidence/slicer-oblique-probes-artifacts/baseline.input.stl.gz",
+      "sha256": "41818617412081ad5ffd62fba6197c02862b721483ef783d1d95e0f05e896598",
+      "uncompressed_sha256": "38c4e24ae5fabbb4176275dbabaed3c4bd0cf85eb5afb03e61bcf1fbe9f9c998"
+    },
+    "machine.json": {
+      "path": "evidence/slicer-oblique-probes-artifacts/baseline.machine.json.gz",
+      "sha256": "ee8c28970103e69fd018ab7883b017538e4949e9252a75a9f674ea403ac8d336",
+      "uncompressed_sha256": "cfe77e84bc1245939778c3cb121d6775d3cfaadba9a58803a95f6e633848a322"
+    },
+    "process.json": {
+      "path": "evidence/slicer-oblique-probes-artifacts/baseline.process.json.gz",
+      "sha256": "ab8ea0315f9e657ba45730a3ab347a715c9a61cbc9373fcca306f5dcab600e02",
+      "uncompressed_sha256": "8f85e863081b88cb8e4599220949b3aeda596d07370f82a5fddc5d17b208fd11"
+    },
+    "filament.json": {
+      "path": "evidence/slicer-oblique-probes-artifacts/baseline.filament.json.gz",
+      "sha256": "d004296094f005cf02a0773b8b796be75767dbe15e5f8c29b24dbfa3ddc1609f",
+      "uncompressed_sha256": "54cc011f4c1406969571ca170098be578dc777eb11981c9ed8eeda85e531b139"
+    }
+  },
+  "created_at": "2026-09-22T10:08:30.536508+00:00",
+  "scope": "Controlled diagnostic probes, not accepted mass or printability measurements.",
+  "source_evidence": "evidence/slicer-oblique-diagnosis.json",
+  "crash_diagnosis": {
+    "exception": "EXC_CRASH (SIGABRT)",
+    "termination": "Abort trap 6",
+    "relevant_frames": [
+      "_RegisterApplication",
+      "NSApplication",
+      "_glfwInitCocoa",
+      "glfwInit",
+      "Slic3r::CLI::run"
+    ],
+    "interpretation": "The first support-enabled probe generated G-code, then aborted during macOS application/graphics initialization for project export. No measurement from this incomplete attempt is accepted.",
+    "source": "Targeted inspection of local OrcaSlicer-2026-09-22-034919.ips; private crash report is not copied."
+  },
+  "desktop_retry": {
+    "directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-supported-desktop-mxci1x8u",
+    "exit_code": 0,
+    "stdout": "",
+    "gcode_exists": true,
+    "roles": [
+      "Custom",
+      "Gap infill",
+      "Inner wall",
+      "Internal Bridge",
+      "Internal solid infill",
+      "Outer wall",
+      "Sparse infill",
+      "Support"
+    ],
+    "superseded_by": "evidence/slicer-supported-oblique.json",
+    "note": "The subsequent full three-case record supplies retained accepted measurements and export artifacts."
+  },
+  "source_inspection": [
+    {
+      "url": "https://github.com/OrcaSlicer/OrcaSlicer/blob/v2.4.2/src/libslic3r/GCode.cpp#L1642-L1647",
+      "finding": "Layer collection rejects a first layer with no extrusion. Later multi-object collection aggregates the detailed exceptions."
+    },
+    {
+      "url": "https://github.com/OrcaSlicer/OrcaSlicer/blob/v2.4.2/src/OrcaSlicer.cpp#L5802-L5807",
+      "finding": "The CLI catch reports the exception message. The observed CLI output exposes only the aggregate Errors message."
+    }
+  ]
+}

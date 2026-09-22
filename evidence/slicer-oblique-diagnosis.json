@@ -1,0 +1,363 @@
+{
+  "created_at": "2026-09-22T09:59:12.313783+00:00",
+  "temporary_directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf",
+  "scope": "Exploratory model-only deposition comparison. No post-hoc accuracy gate, physical calibration, stiffness validation or printability acceptance. Oblique/overhung cases intentionally omit supports.",
+  "protocol": {
+    "geometries": [
+      "box",
+      "channel",
+      "tube"
+    ],
+    "scenarios": [
+      [
+        "baseline",
+        {}
+      ],
+      [
+        "one-wall",
+        {
+          "wall_count": 1
+        }
+      ],
+      [
+        "five-walls",
+        {
+          "wall_count": 5
+        }
+      ],
+      [
+        "infill-60",
+        {
+          "infill_density": 0.6
+        }
+      ],
+      [
+        "x90",
+        {
+          "rotation_deg": [
+            90,
+            0,
+            0
+          ]
+        }
+      ],
+      [
+        "y90",
+        {
+          "rotation_deg": [
+            0,
+            90,
+            0
+          ]
+        }
+      ],
+      [
+        "oblique",
+        {
+          "rotation_deg": [
+            30,
+            45,
+            20
+          ]
+        }
+      ],
+      [
+        "x90-one-wall",
+        {
+          "rotation_deg": [
+            90,
+            0,
+            0
+          ],
+          "wall_count": 1
+        }
+      ],
+      [
+        "x90-five-walls",
+        {
+          "rotation_deg": [
+            90,
+            0,
+            0
+          ],
+          "wall_count": 5
+        }
+      ],
+      [
+        "nozzle-06",
+        {
+          "line_width_mm": 0.6,
+          "layer_height_mm": 0.3
+        }
+      ]
+    ],
+    "supports_enabled": false,
+    "selected_case_ids": [
+      "box-oblique",
+      "channel-oblique",
+      "tube-oblique"
+    ],
+    "expected_case_count": 3,
+    "measurement_checks": [
+      "frozen input hash",
+      "matched effective settings",
+      "translation-only slicer placement",
+      "positive role deposition agrees with slicer total within 0.03 mm"
+    ],
+    "transform": "STL vertices @ print-to-global rotation matrix; subtract XYZ minima and center XY at (128,128) mm. Matches OpenFEA global-to-print row-vector convention. Slicer arrangement and orientation are disabled."
+  },
+  "slicer": "OrcaSlicer-2.4.2:",
+  "frozen_source_record": "evidence/slicer-usage-comparison.json",
+  "frozen_source_record_sha256": "87717bcf818206017fd01103e35edbbad331623542f7735ed3d420b7e6054385",
+  "source_hashes": {
+    "backend/print_geometry.py": "7765a2dff1fb76e4973aab1c9abb75930d9d8ebe0fd4bac0876e0b2777cc8690",
+    "backend/print_model.py": "f57aadcc48661646b7d323d6de55a8887d8d46e31720d336432ad3bd4d79971a",
+    "scripts/compare_slicer_usage.py": "4475b4b1fb42f45d327df1d3067fd4288312bf70c404d8852b695f130b3c9386",
+    "scripts/compare_slicer_matrix.py": "203e8f3ae1e9acedff18a9681586f43aa1e37e7dc59188cc26b7e1cb97fa42a7"
+  },
+  "cases": [
+    {
+      "id": "box-oblique",
+      "geometry": "box",
+      "scenario": "oblique",
+      "settings": {
+        "enabled": true,
+        "rotation_deg": [
+          30.0,
+          45.0,
+          20.0
+        ],
+        "infill_pattern": "gyroid",
+        "infill_density": 0.2,
+        "wall_count": 3,
+        "line_width_mm": 0.4,
+        "layer_height_mm": 0.2,
+        "top_layers": 4,
+        "bottom_layers": 4
+      },
+      "frozen_stl": "evidence/slicer-usage-artifacts/box.stl.gz",
+      "frozen_stl_sha256": "0117fb231ace5aa1f553d4e17a06bb46e9cc651714e381620a7fa331eb629c4d",
+      "checks_passed": false,
+      "profile_source_hashes": {
+        "machine/Bambu Lab X1 Carbon 0.4 nozzle.json": "9732f290e2d407ba19fd3be810c3ee5ac3723da4c99426d07503d571e4e21e99",
+        "machine/fdm_bbl_3dp_001_common.json": "e90597a202d5461a2f8636a06c35409cffc79a2c1991bb726c6e465e9a0bd26c",
+        "machine/fdm_machine_common.json": "cdcaa5e5061934a9b960c94e203cc7d1e3b869a407182644f2dda9fdcbf5c2b3",
+        "process/0.20mm Standard @BBL X1C.json": "1b2b5e890d042ba34abe317cd443fd1190e095912240dc65ce8596558cdc7453",
+        "process/fdm_process_single_0.20.json": "b26b4c110e0f44dc25985af0acb2deb00d7d1b3eba57b8d2241ad8106fc8e034",
+        "process/fdm_process_single_common.json": "59fc5ca43dcf9850076708b8ca14b7f9098fe90b9b32ceffc6741b4fcaf3e73e",
+        "process/fdm_process_common.json": "398fcb322a7f459edab00cb2daf524345a19b8cef074415af52f377f91e4bd5b",
+        "filament/Generic PLA.json": "d8ff56f56066bcbc810411ebc0f6763cc9f12de752d781da9ad7c29534ae2314",
+        "filament/Generic PLA @base.json": "85ebc04bd25c236322547d6d95f5a074ce4cab53cf975392e1f6b2c1fb74d406",
+        "filament/fdm_filament_pla.json": "79f257ca32c8a938f49df82623cc84ca86d1044a818d600714b024e6b6499642",
+        "filament/fdm_filament_common.json": "05725cc129f96ea903dc77c40d248fa1bd0137cfc41216d09d952cfdd37d3683"
+      },
+      "regions": {
+        "geometry_method": "layer-contours-v1",
+        "layer_count": 187,
+        "first_layer_nominal_footprint": {
+          "slice_height_mm": 0.1,
+          "section_area_mm2": 0.0420055574794999,
+          "centerline_region_area_mm2": 0.0,
+          "has_centerline_area": false,
+          "scope": "Positive-area region after offsetting the first model-layer midsection inward by half the nominal line width. No toolpath, adhesion, support or printability guarantee; exact-width and variable-width paths may differ."
+        },
+        "section_precision_mm": 1e-06,
+        "print_extents_mm": [
+          34.653822851519124,
+          13.616962930212342,
+          37.36108273359688
+        ],
+        "sampled_solid_volume_mm3": 3200.0014529761993,
+        "perimeter_volume_mm3": 1399.4703861436926,
+        "skin_volume_mm3": 1.2954082251326323e-13,
+        "core_volume_mm3": 1800.5310668325092,
+        "shell_volume_fraction": 0.43733429709605165
+      },
+      "openfea_mass_g": 2.181874983392638,
+      "volume_discretization_relative_error": 4.540550622156303e-07,
+      "slicer_input_extent_mm": [
+        34.65381622314453,
+        13.616966247558594,
+        37.361083984375
+      ],
+      "error": "CalledProcessError: Command '['/Applications/OrcaSlicer.app/Contents/MacOS/OrcaSlicer', '--debug', '5', '--logfile', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/box-oblique/diagnostic.log', '--datadir', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/config', '--load-settings', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/box-oblique/machine.json;/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/box-oblique/process.json', '--load-filaments', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/box-oblique/filament.json', '--slice', '0', '--arrange', '0', '--orient', '0', '--ensure-on-bed', '--outputdir', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/box-oblique/sliced', '--export-3mf', 'project.3mf', '--export-settings', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/box-oblique/effective.json', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/box-oblique/input.stl']' returned non-zero exit status 156.",
+      "artifacts": {
+        "evidence/slicer-oblique-diagnosis-artifacts/box-oblique.stl.gz": {
+          "sha256": "41818617412081ad5ffd62fba6197c02862b721483ef783d1d95e0f05e896598",
+          "uncompressed_sha256": "38c4e24ae5fabbb4176275dbabaed3c4bd0cf85eb5afb03e61bcf1fbe9f9c998"
+        },
+        "evidence/slicer-oblique-diagnosis-artifacts/box-oblique.log.gz": {
+          "sha256": "375f331c4b57f4b10f39f14a000fafdd6a50176e118850121379ef836aa61474",
+          "uncompressed_sha256": "027fc05bd55b619931c8a427332f04fb35a9e53ccc913df29cc4835bd31faec1"
+        },
+        "evidence/slicer-oblique-diagnosis-artifacts/box-oblique.diagnostic.log.gz": {
+          "sha256": "05d4e39377a42fe84da721a7df9cbcf20ddbcd443aefb140f5a75453b74f7cc6",
+          "uncompressed_sha256": "5596794fca8fb907ffdbc2403a735b1b384fee0e7a8db9ca9f7386d88cb89e87"
+        }
+      }
+    },
+    {
+      "id": "channel-oblique",
+      "geometry": "channel",
+      "scenario": "oblique",
+      "settings": {
+        "enabled": true,
+        "rotation_deg": [
+          30.0,
+          45.0,
+          20.0
+        ],
+        "infill_pattern": "gyroid",
+        "infill_density": 0.2,
+        "wall_count": 3,
+        "line_width_mm": 0.4,
+        "layer_height_mm": 0.2,
+        "top_layers": 4,
+        "bottom_layers": 4
+      },
+      "frozen_stl": "evidence/slicer-usage-artifacts/channel.stl.gz",
+      "frozen_stl_sha256": "75cd8f09dd6647adc86da2e2fa71bc027620409c6459257ff8c7ef7fb9bb6e7c",
+      "checks_passed": false,
+      "profile_source_hashes": {
+        "machine/Bambu Lab X1 Carbon 0.4 nozzle.json": "9732f290e2d407ba19fd3be810c3ee5ac3723da4c99426d07503d571e4e21e99",
+        "machine/fdm_bbl_3dp_001_common.json": "e90597a202d5461a2f8636a06c35409cffc79a2c1991bb726c6e465e9a0bd26c",
+        "machine/fdm_machine_common.json": "cdcaa5e5061934a9b960c94e203cc7d1e3b869a407182644f2dda9fdcbf5c2b3",
+        "process/0.20mm Standard @BBL X1C.json": "1b2b5e890d042ba34abe317cd443fd1190e095912240dc65ce8596558cdc7453",
+        "process/fdm_process_single_0.20.json": "b26b4c110e0f44dc25985af0acb2deb00d7d1b3eba57b8d2241ad8106fc8e034",
+        "process/fdm_process_single_common.json": "59fc5ca43dcf9850076708b8ca14b7f9098fe90b9b32ceffc6741b4fcaf3e73e",
+        "process/fdm_process_common.json": "398fcb322a7f459edab00cb2daf524345a19b8cef074415af52f377f91e4bd5b",
+        "filament/Generic PLA.json": "d8ff56f56066bcbc810411ebc0f6763cc9f12de752d781da9ad7c29534ae2314",
+        "filament/Generic PLA @base.json": "85ebc04bd25c236322547d6d95f5a074ce4cab53cf975392e1f6b2c1fb74d406",
+        "filament/fdm_filament_pla.json": "79f257ca32c8a938f49df82623cc84ca86d1044a818d600714b024e6b6499642",
+        "filament/fdm_filament_common.json": "05725cc129f96ea903dc77c40d248fa1bd0137cfc41216d09d952cfdd37d3683"
+      },
+      "regions": {
+        "geometry_method": "layer-contours-v1",
+        "layer_count": 305,
+        "first_layer_nominal_footprint": {
+          "slice_height_mm": 0.1,
+          "section_area_mm2": 0.04200548078099996,
+          "centerline_region_area_mm2": 0.0,
+          "has_centerline_area": false,
+          "scope": "Positive-area region after offsetting the first model-layer midsection inward by half the nominal line width. No toolpath, adhesion, support or printability guarantee; exact-width and variable-width paths may differ."
+        },
+        "section_precision_mm": 1e-06,
+        "print_extents_mm": [
+          56.98576426585665,
+          30.25213852175186,
+          60.8347372626868
+        ],
+        "sampled_solid_volume_mm3": 6240.000062942375,
+        "perimeter_volume_mm3": 6110.010310913635,
+        "skin_volume_mm3": 2.1108119592494485e-13,
+        "core_volume_mm3": 129.98975202873473,
+        "shell_volume_fraction": 0.9791683091798816
+      },
+      "openfea_mass_g": 7.60865024403604,
+      "volume_discretization_relative_error": 1.0086919077778589e-08,
+      "slicer_input_extent_mm": [
+        56.98577117919922,
+        30.25213623046875,
+        60.83473587036133
+      ],
+      "error": "CalledProcessError: Command '['/Applications/OrcaSlicer.app/Contents/MacOS/OrcaSlicer', '--debug', '5', '--logfile', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/channel-oblique/diagnostic.log', '--datadir', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/config', '--load-settings', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/channel-oblique/machine.json;/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/channel-oblique/process.json', '--load-filaments', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/channel-oblique/filament.json', '--slice', '0', '--arrange', '0', '--orient', '0', '--ensure-on-bed', '--outputdir', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/channel-oblique/sliced', '--export-3mf', 'project.3mf', '--export-settings', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/channel-oblique/effective.json', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/channel-oblique/input.stl']' returned non-zero exit status 156.",
+      "artifacts": {
+        "evidence/slicer-oblique-diagnosis-artifacts/channel-oblique.stl.gz": {
+          "sha256": "668dc8a3c818f64aa9c272a03cb99e131473169ca28fc48802af5ae884a22529",
+          "uncompressed_sha256": "866e5a67022976e51f2df2ff988731446df9f4707fc22fb65abe1edee70b95c1"
+        },
+        "evidence/slicer-oblique-diagnosis-artifacts/channel-oblique.log.gz": {
+          "sha256": "375f331c4b57f4b10f39f14a000fafdd6a50176e118850121379ef836aa61474",
+          "uncompressed_sha256": "027fc05bd55b619931c8a427332f04fb35a9e53ccc913df29cc4835bd31faec1"
+        },
+        "evidence/slicer-oblique-diagnosis-artifacts/channel-oblique.diagnostic.log.gz": {
+          "sha256": "523d6fb37c59e5964580cbc09292e339e053775c03e2d57cb218c9c7e854014f",
+          "uncompressed_sha256": "c7c9777a52a50740b62f9f35e1f9863abb1978bbd6423902e59e3fcdd3c138d2"
+        }
+      }
+    },
+    {
+      "id": "tube-oblique",
+      "geometry": "tube",
+      "scenario": "oblique",
+      "settings": {
+        "enabled": true,
+        "rotation_deg": [
+          30.0,
+          45.0,
+          20.0
+        ],
+        "infill_pattern": "gyroid",
+        "infill_density": 0.2,
+        "wall_count": 3,
+        "line_width_mm": 0.4,
+        "layer_height_mm": 0.2,
+        "top_layers": 4,
+        "bottom_layers": 4
+      },
+      "frozen_stl": "evidence/slicer-usage-artifacts/tube.stl.gz",
+      "frozen_stl_sha256": "3e8b8669bfa0d316d0afdc06727bb8a61a5966f6a54d71c8a4d00b95f90af934",
+      "checks_passed": false,
+      "profile_source_hashes": {
+        "machine/Bambu Lab X1 Carbon 0.4 nozzle.json": "9732f290e2d407ba19fd3be810c3ee5ac3723da4c99426d07503d571e4e21e99",
+        "machine/fdm_bbl_3dp_001_common.json": "e90597a202d5461a2f8636a06c35409cffc79a2c1991bb726c6e465e9a0bd26c",
+        "machine/fdm_machine_common.json": "cdcaa5e5061934a9b960c94e203cc7d1e3b869a407182644f2dda9fdcbf5c2b3",
+        "process/0.20mm Standard @BBL X1C.json": "1b2b5e890d042ba34abe317cd443fd1190e095912240dc65ce8596558cdc7453",
+        "process/fdm_process_single_0.20.json": "b26b4c110e0f44dc25985af0acb2deb00d7d1b3eba57b8d2241ad8106fc8e034",
+        "process/fdm_process_single_common.json": "59fc5ca43dcf9850076708b8ca14b7f9098fe90b9b32ceffc6741b4fcaf3e73e",
+        "process/fdm_process_common.json": "398fcb322a7f459edab00cb2daf524345a19b8cef074415af52f377f91e4bd5b",
+        "filament/Generic PLA.json": "d8ff56f56066bcbc810411ebc0f6763cc9f12de752d781da9ad7c29534ae2314",
+        "filament/Generic PLA @base.json": "85ebc04bd25c236322547d6d95f5a074ce4cab53cf975392e1f6b2c1fb74d406",
+        "filament/fdm_filament_pla.json": "79f257ca32c8a938f49df82623cc84ca86d1044a818d600714b024e6b6499642",
+        "filament/fdm_filament_common.json": "05725cc129f96ea903dc77c40d248fa1bd0137cfc41216d09d952cfdd37d3683"
+      },
+      "regions": {
+        "geometry_method": "layer-contours-v1",
+        "layer_count": 141,
+        "first_layer_nominal_footprint": {
+          "slice_height_mm": 0.1,
+          "section_area_mm2": 0.4222593056229955,
+          "centerline_region_area_mm2": 0.0,
+          "has_centerline_area": false,
+          "scope": "Positive-area region after offsetting the first model-layer midsection inward by half the nominal line width. No toolpath, adhesion, support or printability guarantee; exact-width and variable-width paths may differ."
+        },
+        "section_precision_mm": 1e-06,
+        "print_extents_mm": [
+          28.240343414551,
+          25.713196283507475,
+          28.00303432883146
+        ],
+        "sampled_solid_volume_mm3": 2261.004045350953,
+        "perimeter_volume_mm3": 2090.279108216535,
+        "skin_volume_mm3": 4.846123502488808e-14,
+        "core_volume_mm3": 170.72493713441676,
+        "shell_volume_fraction": 0.9244915384006238
+      },
+      "openfea_mass_g": 2.63428587859784,
+      "volume_discretization_relative_error": 2.5338496989490977e-07,
+      "slicer_input_extent_mm": [
+        28.24034881591797,
+        25.71319580078125,
+        28.003034591674805
+      ],
+      "error": "CalledProcessError: Command '['/Applications/OrcaSlicer.app/Contents/MacOS/OrcaSlicer', '--debug', '5', '--logfile', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/tube-oblique/diagnostic.log', '--datadir', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/config', '--load-settings', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/tube-oblique/machine.json;/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/tube-oblique/process.json', '--load-filaments', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/tube-oblique/filament.json', '--slice', '0', '--arrange', '0', '--orient', '0', '--ensure-on-bed', '--outputdir', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/tube-oblique/sliced', '--export-3mf', 'project.3mf', '--export-settings', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/tube-oblique/effective.json', '/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-8d09m7rf/tube-oblique/input.stl']' returned non-zero exit status 156.",
+      "artifacts": {
+        "evidence/slicer-oblique-diagnosis-artifacts/tube-oblique.stl.gz": {
+          "sha256": "79c49575ac1c46a34c8352730d71074bf479f148002ec46938877d32fd91ea10",
+          "uncompressed_sha256": "440406cf7d12d1849f0df72caf901b55f522523468ce370bbcecb9bb64b09f3f"
+        },
+        "evidence/slicer-oblique-diagnosis-artifacts/tube-oblique.log.gz": {
+          "sha256": "375f331c4b57f4b10f39f14a000fafdd6a50176e118850121379ef836aa61474",
+          "uncompressed_sha256": "027fc05bd55b619931c8a427332f04fb35a9e53ccc913df29cc4835bd31faec1"
+        },
+        "evidence/slicer-oblique-diagnosis-artifacts/tube-oblique.diagnostic.log.gz": {
+          "sha256": "f5e4f3ec73608962d14713018c4cc2670eac295497f7415d3ab785638feb3187",
+          "uncompressed_sha256": "4cd68a2b7ca0f741122f8d7927cfc637bfef22d4139db7421fc9271921f8d053"
+        }
+      }
+    }
+  ],
+  "completed_case_count": 3,
+  "measured_case_count": 0,
+  "all_measurement_checks_passed": false
+}

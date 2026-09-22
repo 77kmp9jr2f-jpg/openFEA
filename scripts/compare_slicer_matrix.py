@@ -2,7 +2,8 @@
 
 Run: python -m scripts.compare_slicer_matrix
 Requires the installed OrcaSlicer and BBL profiles. Toolpaths are measurement
-artifacts with no startup or support operations; never send them to a printer.
+artifacts with no machine startup operations; never send them to a printer.
+Supports are off unless explicitly requested, and their usage is kept separate.
 No physical-mass, stiffness or universal accuracy claim is made.
 """
 import argparse
@@ -20,7 +21,7 @@ import zipfile
 
 import numpy as np
 
-from .compare_slicer_usage import extrusion, prepare_profiles, sha
+from .compare_slicer_usage import extrusion, deposition_totals, prepare_profiles, sha
 
 
 SCENARIOS = [
@@ -37,12 +38,12 @@ SCENARIOS = [
 ]
 
 
-def verify_settings(effective, settings):
+def verify_settings(effective, settings, *, supports=False):
     """Check the slicer actually used the requested comparable inputs."""
     scalars = {'wall_loops': settings.wall_count, 'layer_height': settings.layer_height_mm,
         'initial_layer_print_height': settings.layer_height_mm, 'top_shell_layers': settings.top_layers,
         'bottom_shell_layers': settings.bottom_layers, 'top_shell_thickness': 0,
-        'bottom_shell_thickness': 0, 'enable_support': 0, 'skirt_loops': 0,
+        'bottom_shell_thickness': 0, 'enable_support': int(supports), 'skirt_loops': 0,
         'brim_width': 0, 'enable_prime_tower': 0}
     widths = ('line_width', 'initial_layer_line_width', 'inner_wall_line_width',
         'outer_wall_line_width', 'internal_solid_infill_line_width', 'sparse_infill_line_width',
@@ -59,7 +60,9 @@ def verify_settings(effective, settings):
         raise ValueError('Slicer infill density differs.')
     if effective['sparse_infill_pattern'] != settings.infill_pattern or effective['wall_generator'] != 'classic':
         raise ValueError('Slicer infill pattern or wall generator differs.')
-    return {key: effective[key] for key in effective if key in scalars or key in (
+    if supports and effective['support_type'] != 'tree(auto)':
+        raise ValueError('Slicer automatic tree support setting differs.')
+    return {key: effective[key] for key in effective if key in scalars or key.startswith(('support_', 'tree_support_')) or key in (
         'sparse_infill_density', 'sparse_infill_pattern', 'wall_generator', 'nozzle_diameter',
         'filament_flow_ratio', 'filament_density', 'filament_diameter', 'bridge_line_width', 'printer_model')}
 
@@ -80,7 +83,7 @@ def placement_transforms(project, xml_path):
     return transforms
 
 
-def compare(executable, profiles, output, *, only=None):
+def compare(executable, profiles, output, *, only=None, supports=False):
     from backend.schemas import Material, PrintSettings
     from backend.stl_io import parse_stl, inspect_triangles, write_binary_stl
     from backend.print_geometry import measure_regions
@@ -92,8 +95,11 @@ def compare(executable, profiles, output, *, only=None):
     prior = json.loads(prior_path.read_text())
     material = Material(name='Illustrative PLA', young_mpa=3500, poisson=.35, yield_mpa=40, density_kg_m3=1240)
     evidence = {'created_at': datetime.now(timezone.utc).isoformat(), 'temporary_directory': str(temporary),
-        'scope': 'Exploratory model-only deposition comparison. No post-hoc accuracy gate, physical calibration, stiffness validation or printability acceptance. Oblique/overhung cases intentionally omit supports.',
+        'scope': 'Exploratory model-only deposition comparison. No post-hoc accuracy gate, physical calibration, stiffness validation or printability acceptance. '
+                 + ('Automatic tree support deposition is measured separately, excluded from the model-only comparison.' if supports
+                    else 'Oblique/overhung cases intentionally omit supports.'),
         'protocol': {'geometries': ['box', 'channel', 'tube'], 'scenarios': SCENARIOS,
+            'supports_enabled': supports,
             'selected_case_ids': only, 'expected_case_count': len(only) if only else 30,
             'measurement_checks': ['frozen input hash', 'matched effective settings', 'translation-only slicer placement',
                                    'positive role deposition agrees with slicer total within 0.03 mm'],
@@ -124,7 +130,7 @@ def compare(executable, profiles, output, *, only=None):
                 machine = 'Bambu Lab X1 Carbon 0.6 nozzle' if large else 'Bambu Lab X1 Carbon 0.4 nozzle'
                 process = '0.30mm Standard @BBL X1C 0.6 nozzle' if large else '0.20mm Standard @BBL X1C'
                 case['profile_source_hashes'] = prepare_profiles(profiles, folder, settings=settings,
-                    machine_profile=machine, process_profile=process)
+                    machine_profile=machine, process_profile=process, supports=supports)
                 regions = measure_regions(triangles, settings)
                 current = apply_usage(homogenize(inspection['bounds'], material, settings, regions=regions),
                     abs(inspection['signed_volume_mm3']), material.density_kg_m3)
@@ -136,24 +142,30 @@ def compare(executable, profiles, output, *, only=None):
                 source = folder/'input.stl'
                 write_binary_stl(source, oriented)
                 case['slicer_input_extent_mm'] = np.ptp(parse_stl(source.read_bytes()).reshape(-1, 3), axis=0).tolist()
-                command = [str(executable), '--debug', '3', '--logfile', str(folder/'diagnostic.log'),
+                command = [str(executable), '--debug', '5', '--logfile', str(folder/'diagnostic.log'),
                     '--datadir', str(temporary/'config'), '--load-settings',
                     str(folder/'machine.json')+';'+str(folder/'process.json'), '--load-filaments', str(folder/'filament.json'),
                     '--slice', '0', '--arrange', '0', '--orient', '0', '--ensure-on-bed', '--outputdir', str(folder/'sliced'),
                     '--export-3mf', 'project.3mf', '--export-settings', str(folder/'effective.json'), str(source)]
                 with (folder/'slicer.log').open('w') as log:
                     subprocess.run(command, cwd=folder, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=120)
-                case['effective_settings'] = verify_settings(json.loads((folder/'effective.json').read_text()), settings)
+                case['effective_settings'] = verify_settings(json.loads((folder/'effective.json').read_text()), settings, supports=supports)
                 case['placement_transforms'] = placement_transforms(folder/'sliced/project.3mf', folder/'placement.model.xml')
                 gcode_path = folder/'sliced/plate_1.gcode'
                 gcode = gcode_path.read_text()
-                roles = extrusion(gcode)
-                length = sum(roles.values())
+                roles = extrusion(gcode, include_support=supports)
+                totals = deposition_totals(roles)
+                length = totals['total_mm']
                 stats_length = float(re.search(r'; filament used \[mm\] = ([\d.]+)', gcode)[1])
                 if length <= 0 or abs(length-stats_length) > .03:
                     raise ValueError(f'Role deposition {length} differs from slicer total {stats_length}.')
-                mass = length*math.pi*1.75**2/4*1.24/1000
+                grams_per_mm = math.pi*1.75**2/4*1.24/1000
+                mass = totals['model_mm']*grams_per_mm
+                if mass <= 0:
+                    raise ValueError('No model deposition was found.')
                 case.update(slicer_mass_g=mass, slicer_deposited_length_mm=length, slicer_total_length_mm=stats_length,
+                    slicer_model_deposited_length_mm=totals['model_mm'], slicer_support_deposited_length_mm=totals['support_mm'],
+                    slicer_support_mass_g=totals['support_mm']*grams_per_mm, slicer_total_mass_g=length*grams_per_mm,
                     deposition_by_role_mm=roles, relative_mass_difference=current['filament_mass_g']/mass-1, checks_passed=True)
             except Exception as exc:
                 case['error'] = f'{type(exc).__name__}: {exc}'
@@ -184,6 +196,7 @@ if __name__ == '__main__':
     parser.add_argument('--profiles', type=Path, default=Path('/Applications/OrcaSlicer.app/Contents/Resources/profiles/BBL'))
     parser.add_argument('--output', type=Path, default=Path('evidence/slicer-matrix.json'))
     parser.add_argument('--only', nargs='+', help='Explicit geometry-scenario IDs for diagnosis; omit for all 30 cases.')
+    parser.add_argument('--supports', action='store_true', help='Enable automatic tree supports and measure their usage separately from the part.')
     args = parser.parse_args()
     os.environ.setdefault('FEAR_DATA_DIR', tempfile.mkdtemp(prefix='openfea-slicer-models-'))
-    raise SystemExit(0 if compare(args.executable, args.profiles, args.output, only=args.only) else 1)
+    raise SystemExit(0 if compare(args.executable, args.profiles, args.output, only=args.only, supports=args.supports) else 1)

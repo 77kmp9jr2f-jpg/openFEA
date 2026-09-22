@@ -73,8 +73,25 @@ def test_open_contours_are_rejected_instead_of_falling_back_to_a_box(tmp_path):
         measure_regions(triangles, PrintSettings(enabled=True))
 
 
-@pytest.mark.parametrize('method', ['layer-contours-v1', 'bounding-box-v1'])
-def test_print_preview_solve_and_archive_keep_the_recorded_method(tmp_path, method):
+@pytest.mark.parametrize('angles, expected', [((0, 0, 0), True), ((90, 0, 0), True), ((30, 45, 20), False)])
+def test_first_layer_nominal_line_footprint_follows_print_orientation(tmp_path, angles, expected):
+    from backend.print_geometry import measure_regions
+    from backend.print_model import homogenize
+    from backend.schemas import Material
+    triangles = box_triangles(tmp_path)
+    settings = PrintSettings(enabled=True, rotation_deg=angles)
+    regions = measure_regions(triangles, settings)
+    first = regions['first_layer_nominal_footprint']
+    assert first['slice_height_mm'] == pytest.approx(.1)
+    assert (first['centerline_region_area_mm2'] > 0) == expected
+    assert first['has_centerline_area'] is expected
+    result = homogenize([[0, 0, 0], [40, 10, 8]], Material(), settings, regions=regions)
+    assert any('first model layer' in a for a in result['assumptions']) == (not expected)
+
+
+@pytest.mark.parametrize('method, angles', [('layer-contours-v1', (0, 0, 0)),
+    ('bounding-box-v1', (0, 0, 0)), ('layer-contours-v1', (30, 45, 20))])
+def test_print_preview_solve_and_archive_keep_the_recorded_method(tmp_path, method, angles):
     import json, os, subprocess, sys, zipfile
     from fastapi.testclient import TestClient
     from backend.app import app
@@ -89,7 +106,7 @@ def test_print_preview_solve_and_archive_keep_the_recorded_method(tmp_path, meth
         fixed_faces=[model['recommended']['fixed_face']],
         loads=[{'face_id': model['recommended']['load_face'], 'vector': [0,0,-4]}],
         material=Material(name='Illustrative PLA', young_mpa=3500, poisson=.35, yield_mpa=40, density_kg_m3=1240),
-        print=PrintSettings(enabled=True))
+        print=PrintSettings(enabled=True, rotation_deg=angles))
     result = solve_model(setup, reproduction_print_model=method)
     client = TestClient(app)
     response = client.post('/api/print-preview', json={k: setup.model_dump(mode='json')[k]
@@ -97,7 +114,10 @@ def test_print_preview_solve_and_archive_keep_the_recorded_method(tmp_path, meth
     assert response.status_code == 200, response.text
     preview = response.json()
     assert preview['geometry_method'] == 'layer-contours-v1'
-    assert preview['filament_mass_g'] == pytest.approx(7.170779136, rel=1e-6)
+    assert preview['filament_mass_g'] == pytest.approx(7.608650244 if any(angles) else 7.170779136, rel=1e-6)
+    if any(angles):
+        assert not preview['first_layer_nominal_footprint']['has_centerline_area']
+        assert any('first model layer' in warning for warning in result['warnings'])
     assert client.post('/api/readiness', json={k: v for k, v in setup.model_dump(mode='json').items()
         if k in ('model_id','material','fixed_faces','loads','confirmed','print')}).json()['ready']
     if method == 'layer-contours-v1':
@@ -111,6 +131,9 @@ def test_print_preview_solve_and_archive_keep_the_recorded_method(tmp_path, meth
         write_json(resource('runs', result['id'])/'result.json', result)
     with zipfile.ZipFile(export_report(result['id'], 'zip')) as archive:
         assert 'source/backend/print_geometry.py' in archive.namelist()
+        if any(angles):
+            assert 'first model layer' in archive.read('report.html').decode()
+            assert not json.loads(archive.read('result.json'))['print']['first_layer_nominal_footprint']['has_centerline_area']
         archive.extractall(tmp_path)
     process = subprocess.run([sys.executable, str(tmp_path/'reproduce.py')], cwd=tmp_path,
         env={**os.environ, 'PYTHONPATH': ''}, capture_output=True, text=True, timeout=60)
@@ -119,5 +142,7 @@ def test_print_preview_solve_and_archive_keep_the_recorded_method(tmp_path, meth
     actual = json.loads(path.read_text())
     assert actual['print']['geometry_method'] == method
     assert actual['mass_g'] == pytest.approx(result['mass_g'], rel=1e-10)
+    if any(angles):
+        assert any('first model layer' in warning for warning in actual['warnings'])
     with np.load(resource('runs', result['id'])/'solution.npz') as expected, np.load(path.parent/'solution.npz') as reproduced:
         np.testing.assert_allclose(reproduced['dof_displacement'], expected['dof_displacement'], rtol=1e-9, atol=1e-12)

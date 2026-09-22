@@ -1,0 +1,194 @@
+{
+  "artifacts_verified": 27,
+  "case_checks": [
+    {
+      "id": "box-oblique",
+      "source_matches_original_and_rejection": true,
+      "profile_differences": {
+        "machine.json": {},
+        "filament.json": {},
+        "process.json": {
+          "enable_support": [
+            "0",
+            "1"
+          ]
+        }
+      },
+      "length_reconciliation_error_mm": 0.0021899999993593156,
+      "first_layer_nominal_footprint": {
+        "slice_height_mm": 0.1,
+        "section_area_mm2": 0.0420055574794999,
+        "centerline_region_area_mm2": 0.0,
+        "has_centerline_area": false,
+        "scope": "Positive-area region after offsetting the first model-layer midsection inward by half the nominal line width. No toolpath, adhesion, support or printability guarantee; exact-width and variable-width paths may differ."
+      }
+    },
+    {
+      "id": "channel-oblique",
+      "source_matches_original_and_rejection": true,
+      "profile_differences": {
+        "machine.json": {},
+        "filament.json": {},
+        "process.json": {
+          "enable_support": [
+            "0",
+            "1"
+          ]
+        }
+      },
+      "length_reconciliation_error_mm": 0.0033099999991463847,
+      "first_layer_nominal_footprint": {
+        "slice_height_mm": 0.1,
+        "section_area_mm2": 0.04200548078099996,
+        "centerline_region_area_mm2": 0.0,
+        "has_centerline_area": false,
+        "scope": "Positive-area region after offsetting the first model-layer midsection inward by half the nominal line width. No toolpath, adhesion, support or printability guarantee; exact-width and variable-width paths may differ."
+      }
+    },
+    {
+      "id": "tube-oblique",
+      "source_matches_original_and_rejection": true,
+      "profile_differences": {
+        "machine.json": {},
+        "filament.json": {},
+        "process.json": {
+          "enable_support": [
+            "0",
+            "1"
+          ]
+        }
+      },
+      "length_reconciliation_error_mm": 0.0046900000006644404,
+      "first_layer_nominal_footprint": {
+        "slice_height_mm": 0.1,
+        "section_area_mm2": 0.4222593056229955,
+        "centerline_region_area_mm2": 0.0,
+        "has_centerline_area": false,
+        "scope": "Positive-area region after offsetting the first model-layer midsection inward by half the nominal line width. No toolpath, adhesion, support or printability guarantee; exact-width and variable-width paths may differ."
+      }
+    }
+  ],
+  "created_at": "2026-09-22T10:08:30.536508+00:00",
+  "base_commit": "d9bfa163fe06d66f50d41ebddbadba86deb0eec5",
+  "scope": "Software, geometry and deposition evidence; no physical print, adhesion, support removal or material calibration acceptance.",
+  "source_hashes": {
+    "backend/print_geometry.py": "7765a2dff1fb76e4973aab1c9abb75930d9d8ebe0fd4bac0876e0b2777cc8690",
+    "backend/print_model.py": "f57aadcc48661646b7d323d6de55a8887d8d46e31720d336432ad3bd4d79971a",
+    "scripts/compare_slicer_usage.py": "4475b4b1fb42f45d327df1d3067fd4288312bf70c404d8852b695f130b3c9386",
+    "scripts/compare_slicer_matrix.py": "203e8f3ae1e9acedff18a9681586f43aa1e37e7dc59188cc26b7e1cb97fa42a7",
+    "tests/test_print_geometry.py": "63702c759779e824d769b1a837fd7ec10aafb814a6a6143d8b15ed15cfaef53d",
+    "tests/test_slicer_usage.py": "cb8cfb43a7fcc14801da29566c83d4091bcab3391b46e783407570ba1e63341b",
+    "tests/test_stl_print.py": "a8e1f5217daa0e8f15688fa29057f4853fb1cd23fb77999c1e4d3a985dcabd20"
+  },
+  "final_artifact_recheck": {
+    "compressed_and_uncompressed_hashes_passed": 27,
+    "measurement_source_hashes_match_current": true,
+    "all_supported_placement_linear_transforms_identity": true
+  },
+  "independent_review": {
+    "reviewer": "print_mechanics_review agent; read-only bounded review",
+    "actionable_findings": [],
+    "baseline": "git show HEAD versions of backend/print_geometry.py and backend/print_model.py; HEAD was d9bfa163fe06d66f50d41ebddbadba86deb0eec5",
+    "method": "Load old and current modules into separate namespaces; decompress frozen STL fixtures from evidence/slicer-usage-artifacts; compare all preexisting region fields with exact equality, full 6x6 stiffness with numpy.testing.assert_array_equal and usage dictionaries with exact equality. Material() defaults for stiffness; density 1240 kg/m3 for usage.",
+    "cases": [
+      {
+        "geometry": "box",
+        "settings": "defaults"
+      },
+      {
+        "geometry": "box",
+        "rotation_deg": [
+          90,
+          0,
+          0
+        ]
+      },
+      {
+        "geometry": "box",
+        "rotation_deg": [
+          30,
+          45,
+          20
+        ]
+      },
+      {
+        "geometry": "channel",
+        "rotation_deg": [
+          90,
+          0,
+          0
+        ]
+      },
+      {
+        "geometry": "tube",
+        "settings": "defaults"
+      },
+      {
+        "geometry": "tube",
+        "line_width_mm": 0.6,
+        "layer_height_mm": 0.3
+      }
+    ],
+    "all_prior_region_fields_equal": true,
+    "all_stiffness_matrices_equal": true,
+    "all_usage_equal": true,
+    "supported_gcodes_reparsed": 3,
+    "max_total_length_reconciliation_error_mm": 0.0046900000006644404,
+    "readiness_and_run_gates_unchanged": true
+  },
+  "tests": {
+    "command": ".venv/bin/python -m pytest -q tests/test_slicer_usage.py tests/test_print_geometry.py tests/test_stl_print.py",
+    "exit_code": 0,
+    "passed": 23,
+    "warnings": 2,
+    "duration_seconds": 23.68,
+    "archive_reproduction_cases": [
+      {
+        "method": "layer-contours-v1",
+        "rotation_deg": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "method": "bounding-box-v1",
+        "rotation_deg": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "method": "layer-contours-v1",
+        "rotation_deg": [
+          30,
+          45,
+          20
+        ]
+      }
+    ],
+    "warning_retained_in": [
+      "preview",
+      "solve warnings",
+      "archive result.json",
+      "archive report.html",
+      "executed archive reproduction"
+    ],
+    "full_displacement_reproduction_passed": true
+  },
+  "browser": {
+    "url": "http://127.0.0.1:8000/",
+    "observed": "Reloaded production page, waited for study restoration, opened Print and visually inspected new first-layer warning at XYZ [30,45,20] degrees, 35% infill and unchanged 2.52 g usage. Returned to Results and verified report identity and comparison heading.",
+    "screenshot": "evidence/print-first-layer-warning.png",
+    "screenshot_sha256": "f0aea3c2f0ea4304fb5797ac4ca3e4db30d3d38d6c602c5a9eea7d459f82877a",
+    "study_id": "4266b85b6f0a4548b7ddb27c79e9ea83",
+    "study_sha256_unchanged": "219cd4e093335cca99e025aecf9b9740aec607c720c4e24efa406092b4104971",
+    "model_id": "9737ceeb435f40c6855ecef6bacf518a",
+    "run_id": "12f9942450724ed1876b14254905a847",
+    "pinned_run_id": "4d162ab8d809467ea43bf764c5c8479a",
+    "report_href": "/api/runs/12f9942450724ed1876b14254905a847/report/pdf",
+    "comparison_heading_visible": true,
+    "new_gpu_execution": false
+  }
+}

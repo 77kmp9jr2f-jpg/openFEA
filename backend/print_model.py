@@ -79,6 +79,9 @@ def homogenize(bounds, material: Material, settings: PrintSettings, *, regions=N
     ]
     if regions is not None:
         assumptions.append('Layer contours use nominal line width and layer height; bead overlap, variable extrusion widths, gap fill and toolpaths are not modeled.')
+        first_layer = regions.get('first_layer_nominal_footprint', {})
+        if first_layer.get('has_centerline_area') is False:
+            assumptions.append('No interior margin for a nominal-width line was found in the first model layer at this orientation. Check first-layer extrusion, bed contact and supports in your slicer; exact-width and variable-width paths may behave differently.')
         error = regions.get('volume_discretization_relative_error', 0)
         if error > .01:
             assumptions.append(f'Layer-sampled volume differs from the input solid by {100*error:.3g}%; refine the surface mesh or reduce layer height before interpreting material usage.')

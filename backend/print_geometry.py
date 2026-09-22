@@ -81,7 +81,14 @@ def measure_regions(triangles, settings: PrintSettings) -> dict:
         core_volume += core.area*thickness
     if total <= 0:
         raise ValueError('No closed material contours were found for the print geometry.')
+    centerline_area = float(layers[0].buffer(-settings.line_width_mm/2).area)
     return {'geometry_method': METHOD, 'layer_count': count,
+            'first_layer_nominal_footprint': {
+                'slice_height_mm': thicknesses[0]/2,
+                'section_area_mm2': float(layers[0].area),
+                'centerline_region_area_mm2': centerline_area,
+                'has_centerline_area': bool(centerline_area > PRECISION_MM**2),
+                'scope': 'Positive-area region after offsetting the first model-layer midsection inward by half the nominal line width. No toolpath, adhesion, support or printability guarantee; exact-width and variable-width paths may differ.'},
             'section_precision_mm': PRECISION_MM, 'print_extents_mm': extent.tolist(),
             'sampled_solid_volume_mm3': total, 'perimeter_volume_mm3': perimeter,
             'skin_volume_mm3': skins, 'core_volume_mm3': core_volume,

@@ -24,13 +24,14 @@ FILAMENT_OVERRIDES = dict(filament_flow_ratio=['1'], filament_density=['1.24'], 
 MACHINE_OVERRIDES = dict(machine_start_gcode='G90\nM83\nG92 E0\n', machine_end_gcode='M400\n',
     change_filament_gcode='', before_layer_change_gcode='', layer_change_gcode='',
     time_lapse_gcode='', scan_first_layer='0', use_relative_e_distances='1')
+SUPPORT_ROLES = frozenset(('Support', 'Support interface', 'Support transition'))
 
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def prepare_profiles(source, target, *, settings=None,
+def prepare_profiles(source, target, *, settings=None, supports=False,
                      machine_profile='Bambu Lab X1 Carbon 0.4 nozzle',
                      process_profile='0.20mm Standard @BBL X1C'):
     paths = {p.stem: p for p in source.rglob('*.json')}
@@ -49,6 +50,8 @@ def prepare_profiles(source, target, *, settings=None,
         data.pop('inherits', None)
         data.update(overrides)
         if kind == 'process':
+            if supports:
+                data.update(enable_support='1', support_type='tree(auto)')
             if settings is not None:
                 data.update(wall_loops=str(settings.wall_count), layer_height=str(settings.layer_height_mm),
                     initial_layer_print_height=str(settings.layer_height_mm), top_shell_layers=str(settings.top_layers),
@@ -61,8 +64,8 @@ def prepare_profiles(source, target, *, settings=None,
     return hashes
 
 
-def extrusion(gcode):
-    """Sum deposited E on XY moves by model role; exclude retract/prime/custom."""
+def extrusion(gcode, *, include_support=False):
+    """Sum deposited E on XY moves by role; supports require explicit opt-in."""
     role = None
     relative = False
     amount = {}
@@ -80,10 +83,17 @@ def extrusion(gcode):
         if match and float(match[1]) > 0 and re.search(r'\b[XY]-?[\d.]', command):
             if not relative:
                 raise ValueError('This measurement requires relative extrusion.')
-            if role in (None, 'Custom', 'Skirt', 'Brim', 'Support', 'Support interface', 'Prime tower'):
+            if role in (None, 'Custom', 'Skirt', 'Brim', 'Prime tower') or (role in SUPPORT_ROLES and not include_support):
                 raise ValueError(f'Unexpected non-model deposition: {role}.')
             amount[role] = amount.get(role, 0)+float(match[1])
     return amount
+
+
+def deposition_totals(roles):
+    """Keep removable support material out of model-only usage comparisons."""
+    model = sum(length for role, length in roles.items() if role not in SUPPORT_ROLES)
+    support = sum(length for role, length in roles.items() if role in SUPPORT_ROLES)
+    return {'model_mm': model, 'support_mm': support, 'total_mm': model+support}
 
 
 def compare(executable, profiles, output):

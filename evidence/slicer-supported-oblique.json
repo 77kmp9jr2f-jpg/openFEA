@@ -1,0 +1,727 @@
+{
+  "created_at": "2026-09-22T09:56:09.581119+00:00",
+  "temporary_directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-slicer-matrix-gda99aqt",
+  "scope": "Exploratory model-only deposition comparison. No post-hoc accuracy gate, physical calibration, stiffness validation or printability acceptance. Automatic tree support deposition is measured separately, excluded from the model-only comparison.",
+  "protocol": {
+    "geometries": [
+      "box",
+      "channel",
+      "tube"
+    ],
+    "scenarios": [
+      [
+        "baseline",
+        {}
+      ],
+      [
+        "one-wall",
+        {
+          "wall_count": 1
+        }
+      ],
+      [
+        "five-walls",
+        {
+          "wall_count": 5
+        }
+      ],
+      [
+        "infill-60",
+        {
+          "infill_density": 0.6
+        }
+      ],
+      [
+        "x90",
+        {
+          "rotation_deg": [
+            90,
+            0,
+            0
+          ]
+        }
+      ],
+      [
+        "y90",
+        {
+          "rotation_deg": [
+            0,
+            90,
+            0
+          ]
+        }
+      ],
+      [
+        "oblique",
+        {
+          "rotation_deg": [
+            30,
+            45,
+            20
+          ]
+        }
+      ],
+      [
+        "x90-one-wall",
+        {
+          "rotation_deg": [
+            90,
+            0,
+            0
+          ],
+          "wall_count": 1
+        }
+      ],
+      [
+        "x90-five-walls",
+        {
+          "rotation_deg": [
+            90,
+            0,
+            0
+          ],
+          "wall_count": 5
+        }
+      ],
+      [
+        "nozzle-06",
+        {
+          "line_width_mm": 0.6,
+          "layer_height_mm": 0.3
+        }
+      ]
+    ],
+    "supports_enabled": true,
+    "selected_case_ids": [
+      "box-oblique",
+      "channel-oblique",
+      "tube-oblique"
+    ],
+    "expected_case_count": 3,
+    "measurement_checks": [
+      "frozen input hash",
+      "matched effective settings",
+      "translation-only slicer placement",
+      "positive role deposition agrees with slicer total within 0.03 mm"
+    ],
+    "transform": "STL vertices @ print-to-global rotation matrix; subtract XYZ minima and center XY at (128,128) mm. Matches OpenFEA global-to-print row-vector convention. Slicer arrangement and orientation are disabled."
+  },
+  "slicer": "OrcaSlicer-2.4.2:",
+  "frozen_source_record": "evidence/slicer-usage-comparison.json",
+  "frozen_source_record_sha256": "87717bcf818206017fd01103e35edbbad331623542f7735ed3d420b7e6054385",
+  "source_hashes": {
+    "backend/print_geometry.py": "7765a2dff1fb76e4973aab1c9abb75930d9d8ebe0fd4bac0876e0b2777cc8690",
+    "backend/print_model.py": "f57aadcc48661646b7d323d6de55a8887d8d46e31720d336432ad3bd4d79971a",
+    "scripts/compare_slicer_usage.py": "4475b4b1fb42f45d327df1d3067fd4288312bf70c404d8852b695f130b3c9386",
+    "scripts/compare_slicer_matrix.py": "203e8f3ae1e9acedff18a9681586f43aa1e37e7dc59188cc26b7e1cb97fa42a7"
+  },
+  "cases": [
+    {
+      "id": "box-oblique",
+      "geometry": "box",
+      "scenario": "oblique",
+      "settings": {
+        "enabled": true,
+        "rotation_deg": [
+          30.0,
+          45.0,
+          20.0
+        ],
+        "infill_pattern": "gyroid",
+        "infill_density": 0.2,
+        "wall_count": 3,
+        "line_width_mm": 0.4,
+        "layer_height_mm": 0.2,
+        "top_layers": 4,
+        "bottom_layers": 4
+      },
+      "frozen_stl": "evidence/slicer-usage-artifacts/box.stl.gz",
+      "frozen_stl_sha256": "0117fb231ace5aa1f553d4e17a06bb46e9cc651714e381620a7fa331eb629c4d",
+      "checks_passed": true,
+      "profile_source_hashes": {
+        "machine/Bambu Lab X1 Carbon 0.4 nozzle.json": "9732f290e2d407ba19fd3be810c3ee5ac3723da4c99426d07503d571e4e21e99",
+        "machine/fdm_bbl_3dp_001_common.json": "e90597a202d5461a2f8636a06c35409cffc79a2c1991bb726c6e465e9a0bd26c",
+        "machine/fdm_machine_common.json": "cdcaa5e5061934a9b960c94e203cc7d1e3b869a407182644f2dda9fdcbf5c2b3",
+        "process/0.20mm Standard @BBL X1C.json": "1b2b5e890d042ba34abe317cd443fd1190e095912240dc65ce8596558cdc7453",
+        "process/fdm_process_single_0.20.json": "b26b4c110e0f44dc25985af0acb2deb00d7d1b3eba57b8d2241ad8106fc8e034",
+        "process/fdm_process_single_common.json": "59fc5ca43dcf9850076708b8ca14b7f9098fe90b9b32ceffc6741b4fcaf3e73e",
+        "process/fdm_process_common.json": "398fcb322a7f459edab00cb2daf524345a19b8cef074415af52f377f91e4bd5b",
+        "filament/Generic PLA.json": "d8ff56f56066bcbc810411ebc0f6763cc9f12de752d781da9ad7c29534ae2314",
+        "filament/Generic PLA @base.json": "85ebc04bd25c236322547d6d95f5a074ce4cab53cf975392e1f6b2c1fb74d406",
+        "filament/fdm_filament_pla.json": "79f257ca32c8a938f49df82623cc84ca86d1044a818d600714b024e6b6499642",
+        "filament/fdm_filament_common.json": "05725cc129f96ea903dc77c40d248fa1bd0137cfc41216d09d952cfdd37d3683"
+      },
+      "regions": {
+        "geometry_method": "layer-contours-v1",
+        "layer_count": 187,
+        "first_layer_nominal_footprint": {
+          "slice_height_mm": 0.1,
+          "section_area_mm2": 0.0420055574794999,
+          "centerline_region_area_mm2": 0.0,
+          "has_centerline_area": false,
+          "scope": "Positive-area region after offsetting the first model-layer midsection inward by half the nominal line width. No toolpath, adhesion, support or printability guarantee; exact-width and variable-width paths may differ."
+        },
+        "section_precision_mm": 1e-06,
+        "print_extents_mm": [
+          34.653822851519124,
+          13.616962930212342,
+          37.36108273359688
+        ],
+        "sampled_solid_volume_mm3": 3200.0014529761993,
+        "perimeter_volume_mm3": 1399.4703861436926,
+        "skin_volume_mm3": 1.2954082251326323e-13,
+        "core_volume_mm3": 1800.5310668325092,
+        "shell_volume_fraction": 0.43733429709605165
+      },
+      "openfea_mass_g": 2.181874983392638,
+      "volume_discretization_relative_error": 4.540550622156303e-07,
+      "slicer_input_extent_mm": [
+        34.65381622314453,
+        13.616966247558594,
+        37.361083984375
+      ],
+      "effective_settings": {
+        "bottom_shell_layers": "4",
+        "bottom_shell_thickness": "0",
+        "bridge_line_width": "100%",
+        "brim_width": "0",
+        "enable_prime_tower": "0",
+        "enable_support": "1",
+        "filament_density": [
+          "1.24"
+        ],
+        "filament_diameter": [
+          "1.75"
+        ],
+        "filament_flow_ratio": [
+          "1"
+        ],
+        "initial_layer_line_width": "0.4",
+        "initial_layer_print_height": "0.2",
+        "inner_wall_line_width": "0.4",
+        "internal_solid_infill_line_width": "0.4",
+        "layer_height": "0.2",
+        "line_width": "0.4",
+        "nozzle_diameter": [
+          "0.4"
+        ],
+        "outer_wall_line_width": "0.4",
+        "printer_model": "Bambu Lab X1 Carbon",
+        "skirt_loops": "0",
+        "sparse_infill_density": "20%",
+        "sparse_infill_line_width": "0.4",
+        "sparse_infill_pattern": "gyroid",
+        "support_air_filtration": "1",
+        "support_angle": "0",
+        "support_base_pattern": "default",
+        "support_base_pattern_spacing": "2.5",
+        "support_bottom_interface_spacing": "0.5",
+        "support_bottom_z_distance": "0.2",
+        "support_chamber_temp_control": "0",
+        "support_critical_regions_only": "0",
+        "support_expansion": "0",
+        "support_filament": "0",
+        "support_flow_ratio": "1",
+        "support_interface_bottom_layers": "2",
+        "support_interface_filament": "0",
+        "support_interface_flow_ratio": "1",
+        "support_interface_loop_pattern": "0",
+        "support_interface_not_for_body": "1",
+        "support_interface_pattern": "auto",
+        "support_interface_spacing": "0.5",
+        "support_interface_speed": "80",
+        "support_interface_top_layers": "2",
+        "support_ironing": "0",
+        "support_ironing_flow": "10%",
+        "support_ironing_pattern": "rectilinear",
+        "support_ironing_spacing": "0.1",
+        "support_line_width": "0.4",
+        "support_material_interface_fan_speed": [
+          "-1"
+        ],
+        "support_multi_bed_types": "0",
+        "support_object_first_layer_gap": "0.2",
+        "support_object_skip_flush": "0",
+        "support_object_xy_distance": "0.35",
+        "support_on_build_plate_only": "0",
+        "support_parallel_printheads": "0",
+        "support_remove_small_overhang": "1",
+        "support_speed": "150",
+        "support_style": "default",
+        "support_threshold_angle": "30",
+        "support_threshold_overlap": "50%",
+        "support_top_z_distance": "0.2",
+        "support_type": "tree(auto)",
+        "top_shell_layers": "4",
+        "top_shell_thickness": "0",
+        "top_surface_line_width": "0.4",
+        "tree_support_angle_slow": "25",
+        "tree_support_auto_brim": "1",
+        "tree_support_branch_angle": "45",
+        "tree_support_branch_angle_organic": "40",
+        "tree_support_branch_diameter": "2",
+        "tree_support_branch_diameter_angle": "5",
+        "tree_support_branch_diameter_organic": "2",
+        "tree_support_branch_distance": "5",
+        "tree_support_branch_distance_organic": "1",
+        "tree_support_brim_width": "3",
+        "tree_support_tip_diameter": "0.8",
+        "tree_support_top_rate": "30%",
+        "tree_support_wall_count": "0",
+        "wall_generator": "classic",
+        "wall_loops": "3"
+      },
+      "placement_transforms": [
+        "1 0 0 0 1 0 0 0 1 127.999996 128.000004 18.680542",
+        "1 0 0 0 1 0 0 0 1 0 0 0"
+      ],
+      "slicer_mass_g": 2.379623887942638,
+      "slicer_deposited_length_mm": 830.7978100000006,
+      "slicer_total_length_mm": 830.8,
+      "slicer_model_deposited_length_mm": 797.8489100000006,
+      "slicer_support_deposited_length_mm": 32.94890000000003,
+      "slicer_support_mass_g": 0.09827172606080667,
+      "slicer_total_mass_g": 2.4778956140034443,
+      "deposition_by_role_mm": {
+        "Support": 32.94890000000003,
+        "Outer wall": 191.57080000000005,
+        "Inner wall": 328.3779100000023,
+        "Internal solid infill": 111.54296999999976,
+        "Gap infill": 0.0033,
+        "Sparse infill": 163.79995999999846,
+        "Internal Bridge": 2.5539699999999996
+      },
+      "relative_mass_difference": -0.08310090748037025,
+      "artifacts": {
+        "evidence/slicer-supported-oblique-artifacts/box-oblique.stl.gz": {
+          "sha256": "41818617412081ad5ffd62fba6197c02862b721483ef783d1d95e0f05e896598",
+          "uncompressed_sha256": "38c4e24ae5fabbb4176275dbabaed3c4bd0cf85eb5afb03e61bcf1fbe9f9c998"
+        },
+        "evidence/slicer-supported-oblique-artifacts/box-oblique.gcode.gz": {
+          "sha256": "2281ecf2b7865f942db8be9ed7b1a3b2a2f3473cec3510481ebe21f6d283b1fa",
+          "uncompressed_sha256": "e212c0ead27c611a1ced18114797b34c192ff5be1a6d353aeb3bf1a2ae7e85eb"
+        },
+        "evidence/slicer-supported-oblique-artifacts/box-oblique.settings.json.gz": {
+          "sha256": "eaff5a4cdb365835a9b64f938db69da56a0f75f100ff219c7873631bb2c5edf4",
+          "uncompressed_sha256": "33b94c072ae6c45c89bfd049be84614fb4dc5a5cb58eb35519fba4cdcd01474b"
+        },
+        "evidence/slicer-supported-oblique-artifacts/box-oblique.log.gz": {
+          "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+          "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "evidence/slicer-supported-oblique-artifacts/box-oblique.diagnostic.log.gz": {
+          "sha256": "28d15cde22ea1b6216722d3057361b2ffeb1839d4fe7c18684b7c019c14a60cd",
+          "uncompressed_sha256": "e0e2948d8cf3c6f2ed20e79bc9e853e0a0b60dc0210316932159b78b840d620b"
+        },
+        "evidence/slicer-supported-oblique-artifacts/box-oblique.placement.model.xml.gz": {
+          "sha256": "884f11b48d48c238f7214b4a8abad80b2118395c2908420ecdc8e02158124041",
+          "uncompressed_sha256": "b96b8fd4a2b8d35da67b1e8f3f1c1522b83965f616e66b203a0ccc0edb671aa4"
+        }
+      }
+    },
+    {
+      "id": "channel-oblique",
+      "geometry": "channel",
+      "scenario": "oblique",
+      "settings": {
+        "enabled": true,
+        "rotation_deg": [
+          30.0,
+          45.0,
+          20.0
+        ],
+        "infill_pattern": "gyroid",
+        "infill_density": 0.2,
+        "wall_count": 3,
+        "line_width_mm": 0.4,
+        "layer_height_mm": 0.2,
+        "top_layers": 4,
+        "bottom_layers": 4
+      },
+      "frozen_stl": "evidence/slicer-usage-artifacts/channel.stl.gz",
+      "frozen_stl_sha256": "75cd8f09dd6647adc86da2e2fa71bc027620409c6459257ff8c7ef7fb9bb6e7c",
+      "checks_passed": true,
+      "profile_source_hashes": {
+        "machine/Bambu Lab X1 Carbon 0.4 nozzle.json": "9732f290e2d407ba19fd3be810c3ee5ac3723da4c99426d07503d571e4e21e99",
+        "machine/fdm_bbl_3dp_001_common.json": "e90597a202d5461a2f8636a06c35409cffc79a2c1991bb726c6e465e9a0bd26c",
+        "machine/fdm_machine_common.json": "cdcaa5e5061934a9b960c94e203cc7d1e3b869a407182644f2dda9fdcbf5c2b3",
+        "process/0.20mm Standard @BBL X1C.json": "1b2b5e890d042ba34abe317cd443fd1190e095912240dc65ce8596558cdc7453",
+        "process/fdm_process_single_0.20.json": "b26b4c110e0f44dc25985af0acb2deb00d7d1b3eba57b8d2241ad8106fc8e034",
+        "process/fdm_process_single_common.json": "59fc5ca43dcf9850076708b8ca14b7f9098fe90b9b32ceffc6741b4fcaf3e73e",
+        "process/fdm_process_common.json": "398fcb322a7f459edab00cb2daf524345a19b8cef074415af52f377f91e4bd5b",
+        "filament/Generic PLA.json": "d8ff56f56066bcbc810411ebc0f6763cc9f12de752d781da9ad7c29534ae2314",
+        "filament/Generic PLA @base.json": "85ebc04bd25c236322547d6d95f5a074ce4cab53cf975392e1f6b2c1fb74d406",
+        "filament/fdm_filament_pla.json": "79f257ca32c8a938f49df82623cc84ca86d1044a818d600714b024e6b6499642",
+        "filament/fdm_filament_common.json": "05725cc129f96ea903dc77c40d248fa1bd0137cfc41216d09d952cfdd37d3683"
+      },
+      "regions": {
+        "geometry_method": "layer-contours-v1",
+        "layer_count": 305,
+        "first_layer_nominal_footprint": {
+          "slice_height_mm": 0.1,
+          "section_area_mm2": 0.04200548078099996,
+          "centerline_region_area_mm2": 0.0,
+          "has_centerline_area": false,
+          "scope": "Positive-area region after offsetting the first model-layer midsection inward by half the nominal line width. No toolpath, adhesion, support or printability guarantee; exact-width and variable-width paths may differ."
+        },
+        "section_precision_mm": 1e-06,
+        "print_extents_mm": [
+          56.98576426585665,
+          30.25213852175186,
+          60.8347372626868
+        ],
+        "sampled_solid_volume_mm3": 6240.000062942375,
+        "perimeter_volume_mm3": 6110.010310913635,
+        "skin_volume_mm3": 2.1108119592494485e-13,
+        "core_volume_mm3": 129.98975202873473,
+        "shell_volume_fraction": 0.9791683091798816
+      },
+      "openfea_mass_g": 7.60865024403604,
+      "volume_discretization_relative_error": 1.0086919077778589e-08,
+      "slicer_input_extent_mm": [
+        56.98577117919922,
+        30.25213623046875,
+        60.83473587036133
+      ],
+      "effective_settings": {
+        "bottom_shell_layers": "4",
+        "bottom_shell_thickness": "0",
+        "bridge_line_width": "100%",
+        "brim_width": "0",
+        "enable_prime_tower": "0",
+        "enable_support": "1",
+        "filament_density": [
+          "1.24"
+        ],
+        "filament_diameter": [
+          "1.75"
+        ],
+        "filament_flow_ratio": [
+          "1"
+        ],
+        "initial_layer_line_width": "0.4",
+        "initial_layer_print_height": "0.2",
+        "inner_wall_line_width": "0.4",
+        "internal_solid_infill_line_width": "0.4",
+        "layer_height": "0.2",
+        "line_width": "0.4",
+        "nozzle_diameter": [
+          "0.4"
+        ],
+        "outer_wall_line_width": "0.4",
+        "printer_model": "Bambu Lab X1 Carbon",
+        "skirt_loops": "0",
+        "sparse_infill_density": "20%",
+        "sparse_infill_line_width": "0.4",
+        "sparse_infill_pattern": "gyroid",
+        "support_air_filtration": "1",
+        "support_angle": "0",
+        "support_base_pattern": "default",
+        "support_base_pattern_spacing": "2.5",
+        "support_bottom_interface_spacing": "0.5",
+        "support_bottom_z_distance": "0.2",
+        "support_chamber_temp_control": "0",
+        "support_critical_regions_only": "0",
+        "support_expansion": "0",
+        "support_filament": "0",
+        "support_flow_ratio": "1",
+        "support_interface_bottom_layers": "2",
+        "support_interface_filament": "0",
+        "support_interface_flow_ratio": "1",
+        "support_interface_loop_pattern": "0",
+        "support_interface_not_for_body": "1",
+        "support_interface_pattern": "auto",
+        "support_interface_spacing": "0.5",
+        "support_interface_speed": "80",
+        "support_interface_top_layers": "2",
+        "support_ironing": "0",
+        "support_ironing_flow": "10%",
+        "support_ironing_pattern": "rectilinear",
+        "support_ironing_spacing": "0.1",
+        "support_line_width": "0.4",
+        "support_material_interface_fan_speed": [
+          "-1"
+        ],
+        "support_multi_bed_types": "0",
+        "support_object_first_layer_gap": "0.2",
+        "support_object_skip_flush": "0",
+        "support_object_xy_distance": "0.35",
+        "support_on_build_plate_only": "0",
+        "support_parallel_printheads": "0",
+        "support_remove_small_overhang": "1",
+        "support_speed": "150",
+        "support_style": "default",
+        "support_threshold_angle": "30",
+        "support_threshold_overlap": "50%",
+        "support_top_z_distance": "0.2",
+        "support_type": "tree(auto)",
+        "top_shell_layers": "4",
+        "top_shell_thickness": "0",
+        "top_surface_line_width": "0.4",
+        "tree_support_angle_slow": "25",
+        "tree_support_auto_brim": "1",
+        "tree_support_branch_angle": "45",
+        "tree_support_branch_angle_organic": "40",
+        "tree_support_branch_diameter": "2",
+        "tree_support_branch_diameter_angle": "5",
+        "tree_support_branch_diameter_organic": "2",
+        "tree_support_branch_distance": "5",
+        "tree_support_branch_distance_organic": "1",
+        "tree_support_brim_width": "3",
+        "tree_support_tip_diameter": "0.8",
+        "tree_support_top_rate": "30%",
+        "tree_support_wall_count": "0",
+        "wall_generator": "classic",
+        "wall_loops": "3"
+      },
+      "placement_transforms": [
+        "1 0 0 0 1 0 0 0 1 128.000004 128 30.4173679",
+        "1 0 0 0 1 0 0 0 1 0 0 0"
+      ],
+      "slicer_mass_g": 7.271465645237834,
+      "slicer_deposited_length_mm": 2515.853309999999,
+      "slicer_total_length_mm": 2515.85,
+      "slicer_model_deposited_length_mm": 2438.003319999999,
+      "slicer_support_deposited_length_mm": 77.84998999999996,
+      "slicer_support_mass_g": 0.23219145073482053,
+      "slicer_total_mass_g": 7.503657095972654,
+      "deposition_by_role_mm": {
+        "Support": 77.84998999999996,
+        "Outer wall": 855.7852899999968,
+        "Inner wall": 1133.1515800000009,
+        "Gap infill": 449.06645000000094
+      },
+      "relative_mass_difference": 0.046370926474641694,
+      "artifacts": {
+        "evidence/slicer-supported-oblique-artifacts/channel-oblique.stl.gz": {
+          "sha256": "668dc8a3c818f64aa9c272a03cb99e131473169ca28fc48802af5ae884a22529",
+          "uncompressed_sha256": "866e5a67022976e51f2df2ff988731446df9f4707fc22fb65abe1edee70b95c1"
+        },
+        "evidence/slicer-supported-oblique-artifacts/channel-oblique.gcode.gz": {
+          "sha256": "004af3d8e2fc22c06516349c06315eeac27361ccbe35e43b771880b954e6e7cc",
+          "uncompressed_sha256": "6e17a2605362f9cc3d1dbdaa8c6c7d0c804f27c800795d6981876f70d4e96f1e"
+        },
+        "evidence/slicer-supported-oblique-artifacts/channel-oblique.settings.json.gz": {
+          "sha256": "eaff5a4cdb365835a9b64f938db69da56a0f75f100ff219c7873631bb2c5edf4",
+          "uncompressed_sha256": "33b94c072ae6c45c89bfd049be84614fb4dc5a5cb58eb35519fba4cdcd01474b"
+        },
+        "evidence/slicer-supported-oblique-artifacts/channel-oblique.log.gz": {
+          "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+          "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "evidence/slicer-supported-oblique-artifacts/channel-oblique.diagnostic.log.gz": {
+          "sha256": "8f53fa1c16f28c324e921ef555246300b7491cd1022d8cf57cba30b16ceff111",
+          "uncompressed_sha256": "cc9b8f9ee5bbbf9c5b2fc12ffddb25ed30c51b377ac5b98d7946ff11ce9fa7b2"
+        },
+        "evidence/slicer-supported-oblique-artifacts/channel-oblique.placement.model.xml.gz": {
+          "sha256": "292bd557cb419fd0a3b03c841f8a2c6182fd5cc5bb24a6a1c2a79481d798a793",
+          "uncompressed_sha256": "288b55ddeb8aec69cd18d747d0ff388f96c9d6f164f86c50a66a7ca20ce862bf"
+        }
+      }
+    },
+    {
+      "id": "tube-oblique",
+      "geometry": "tube",
+      "scenario": "oblique",
+      "settings": {
+        "enabled": true,
+        "rotation_deg": [
+          30.0,
+          45.0,
+          20.0
+        ],
+        "infill_pattern": "gyroid",
+        "infill_density": 0.2,
+        "wall_count": 3,
+        "line_width_mm": 0.4,
+        "layer_height_mm": 0.2,
+        "top_layers": 4,
+        "bottom_layers": 4
+      },
+      "frozen_stl": "evidence/slicer-usage-artifacts/tube.stl.gz",
+      "frozen_stl_sha256": "3e8b8669bfa0d316d0afdc06727bb8a61a5966f6a54d71c8a4d00b95f90af934",
+      "checks_passed": true,
+      "profile_source_hashes": {
+        "machine/Bambu Lab X1 Carbon 0.4 nozzle.json": "9732f290e2d407ba19fd3be810c3ee5ac3723da4c99426d07503d571e4e21e99",
+        "machine/fdm_bbl_3dp_001_common.json": "e90597a202d5461a2f8636a06c35409cffc79a2c1991bb726c6e465e9a0bd26c",
+        "machine/fdm_machine_common.json": "cdcaa5e5061934a9b960c94e203cc7d1e3b869a407182644f2dda9fdcbf5c2b3",
+        "process/0.20mm Standard @BBL X1C.json": "1b2b5e890d042ba34abe317cd443fd1190e095912240dc65ce8596558cdc7453",
+        "process/fdm_process_single_0.20.json": "b26b4c110e0f44dc25985af0acb2deb00d7d1b3eba57b8d2241ad8106fc8e034",
+        "process/fdm_process_single_common.json": "59fc5ca43dcf9850076708b8ca14b7f9098fe90b9b32ceffc6741b4fcaf3e73e",
+        "process/fdm_process_common.json": "398fcb322a7f459edab00cb2daf524345a19b8cef074415af52f377f91e4bd5b",
+        "filament/Generic PLA.json": "d8ff56f56066bcbc810411ebc0f6763cc9f12de752d781da9ad7c29534ae2314",
+        "filament/Generic PLA @base.json": "85ebc04bd25c236322547d6d95f5a074ce4cab53cf975392e1f6b2c1fb74d406",
+        "filament/fdm_filament_pla.json": "79f257ca32c8a938f49df82623cc84ca86d1044a818d600714b024e6b6499642",
+        "filament/fdm_filament_common.json": "05725cc129f96ea903dc77c40d248fa1bd0137cfc41216d09d952cfdd37d3683"
+      },
+      "regions": {
+        "geometry_method": "layer-contours-v1",
+        "layer_count": 141,
+        "first_layer_nominal_footprint": {
+          "slice_height_mm": 0.1,
+          "section_area_mm2": 0.4222593056229955,
+          "centerline_region_area_mm2": 0.0,
+          "has_centerline_area": false,
+          "scope": "Positive-area region after offsetting the first model-layer midsection inward by half the nominal line width. No toolpath, adhesion, support or printability guarantee; exact-width and variable-width paths may differ."
+        },
+        "section_precision_mm": 1e-06,
+        "print_extents_mm": [
+          28.240343414551,
+          25.713196283507475,
+          28.00303432883146
+        ],
+        "sampled_solid_volume_mm3": 2261.004045350953,
+        "perimeter_volume_mm3": 2090.279108216535,
+        "skin_volume_mm3": 4.846123502488808e-14,
+        "core_volume_mm3": 170.72493713441676,
+        "shell_volume_fraction": 0.9244915384006238
+      },
+      "openfea_mass_g": 2.63428587859784,
+      "volume_discretization_relative_error": 2.5338496989490977e-07,
+      "slicer_input_extent_mm": [
+        28.24034881591797,
+        25.71319580078125,
+        28.003034591674805
+      ],
+      "effective_settings": {
+        "bottom_shell_layers": "4",
+        "bottom_shell_thickness": "0",
+        "bridge_line_width": "100%",
+        "brim_width": "0",
+        "enable_prime_tower": "0",
+        "enable_support": "1",
+        "filament_density": [
+          "1.24"
+        ],
+        "filament_diameter": [
+          "1.75"
+        ],
+        "filament_flow_ratio": [
+          "1"
+        ],
+        "initial_layer_line_width": "0.4",
+        "initial_layer_print_height": "0.2",
+        "inner_wall_line_width": "0.4",
+        "internal_solid_infill_line_width": "0.4",
+        "layer_height": "0.2",
+        "line_width": "0.4",
+        "nozzle_diameter": [
+          "0.4"
+        ],
+        "outer_wall_line_width": "0.4",
+        "printer_model": "Bambu Lab X1 Carbon",
+        "skirt_loops": "0",
+        "sparse_infill_density": "20%",
+        "sparse_infill_line_width": "0.4",
+        "sparse_infill_pattern": "gyroid",
+        "support_air_filtration": "1",
+        "support_angle": "0",
+        "support_base_pattern": "default",
+        "support_base_pattern_spacing": "2.5",
+        "support_bottom_interface_spacing": "0.5",
+        "support_bottom_z_distance": "0.2",
+        "support_chamber_temp_control": "0",
+        "support_critical_regions_only": "0",
+        "support_expansion": "0",
+        "support_filament": "0",
+        "support_flow_ratio": "1",
+        "support_interface_bottom_layers": "2",
+        "support_interface_filament": "0",
+        "support_interface_flow_ratio": "1",
+        "support_interface_loop_pattern": "0",
+        "support_interface_not_for_body": "1",
+        "support_interface_pattern": "auto",
+        "support_interface_spacing": "0.5",
+        "support_interface_speed": "80",
+        "support_interface_top_layers": "2",
+        "support_ironing": "0",
+        "support_ironing_flow": "10%",
+        "support_ironing_pattern": "rectilinear",
+        "support_ironing_spacing": "0.1",
+        "support_line_width": "0.4",
+        "support_material_interface_fan_speed": [
+          "-1"
+        ],
+        "support_multi_bed_types": "0",
+        "support_object_first_layer_gap": "0.2",
+        "support_object_skip_flush": "0",
+        "support_object_xy_distance": "0.35",
+        "support_on_build_plate_only": "0",
+        "support_parallel_printheads": "0",
+        "support_remove_small_overhang": "1",
+        "support_speed": "150",
+        "support_style": "default",
+        "support_threshold_angle": "30",
+        "support_threshold_overlap": "50%",
+        "support_top_z_distance": "0.2",
+        "support_type": "tree(auto)",
+        "top_shell_layers": "4",
+        "top_shell_thickness": "0",
+        "top_surface_line_width": "0.4",
+        "tree_support_angle_slow": "25",
+        "tree_support_auto_brim": "1",
+        "tree_support_branch_angle": "45",
+        "tree_support_branch_angle_organic": "40",
+        "tree_support_branch_diameter": "2",
+        "tree_support_branch_diameter_angle": "5",
+        "tree_support_branch_diameter_organic": "2",
+        "tree_support_branch_distance": "5",
+        "tree_support_branch_distance_organic": "1",
+        "tree_support_brim_width": "3",
+        "tree_support_tip_diameter": "0.8",
+        "tree_support_top_rate": "30%",
+        "tree_support_wall_count": "0",
+        "wall_generator": "classic",
+        "wall_loops": "3"
+      },
+      "placement_transforms": [
+        "1 0 0 0 1 0 0 0 1 128.000004 128 14.0015173",
+        "1 0 0 0 1 0 0 0 1 0 0 0"
+      ],
+      "slicer_mass_g": 2.645910800960662,
+      "slicer_deposited_length_mm": 949.7346900000007,
+      "slicer_total_length_mm": 949.73,
+      "slicer_model_deposited_length_mm": 887.1305500000008,
+      "slicer_support_deposited_length_mm": 62.60413999999989,
+      "slicer_support_mass_g": 0.18671994805144854,
+      "slicer_total_mass_g": 2.8326307490121105,
+      "deposition_by_role_mm": {
+        "Support": 62.60413999999989,
+        "Outer wall": 291.3656900000004,
+        "Gap infill": 72.3782700000003,
+        "Inner wall": 458.2284500000002,
+        "Internal solid infill": 65.15813999999992
+      },
+      "relative_mass_difference": -0.00439354280522275,
+      "artifacts": {
+        "evidence/slicer-supported-oblique-artifacts/tube-oblique.stl.gz": {
+          "sha256": "79c49575ac1c46a34c8352730d71074bf479f148002ec46938877d32fd91ea10",
+          "uncompressed_sha256": "440406cf7d12d1849f0df72caf901b55f522523468ce370bbcecb9bb64b09f3f"
+        },
+        "evidence/slicer-supported-oblique-artifacts/tube-oblique.gcode.gz": {
+          "sha256": "9882cafac5d4d87921ddcf1cbccdf09cea961719d009f8d2a0a5b8a88564e337",
+          "uncompressed_sha256": "becf35802a9163dfcbc15bcf37aacd17acf320bc4b7e315daed9e41993fcc78b"
+        },
+        "evidence/slicer-supported-oblique-artifacts/tube-oblique.settings.json.gz": {
+          "sha256": "eaff5a4cdb365835a9b64f938db69da56a0f75f100ff219c7873631bb2c5edf4",
+          "uncompressed_sha256": "33b94c072ae6c45c89bfd049be84614fb4dc5a5cb58eb35519fba4cdcd01474b"
+        },
+        "evidence/slicer-supported-oblique-artifacts/tube-oblique.log.gz": {
+          "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837",
+          "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "evidence/slicer-supported-oblique-artifacts/tube-oblique.diagnostic.log.gz": {
+          "sha256": "8b8dca2c5c60457b0a43aa2b23dc7cacefd3d507a708a730eca3d6631099820a",
+          "uncompressed_sha256": "91e056b80d771b7b0b92c9ba5feade3f0b75ecce8bbb4ba1603a9d1d77df183e"
+        },
+        "evidence/slicer-supported-oblique-artifacts/tube-oblique.placement.model.xml.gz": {
+          "sha256": "135669f7977717bb42ba19b53adb25c059bfe2ab1fd7b4e3bbb642c2ee7bd752",
+          "uncompressed_sha256": "3f2393b8b1a90d429f9bdd3230365a65aac3221dd32363480316d86ecec93206"
+        }
+      }
+    }
+  ],
+  "completed_case_count": 3,
+  "measured_case_count": 3,
+  "all_measurement_checks_passed": true
+}
