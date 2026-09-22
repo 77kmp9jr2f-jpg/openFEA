@@ -107,3 +107,31 @@ include the exact disposable scripts as compressed execution artifacts. Candidat
 STLs stay in temporary local storage, because they derive from the private source
 and are rejected geometry. These two configurations failed; other settings or methods remain unassessed.
 Supported ingestion remains open, with original source CAD preferred when available.
+
+## Independent PyMeshLab probes — 2026-09-22
+
+PyMeshLab **2025.7.post1** was installed in an isolated temporary directory;
+project dependencies are unchanged. Two fixed configurations of its
+[quadric edge-collapse filter](https://pymeshlab.readthedocs.io/en/latest/filter_list.html#meshing-decimation-quadric-edge-collapse)
+enable boundary, topology and normal preservation, with quality threshold 0.3
+and a target of 80,000 triangles. One permits optimal vertex placement; the
+other restricts collapses to original vertices. Both use the original input
+coordinates and are checked after binary STL precision conversion.
+
+| Configuration | Triangles | Relative volume change | Largest early surface bound | Outcome |
+|---|---:|---:|---:|---|
+| Optimal placement | 80,000 | 0.00622% | 0.0374577 source units | Rejected |
+| Original vertex placement | 80,000 | 0.01704% | 0.0380347 source units | Rejected |
+
+Both retain one watertight shell, consistent winding and Euler characteristic
+−132, but exceed the unchanged **0.0345-source-unit** surface limit. These
+measurements stop early on rejection; they do not report global maximum
+distance or establish all-face coverage. Only these two configurations are
+rejected, not every possible setting or reduction method. Neither candidate
+was adopted, meshed or solved, and no acceptance limit was relaxed.
+
+[Settings, effective parameters, measurements and hashes](../evidence/original-stl-pymeshlab-probes.json)
+retain the exact diagnostic script as a compressed artifact. The private
+candidate STLs remain in temporary storage. Original source and production
+reducer hashes were verified unchanged. Source CAD/STEP remains the preferred
+next input for supported ingestion and independent feature measurements.

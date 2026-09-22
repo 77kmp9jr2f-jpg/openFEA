@@ -2,6 +2,36 @@
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
 
+## Astra interpretation of recorded print runs — 2026-09-22
+
+Astra's result context previously omitted the run's print data, while its system
+guidance still described the older bounding-box approximation. It now receives
+the immutable run's method, settings, usage and assumptions separately from
+current draft controls. Guidance explains contour accounting and globally
+homogenized mechanics, preserves historical methods, and requires missing data
+to be acknowledged. Archived conversations are not added to the bounded context.
+
+All **27 affected tests pass** with the two known dependency warnings. Three new
+transport cases first reproduced the missing-context failure, then passed for
+contour, bounding-box and absent print records. An independent review reran those
+three cases and found no actionable defect. Mocked transport tests establish
+context fidelity, not general language-model obedience.
+
+Two live production Astra calls used preserved synthetic runs while draft
+controls deliberately specified 90% infill and a different orientation. Astra
+correctly explained the contour run's recorded **35%** gyroid infill and actual
+layer regions. It described the historical run's recorded **20%** gyroid infill
+and bounding-box assumptions, acknowledging that its method field was absent.
+Both replies excluded supports, adhesion and purge from part usage, and proposed
+no change. Run and original-study hashes remain unchanged. The [retained requests,
+replies and checks](../evidence/astra-print-context.json) support this pair of
+prompts only; no new GPU, browser or physical-validation claim is made.
+
+Two fixed PyMeshLab reductions also reached 80,000 triangles on the original
+1.44-million-triangle STL, preserving topology and the volume budget, but both
+failed the unchanged surface gate. Neither is adopted. See the [measurements and
+scope](ORIGINAL-STL-VALIDATION.md#independent-pymeshlab-probes--2026-09-22).
+
 ## Chrome GPU and full large-archive reproduction — 2026-09-22
 
 Google Chrome **154.0.8037.17** completed the retained perforated-plate benchmark on this computer's Apple `metal-3` GPU: **31,333 P2 tetrahedra / 157,239 DOFs**. The setup was restored through Studies, inspected in Simulation, explicitly confirmed, and run using the GPU selection. The server independently verifies residual **1.3898e-9**. The full displacement field is identical to the earlier in-app-browser result and differs from the retained float64 CPU solution by **1.0885e-9** relatively; peak stress differs by **1.1286e-9**. Setup, mesh, geometry, interpolation and every DOF coordinate match. Independent review recalculated these comparisons and verified result, solution and source hashes.

@@ -41,6 +41,8 @@ Install the official Codex CLI and sign in with `codex login`; ensure your accou
 
 Sending a chat message transmits its image, annotations and design context to Astra. The UI labels real replies **ASTRA · LIVE**. Static onboarding text is labelled **WORKFLOW GUIDE**. Failures are surfaced explicitly; there is no simulated AI fallback. A health indicator confirms the CLI exists, not account entitlement or a completed model call.
 
+When interpreting a saved print result, Astra receives its recorded method, settings, usage and assumptions separately from current draft controls. Changing the draft does not rewrite the completed run or upgrade historical estimates to the current contour method.
+
 The browser sends the ten most recent messages, including their questions and proposals, alongside the current study. This bounded AI context is separate from the full local conversation retained by saved studies and new analysis/report snapshots. Earlier unapplied instructions may need to be restated for Astra. A run records the conversation as it existed when submitted; later chat does not rewrite that run. Historical reports that kept only 24 text messages are unchanged and cannot recover omitted content automatically. The existing 80 MB request limit and 20,000-character message-text limit reject oversized submissions explicitly; they never trim the stored interview.
 
 ## Engineering scope

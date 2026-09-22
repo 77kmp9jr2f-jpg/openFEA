@@ -1,0 +1,299 @@
+{
+  "created_at": "2026-09-22T10:30:16.574567+00:00",
+  "scope": "Live production Astra transport on preserved synthetic print runs, with deliberately different draft settings. No geometry, setup, study or run is changed; no new solve or physical validation.",
+  "source_sha256": "cad65245573d9280a30eb341092d036c0906d7e0add71c825d4250c64d5ee154",
+  "cases": [
+    {
+      "case": "current-contours",
+      "run_id": "12f9942450724ed1876b14254905a847",
+      "request": {
+        "print": {
+          "enabled": true,
+          "rotation_deg": [
+            90.0,
+            0.0,
+            0.0
+          ],
+          "infill_pattern": "gyroid",
+          "infill_density": 0.9,
+          "wall_count": 3,
+          "line_width_mm": 0.4,
+          "layer_height_mm": 0.2,
+          "top_layers": 4,
+          "bottom_layers": 4
+        },
+        "message": "For this saved run only, explain how wall and skin volumes were estimated, which infill density belongs to it, and whether support material is included. Do not propose changes.",
+        "image_id": null,
+        "annotations": [],
+        "geometry": {
+          "name": "print-coupon",
+          "kind": "stl",
+          "length": 80.0,
+          "width": 40.0,
+          "height": 60.0,
+          "thickness": 8.0,
+          "hole_diameter": 8.0,
+          "mesh_size": 7.0,
+          "features": [],
+          "step_id": null,
+          "stl_id": "3e9a0f396e5644dead46a1722eb6930f",
+          "unit_scale": 1.0,
+          "feature_angle_deg": 40.0,
+          "accept_stl_preprocessing": false,
+          "provenance": "stl_import",
+          "assumptions": []
+        },
+        "history": [],
+        "model_id": "9737ceeb435f40c6855ecef6bacf518a",
+        "material": {
+          "name": "PLA \u00b7 illustrative",
+          "young_mpa": 3500.0,
+          "poisson": 0.35,
+          "yield_mpa": 40.0,
+          "density_kg_m3": 1240.0
+        },
+        "fixed_faces": [
+          9
+        ],
+        "loads": [
+          {
+            "face_id": 7,
+            "vector": [
+              0.0,
+              0.0,
+              -4.0
+            ]
+          }
+        ],
+        "application_notes": "",
+        "run_id": "12f9942450724ed1876b14254905a847",
+        "selected_face": null,
+        "stage": "results"
+      },
+      "recorded_print": {
+        "geometry_method": "layer-contours-v1",
+        "layer_count": 187,
+        "section_precision_mm": 1e-06,
+        "print_extents_mm": [
+          34.653822851519124,
+          13.616962930212342,
+          37.36108273359688
+        ],
+        "sampled_solid_volume_mm3": 3200.0014466125713,
+        "perimeter_volume_mm3": 1399.4699125745237,
+        "skin_volume_mm3": 1.2867489192214256e-13,
+        "core_volume_mm3": 1800.531534038048,
+        "shell_volume_fraction": 0.4373341499754513,
+        "volume_discretization_relative_error": 4.5206642829143107e-07,
+        "enabled": true,
+        "settings": {
+          "enabled": true,
+          "rotation_deg": [
+            30.0,
+            45.0,
+            20.0
+          ],
+          "infill_pattern": "gyroid",
+          "infill_density": 0.35,
+          "wall_count": 3,
+          "line_width_mm": 0.4,
+          "layer_height_mm": 0.2,
+          "top_layers": 4,
+          "bottom_layers": 4
+        },
+        "volume_fraction": 0.6342671974840434,
+        "filament_volume_ratio": 0.6342671974840434,
+        "young_xy_mpa": 2095.8673712637387,
+        "young_z_mpa": 2026.9408046357314,
+        "shear_xy_mpa": 776.2471745421254,
+        "shear_z_mpa": 763.3762900486109,
+        "poisson": 0.35,
+        "eta_xy": 0.5988192489324967,
+        "eta_z": 0.5791259441816375,
+        "assumptions": [
+          "Print stiffness is a homogenized equivalent solid, not an explicit infill mesh or sliced toolpath.",
+          "Perimeter and skin volumes use actual layer contours, including internal holes and local top/bottom surfaces.",
+          "Shell and core fractions are homogenized throughout the body; the spatial stiffness of individual walls and infill is not resolved.",
+          "Layering is transversely isotropic: print Z is the weak/layer direction after the supplied rotation.",
+          "gyroid core factors are illustrative (in-plane 0.82, layer 0.72), not coupon-calibrated.",
+          "Filament modulus, strength and density remain user inputs. No printed-specimen calibration is claimed.",
+          "Additional raster-scale anisotropy, local voids, bonding defects and moisture are not modelled.",
+          "Layer contours use nominal line width and layer height; bead overlap, variable extrusion widths, gap fill and toolpaths are not modeled."
+        ],
+        "filament_volume_mm3": 2029.6559494878402,
+        "filament_mass_g": 2.5167733773649217,
+        "mass_g": 2.5167733773649217
+      },
+      "run_sha256": "f8f9f911f6dc9bbd240a9d01c545dc7284fdb3f3c1f2692f585af6ab71d839dd",
+      "response": {
+        "message": "This saved run used layer-contours-v1: wall and skin volumes were estimated from actual layer contours, including holes and local top/bottom surfaces, across 187 layers at the recorded rotation [30\u00b0, 45\u00b0, 20\u00b0]. Settings were 3 walls, 0.4 mm line width, 0.2 mm layer height, and 4 top/4 bottom layers. Recorded wall volume was 1,399.47 mm\u00b3; skin volume was effectively zero (1.29 \u00d7 10\u207b\u00b9\u00b3 mm\u00b3).\n\nThe run used 35% gyroid infill\u2014not the currently displayed 90%. Estimated part filament usage was 2,029.66 mm\u00b3 (2.52 g), excluding supports, adhesion and purge. These are nominal contour-based estimates, not sliced toolpath measurements; current draft controls do not change the saved run.",
+        "questions": [],
+        "proposal": null,
+        "simulation_proposal": null,
+        "model": "gpt-6-astra",
+        "live": true
+      },
+      "seconds": 11.384457250125706,
+      "run_unchanged": true,
+      "manual_review": {
+        "recorded_method_or_assumptions_explained": true,
+        "recorded_infill_distinguished_from_90_percent_draft": true,
+        "part_usage_excludes_supports_adhesion_and_purge": true,
+        "no_change_proposed": true
+      }
+    },
+    {
+      "case": "historical-box",
+      "run_id": "4d162ab8d809467ea43bf764c5c8479a",
+      "request": {
+        "print": {
+          "enabled": true,
+          "rotation_deg": [
+            90.0,
+            0.0,
+            0.0
+          ],
+          "infill_pattern": "gyroid",
+          "infill_density": 0.9,
+          "wall_count": 3,
+          "line_width_mm": 0.4,
+          "layer_height_mm": 0.2,
+          "top_layers": 4,
+          "bottom_layers": 4
+        },
+        "message": "For this saved run only, explain how wall and skin volumes were estimated, which infill density belongs to it, and whether support material is included. Do not propose changes.",
+        "image_id": null,
+        "annotations": [],
+        "geometry": {
+          "name": "print-coupon",
+          "kind": "stl",
+          "length": 80.0,
+          "width": 40.0,
+          "height": 60.0,
+          "thickness": 8.0,
+          "hole_diameter": 8.0,
+          "mesh_size": 7.0,
+          "features": [],
+          "step_id": null,
+          "stl_id": "3e9a0f396e5644dead46a1722eb6930f",
+          "unit_scale": 1.0,
+          "feature_angle_deg": 40.0,
+          "accept_stl_preprocessing": false,
+          "provenance": "stl_import",
+          "assumptions": []
+        },
+        "history": [],
+        "model_id": "9737ceeb435f40c6855ecef6bacf518a",
+        "material": {
+          "name": "PLA \u00b7 illustrative",
+          "young_mpa": 3500.0,
+          "poisson": 0.35,
+          "yield_mpa": 40.0,
+          "density_kg_m3": 1240.0
+        },
+        "fixed_faces": [
+          9
+        ],
+        "loads": [
+          {
+            "face_id": 7,
+            "vector": [
+              0.0,
+              0.0,
+              -4.0
+            ]
+          }
+        ],
+        "application_notes": "",
+        "run_id": "4d162ab8d809467ea43bf764c5c8479a",
+        "selected_face": null,
+        "stage": "results"
+      },
+      "recorded_print": {
+        "enabled": true,
+        "settings": {
+          "enabled": true,
+          "rotation_deg": [
+            30.0,
+            45.0,
+            20.0
+          ],
+          "infill_pattern": "gyroid",
+          "infill_density": 0.2,
+          "wall_count": 3,
+          "line_width_mm": 0.4,
+          "layer_height_mm": 0.2,
+          "top_layers": 4,
+          "bottom_layers": 4
+        },
+        "print_extents_mm": [
+          34.653822851519124,
+          13.616962930212342,
+          37.36108273359688
+        ],
+        "volume_fraction": 0.4129078580816135,
+        "shell_volume_fraction": 0.2661348226020169,
+        "filament_volume_ratio": 0.4129078580816135,
+        "young_xy_mpa": 1352.7104909335014,
+        "young_z_mpa": 1301.3399285156424,
+        "shear_xy_mpa": 501.0038855309264,
+        "shear_z_mpa": 491.39874454642796,
+        "poisson": 0.35,
+        "eta_xy": 0.3864887116952861,
+        "eta_z": 0.37181140814732644,
+        "assumptions": [
+          "Print stiffness is a homogenized equivalent solid, not an explicit infill mesh or sliced toolpath.",
+          "Walls and top/bottom skins are estimated from the axis-aligned box of the oriented part.",
+          "Layering is transversely isotropic: print Z is the weak/layer direction after the supplied rotation.",
+          "gyroid core factors are illustrative (in-plane 0.82, layer 0.72), not coupon-calibrated.",
+          "Filament modulus, strength and density remain user inputs. No printed-specimen calibration is claimed.",
+          "Anisotropy, voids, bonding defects and moisture are not modelled."
+        ],
+        "filament_volume_mm3": 1321.3051458611635,
+        "filament_mass_g": 1.6384183808678427,
+        "mass_g": 1.6384183808678427
+      },
+      "run_sha256": "7abb4a66802c99f9d8b74b50a9488a566f89f88e129286bd55b48054d38ee290",
+      "response": {
+        "message": "This saved run records a bounding-box estimate: walls and top/bottom skins were estimated from the axis-aligned box of the oriented part, not actual layer contours. Its geometry_method field is unavailable, but its recorded assumptions explicitly identify this method.\n\nThe recorded settings use 3 walls \u00d7 0.4 mm = 1.2 mm nominal wall thickness, and 4 layers \u00d7 0.2 mm = 0.8 mm for each top/bottom skin. The combined shell fraction is 26.61%; separate wall and skin volumes are unavailable.\n\nThis run used 20% gyroid infill and rotation [30\u00b0, 45\u00b0, 20\u00b0]. The current 90% draft infill does not change the saved result.\n\nRecorded part usage is 1,321.3 mm\u00b3 of filament (1.638 g). Supports, adhesion and purge are excluded.",
+        "questions": [],
+        "proposal": null,
+        "simulation_proposal": null,
+        "model": "gpt-6-astra",
+        "live": true
+      },
+      "seconds": 10.513127125101164,
+      "run_unchanged": true,
+      "manual_review": {
+        "recorded_method_or_assumptions_explained": true,
+        "recorded_infill_distinguished_from_90_percent_draft": true,
+        "part_usage_excludes_supports_adhesion_and_purge": true,
+        "no_change_proposed": true
+      }
+    }
+  ],
+  "base_commit": "84f04498957f30b12d34f396754ed2650d18dcdd",
+  "source_file": "backend/assistant.py",
+  "verification": {
+    "test_command": ".venv/bin/python -m pytest -q tests/test_astra_print_context.py tests/test_simulation_proposals.py",
+    "passed": 27,
+    "known_dependency_warnings": 2,
+    "seconds": 4.04,
+    "red_phase": "All three new parametrized cases failed with KeyError print before the production change.",
+    "independent_review": "print_mechanics_review found no actionable defect and independently ran the three context transport cases.",
+    "scope": "Mocked regression tests verify serialized context, not general model obedience. Two preserved live responses verify this pair of prompts only. No new solver, browser or physical-validation claim."
+  },
+  "artifacts": [
+    {
+      "path": "evidence/astra-print-context-artifacts/live.py.gz",
+      "sha256": "162813cbf5775f9a76811489b753590955d1188ae26c41f85056a050cfd7114e",
+      "uncompressed_sha256": "44b9e2f0ff3d886ca4c58602e49e54399ee37983ab7127fb818f9079a3afb8bb",
+      "scope": "Exact disposable script retained as execution evidence; local paths are historical and this is not an installed workflow."
+    }
+  ],
+  "original_study": {
+    "path": "data/studies/4266b85b6f0a4548b7ddb27c79e9ea83.json",
+    "sha256": "219cd4e093335cca99e025aecf9b9740aec607c720c4e24efa406092b4104971",
+    "unchanged": true
+  }
+}
