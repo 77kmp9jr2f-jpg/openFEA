@@ -1537,7 +1537,13 @@ export default function App() {
               </p>
               <ul>
                 {result.warnings.map((w, i) => (
-                  <li key={i}>{w}</li>
+                  <li key={i}>
+                    {result.print?.enabled &&
+                    w ===
+                      "Anisotropy, voids, bonding defects and moisture are not modelled."
+                      ? "Additional raster-scale anisotropy, local voids, bonding defects and moisture are not modelled."
+                      : w}
+                  </li>
                 ))}
               </ul>
             </details>

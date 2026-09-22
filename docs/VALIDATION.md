@@ -21,6 +21,8 @@ Browser lifecycle checks used a real local API outage and the development fronte
 
 Current automated verification: 78 backend tests, five frontend regressions and the TypeScript/Vite build pass. The two known dependency deprecation warnings and the existing bundle-size advisory remain. Remote CI, camera hardware, other GPUs, physical coupons and Sites hosting remain outside this local evidence.
 
+The production browser reopened the completed print study and its pinned comparison after the recovery changes. Historical print-warning boilerplate is clarified in the workspace as it is in exported reports: the directional print equivalent exists, while additional raster-scale anisotropy, local voids, bonding defects and moisture are not modeled. Immutable run JSON is unchanged.
+
 ## Integration acceptance — 2026-09-20
 
 The print-branch review defects were reproduced with independent tests and repaired. Added checks cover arbitrary-angle strain/stress tensor covariance, the 500,000-DOF submission boundary, no implicit P1 downgrade, queued and running-child cancellation, comparison context differences, preserved STL originals, reloadable preprocessing review, P1/P2 archive reproduction, and complete print-proposal revision/provenance binding. Frontend checks cover independent Astra/solve cancellation, cancellation before a job ID arrives, GPU readback resource cleanup and legacy geometry defaults. All 76 backend tests and five frontend regressions pass. TypeScript/Vite build passes; dependency deprecation and bundle-size advisories remain. CI now installs Gmsh's GLU dependency, but the updated Linux workflow has not run remotely because no new push is authorized.
