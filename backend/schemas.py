@@ -1,5 +1,5 @@
 from typing import Literal, Annotated
-from pydantic import BaseModel, Field, ConfigDict, model_validator
+from pydantic import BaseModel, Field, ConfigDict, JsonValue, model_validator
 import math
 
 Number = Annotated[float, Field(allow_inf_nan=False)]
@@ -105,7 +105,9 @@ class Analysis(StrictModel):
     reference_id: str | None = Field(default=None,pattern=r'^[a-f0-9]{32}$')
     annotations: list['Annotation'] = Field(default_factory=list,max_length=100)
     setup_proposal_id: str | None = Field(default=None,pattern=r'^[a-f0-9]{32}$')
-    conversation: list['InterviewMessage'] = Field(default_factory=list,max_length=24)
+    # The HTTP request-size limit remains enforced. Do not silently truncate
+    # the local engineering record to the assistant's recent-context window.
+    conversation: list['InterviewMessage'] = Field(default_factory=list)
     print: PrintSettings = Field(default_factory=PrintSettings)
     @model_validator(mode='after')
     def validate_setup(self):
@@ -119,6 +121,12 @@ class InterviewMessage(StrictModel):
     role: Literal['user','assistant']
     text: str = Field(max_length=20000)
     live: bool = False
+    questions: list[str] | None = Field(default=None, max_length=5, exclude_if=lambda v: v is None)
+    # Review cards are archived as inert JSON, not reapplied or normalized to
+    # today's proposal schema. This preserves their original revision data.
+    proposal: dict[str, JsonValue] | None = Field(default=None, exclude_if=lambda v: v is None)
+    simulation_proposal: dict[str, JsonValue] | None = Field(default=None, exclude_if=lambda v: v is None)
+    interviewFor: str | None = Field(default=None, pattern=r'^[a-f0-9]{32}$', exclude_if=lambda v: v is None)
 
 class Annotation(StrictModel):
     id: str = Field(max_length=80)

@@ -14,7 +14,7 @@ Development: backend on `127.0.0.1:8000`, frontend on `127.0.0.1:5173`.
 
 ```sh
 .venv/bin/python -m pytest -q tests
-node --test tests/frontend-jobs.test.ts
+node --experimental-strip-types --test tests/frontend-*.test.ts
 npm run build
 # Longer, isolated known-CAD/STEP/STL validation (15 CPU solves):
 .venv/bin/python -m scripts.validate_imports

@@ -2,6 +2,18 @@
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
 
+## Complete interview retention — 2026-09-22
+
+New analyses preserve the complete conversation at submission, including separately displayed questions, geometry/setup review cards and their revision markers. Previously, the browser retained only the last 24 message texts in a run. The remote Astra context remains the ten most recent messages plus the current study, but now includes each message's questions and cards. Earlier unapplied instructions may still need restating. Cards in the archive are inert JSON; the existing applied-setup validation remains separate. The 80 MB HTTP request limit and 20,000-character message-text limit reject oversize submissions without silently trimming them. Historical run records are not rewritten.
+
+The regression tests reproduced both truncation and missing structured context before the fix. All **104 backend tests and 17 frontend tests pass**, and the TypeScript/Vite build passes. Both legacy P1/P2 packages and the new long-interview package execute their bundled reproduction scripts. Independent read-only review found no concrete regression; the two existing dependency deprecation warnings and bundle-size advisory remain.
+
+Browser verification used a disposable copy of the saved synthetic print coupon: 12 prior messages plus 24 explicitly labelled synthetic markers (`live=false`). A real Astra request to repeat the previous separately displayed question returned that exact question, bringing the conversation to **38 messages**. Actual Apple `metal-3` GPU run `72e5b30c71144a789ac1c0ec33bbfdeb` preserves all 38, one geometry card, two simulation cards and six messages with questions. The 4,455-DOF result has maximum displacement **0.0995654 mm** and independently verified residual **4.4417e-10**.
+
+The exported ZIP verifies all **28 manifest entries** and retains the exact transcript in both `interview.json` and `result.json`. Its extracted reproduction actually executes and preserves that transcript, with full displacement relative difference **8.0757e-13** from the GPU. Saving, reloading the browser and reopening the saved server snapshot restores the same result link, all 24 markers and both occurrences of the test question. The original study's hash is unchanged; its completed result is restored in the browser afterward. No captured browser console errors were reported.
+
+Evidence: [verification record](../evidence/interview-retention.json), [complete synthetic transcript](../evidence/interview-retention-transcript.json), and [restored result screenshot](../evidence/interview-retention-browser.png). This establishes software traceability on the known coupon, not arbitrary long-context reasoning or new engineering/physical acceptance.
+
 ## Print-usage matrix and scope guidance — 2026-09-22
 
 The [30-case slicer matrix](SLICER-MATRIX.md) exercises three frozen geometries across orientation, wall count, infill and two X1 Carbon nozzle/layer profiles. **27 cases produced verified model-only deposition measurements**; their OpenFEA/slicer mass differences range from **-14.37% to +7.09%**. Three oblique cases failed in OrcaSlicer with exit 156 and generic `Errors`; their source/log evidence is preserved, with no fabricated comparison or bypass. The recorded range is exploratory, not an acceptance threshold. Orientation rankings can differ, and printed stiffness is not established by deposition agreement.

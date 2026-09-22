@@ -41,6 +41,7 @@ import PrintWorkspace from "./PrintWorkspace";
 import CompareTable from "./CompareTable";
 import ResultGuidance from "./ResultGuidance";
 import ReadinessPanel from "./ReadinessPanel";
+import { archiveConversation, assistantHistory } from "./interview";
 import {
   api,
   job,
@@ -619,9 +620,7 @@ export default function App() {
     setPrompt("");
     setAiBusy(true);
     setError("");
-    const history = messages
-      .slice(-10)
-      .map((m) => ({ role: m.role, content: m.text }));
+    const history = assistantHistory(messages);
     setMessages((m) => [...m, { role: "user", text }]);
     try {
       const answer = await job<{
@@ -725,9 +724,7 @@ export default function App() {
         reference_id: image?.id || null,
         annotations: marks,
         setup_proposal_id: setupProposalId,
-        conversation: messages
-          .slice(-24)
-          .map(({ role, text, live }) => ({ role, text, live: !!live })),
+        conversation: archiveConversation(messages),
         print,
       };
       let r: Result;
@@ -2071,8 +2068,9 @@ export default function App() {
             </div>
           </form>
           <p>
-            Image, notes and chat are sent to Astra through your signed-in Codex
-            account.
+            Astra receives the image, current study and 10 most recent messages
+            through your signed-in Codex account. Saved studies and report
+            packages retain the full conversation.
           </p>
         </div>
       </aside>

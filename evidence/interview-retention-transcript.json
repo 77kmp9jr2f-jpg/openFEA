@@ -1,0 +1,446 @@
+[
+  {
+    "role": "assistant",
+    "text": "Let\u2019s give your design a little more certainty. Add a photo or start with this example, then tell me what the part needs to do.",
+    "live": false,
+    "questions": [
+      "What dimensions are known?",
+      "How is it held, and where does the force act?"
+    ]
+  },
+  {
+    "role": "user",
+    "text": "Please model this synthetic reference using supplied dimensions: 80 mm base length, 40 mm width, 60 mm overall upright height, 8 mm thickness, 90 degree bracket. Both plain through-bores are diameter 8 mm: base hole center X=57.6 Y=20, upright hole center Y=20 Z=43.2. No hidden features or fillets. Use the bracket template at mesh size 7 mm. Name it Synthetic demo mounting bracket and state the image is synthetic. Plan fixed rear X=0 and total [0,0,-100] N on X=80 with illustrative aluminum. Return a reviewable geometry proposal.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Reviewable proposal for the synthetic reference, using supplied dimensions rather than pixel measurements. Plan: fully restrain XYZ on the rear X=0 face; uniformly distribute total force [0,0,-100] N over the end face X=80. Global X follows base length, Y spans width, and Z points upward. Use illustrative aluminum: E=69,000 MPa, \u03bd=0.33, yield=240 MPa. Apply and confirm geometry, material and boundary conditions before a new static solve; no results are asserted here.",
+    "live": true,
+    "questions": [],
+    "proposal": {
+      "name": "Synthetic demo mounting bracket",
+      "kind": "bracket",
+      "length": 80,
+      "width": 40,
+      "height": 60,
+      "thickness": 8,
+      "hole_diameter": 8,
+      "mesh_size": 7,
+      "features": [],
+      "step_id": null,
+      "provenance": "image_proposal",
+      "assumptions": [
+        "The image is synthetic; all dimensions are supplied demonstration specifications in mm.",
+        "90\u00b0 bracket: base occupies X=0\u201380, Y=0\u201340, Z=0\u20138; upright occupies X=0\u20138, Y=0\u201340, Z=0\u201360. Height is overall.",
+        "Both bores are plain \u00d88 mm through-holes: base center X=57.6, Y=20, axis Z; upright center Y=20, Z=43.2, axis X.",
+        "No hidden features or fillets; the legs form one connected solid.",
+        "7 mm is the initial mesh size. Sharp internal-corner and fixture-edge stresses may be mesh-dependent; assess mesh convergence.",
+        "Material properties are illustrative, not certified. Analysis assumes homogeneous isotropic small-strain linear elasticity and a static load."
+      ]
+    }
+  },
+  {
+    "role": "user",
+    "text": "For a new hypothetical static application, this bracket carries a heavy load. Do not reuse the previous demo load or material as approved inputs. What details do you need before proposing the setup?",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "I\u2019ll use the built bracket geometry, but treat the demo material, supports, loads and results as unapproved for this application. Global X follows the base length, Y spans its width, and Z points upward. Supports can only fully restrain XYZ on selected faces; loads are total forces uniformly distributed over faces. Bolts, contact, moments and partial restraints are not implemented.",
+    "live": true,
+    "questions": [
+      "How is the bracket attached, and which faces may reasonably be idealized as fully fixed\u2014for example, rear X=0 or underside Z=0?",
+      "Where does the load act, and what is its total magnitude in N and global direction (or [Fx, Fy, Fz])? Include any additional loads and whether self-weight matters.",
+      "What material and condition should be used? Supply verified E, Poisson\u2019s ratio, yield strength and density, or explicitly authorize an illustrative preset. Is loading steady at room temperature with small deformation, and what stress or deflection limits should be assessed?"
+    ]
+  },
+  {
+    "role": "user",
+    "text": "For this synthetic demonstration, adopt the illustrative aluminum values E=69000 MPa, Poisson ratio 0.33, yield strength 240 MPa and density 2700 kg/m3. Fully fix the entire rear X=0 face in XYZ. Apply a TOTAL [0,0,-150] N uniformly across the selected X=80 end face, replacing the previous 100 N force. Both bores stay free. Assume steady room-temperature small-strain linear static loading, no self-weight, no contact, bolts or preload. No acceptance threshold is specified; this is a demonstration, not physical approval. Keep the current geometry and propose the complete setup for visual review.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Complete setup for visual review: retain the current geometry, illustrative aluminum and rear restraint; replace the 100 N load with 150 N downward on face 9. Both bores remain free. Apply and confirm the setup before solving; previous results do not represent this load.",
+    "live": true,
+    "questions": [],
+    "simulation_proposal": {
+      "material": {
+        "name": "Aluminum \u00b7 illustrative",
+        "young_mpa": 69000,
+        "poisson": 0.33,
+        "yield_mpa": 240,
+        "density_kg_m3": 2700
+      },
+      "fixed_faces": [
+        1
+      ],
+      "loads": [
+        {
+          "face_id": 9,
+          "vector": [
+            0,
+            0,
+            -150
+          ]
+        }
+      ],
+      "notes": "Fully fix the entire rear X=0 face (1) in XYZ. Apply a TOTAL force [0,0,-150] N uniformly over the selected X=80 end face (9), replacing the previous force. Global X follows base length, Y spans width, and Z points upward. Bore surfaces 6 and 10 remain unrestrained and unloaded. This complete setup retains the existing geometry. Preview, apply and confirm before a new solve.",
+      "assumptions": [
+        "Synthetic demonstration with explicitly adopted illustrative, uncertified material properties.",
+        "Homogeneous isotropic small-strain linear-elastic static response under steady room-temperature loading.",
+        "Rear support is an ideal full XYZ restraint.",
+        "No self-weight, contact, bolts or preload.",
+        "No acceptance threshold is specified; this proposal provides no physical approval.",
+        "The current 7 mm mesh is an initial mesh; sharp-corner and fixture-edge stresses require mesh-convergence assessment."
+      ],
+      "id": "cebc9a619837423188d290b01629635d",
+      "model_id": "f5f0cb3a22034e0f8b67f1b4733b5573",
+      "source_context": {
+        "model_id": "f5f0cb3a22034e0f8b67f1b4733b5573",
+        "geometry": {
+          "name": "Synthetic demo mounting bracket",
+          "kind": "bracket",
+          "length": 80,
+          "width": 40,
+          "height": 60,
+          "thickness": 8,
+          "hole_diameter": 8,
+          "mesh_size": 7,
+          "features": [],
+          "step_id": null,
+          "provenance": "image_proposal",
+          "assumptions": [
+            "The image is synthetic; all dimensions are supplied demonstration specifications in mm.",
+            "90\u00b0 bracket: base occupies X=0\u201380, Y=0\u201340, Z=0\u20138; upright occupies X=0\u20138, Y=0\u201340, Z=0\u201360. Height is overall.",
+            "Both bores are plain \u00d88 mm through-holes: base center X=57.6, Y=20, axis Z; upright center Y=20, Z=43.2, axis X.",
+            "No hidden features or fillets; the legs form one connected solid.",
+            "7 mm is the initial mesh size. Sharp internal-corner and fixture-edge stresses may be mesh-dependent; assess mesh convergence.",
+            "Material properties are illustrative, not certified. Analysis assumes homogeneous isotropic small-strain linear elasticity and a static load."
+          ]
+        },
+        "material": {
+          "name": "Aluminum \u00b7 illustrative",
+          "young_mpa": 69000,
+          "poisson": 0.33,
+          "yield_mpa": 240,
+          "density_kg_m3": 2700
+        },
+        "fixed_faces": [
+          1
+        ],
+        "loads": [
+          {
+            "face_id": 9,
+            "vector": [
+              0,
+              0,
+              -100
+            ]
+          }
+        ],
+        "notes": "Synthetic demonstration only. Rear X=0 is fully fixed; total [0,0,-100] N is uniformly distributed on X=80. Bores are unloaded. No fillets, contact, bolts or preload. Check actual dimensions, material condition and mesh convergence before real use.",
+        "reference_id": "52b767032c7c4646b91b72ffaec2670c",
+        "annotations": [
+          {
+            "id": "fe7d69b2-5349-4f62-a68b-60629f0dceba",
+            "tool": "dimension",
+            "start": [
+              0.23424369747899154,
+              0.7241115196078431
+            ],
+            "end": [
+              0.6081932773109243,
+              0.9201899509803922
+            ],
+            "text": "80 mm overall base length (supplied demo specification)"
+          }
+        ]
+      },
+      "source_hash": "d2fc7cfc3e0a823a6bb02c56ed1fb699454b9aa25a202d14f7477794511f434c"
+    }
+  },
+  {
+    "role": "assistant",
+    "text": "Your solid and mesh are ready. Next, let\u2019s describe how the part is used so Astra can propose the simulation setup.",
+    "live": false,
+    "questions": [
+      "Which material properties should we use?",
+      "How is it attached or held? Select a face if that helps.",
+      "Where does the load act, and what is its magnitude and global X/Y/Z direction?"
+    ],
+    "interviewFor": "9737ceeb435f40c6855ecef6bacf518a"
+  },
+  {
+    "role": "user",
+    "text": "For this new imported print coupon, ignore the prior bracket and its loads/material. I want a static printed-part analysis, but have not chosen print orientation, infill or the real force. What missing print and loading inputs do you need before a complete setup? Do not propose defaults as approved.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "I\u2019ll use the imported coupon, whose built bounds are 40 \u00d7 10 \u00d7 8 mm, and discard the prior bracket\u2019s material, loads and support assumptions. Displayed print settings remain unapproved drafts. Print analysis uses an approximate directional equivalent solid, not sliced infill or calibrated printed strength. Supports fully restrain XYZ; face loads are uniformly distributed total forces. Bolts, contact, moments and partial restraints are unsupported.",
+    "live": true,
+    "questions": [
+      "Which filament and properties should be used: Young\u2019s modulus (MPa), Poisson ratio, yield strength (MPa) and density (kg/m\u00b3)? Supply verified values or explicitly authorize an illustrative preset for the named filament.",
+      "What print settings do you want: orientation/build direction, infill pattern and density, wall count, line width, layer height, and top/bottom layer counts? Orientation can be specified as extrinsic X\u2192Y\u2192Z rotations in degrees; print Z is the build direction.",
+      "How is the coupon attached, and which surfaces may be idealized as fully fixed in XYZ? Specify the loaded surface(s), total force in N and global direction/components, plus operating temperature, whether loading is steady, and whether self-weight matters. The end patches are face 9 at X=0 and face 7 at X=40 mm; neither is assigned yet."
+    ]
+  },
+  {
+    "role": "user",
+    "text": "For this software verification coupon, explicitly adopt illustrative PLA: E=3500 MPa, Poisson ratio=0.35, yield=40 MPa, density=1240 kg/m3. Enable the experimental print equivalent with rotation XYZ=[30,45,20] degrees, gyroid infill density=0.2, 3 walls, line width=0.4 mm, layer height=0.2 mm, 4 top and 4 bottom layers. Fully fix face 9 at X=0 in XYZ; apply a total [0,0,-4] N uniformly on face 7 at X=40. All other surfaces free. Steady room-temperature small-strain static loading, no self-weight, contact, bolts or preload. No physical acceptance claim. Keep geometry unchanged and propose the entire material/print/support/load setup for review.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Complete coupon setup for review: replace illustrative aluminum with adopted illustrative PLA, enable the specified print equivalent, fix face 9 and apply 4 N downward on face 7. Geometry stays unchanged. Preview, apply and confirm before solving.",
+    "live": true,
+    "questions": [],
+    "simulation_proposal": {
+      "print": {
+        "enabled": true,
+        "rotation_deg": [
+          30,
+          45,
+          20
+        ],
+        "infill_pattern": "gyroid",
+        "infill_density": 0.2,
+        "wall_count": 3,
+        "line_width_mm": 0.4,
+        "layer_height_mm": 0.2,
+        "top_layers": 4,
+        "bottom_layers": 4
+      },
+      "material": {
+        "name": "PLA \u00b7 illustrative",
+        "young_mpa": 3500,
+        "poisson": 0.35,
+        "yield_mpa": 40,
+        "density_kg_m3": 1240
+      },
+      "fixed_faces": [
+        9
+      ],
+      "loads": [
+        {
+          "face_id": 7,
+          "vector": [
+            0,
+            0,
+            -4
+          ]
+        }
+      ],
+      "notes": "Use the unchanged built 40 \u00d7 10 \u00d7 8 mm imported coupon. Face 9 at X=0 is fully restrained in XYZ. Face 7 at X=40 receives TOTAL force [0,0,-4] N uniformly distributed over its area; all other surfaces are free. Replace prior bracket application notes and conditions. Print rotation is extrinsic X then Y then Z, R=Rz Ry Rx, mapping print axes into global axes; print Z is the layer normal. Force remains in global axes. Experimental directional homogenization uses illustrative pattern coefficients and bounding-box wall/skin estimates, not sliced infill or calibrated printed strength. No results or physical acceptance are asserted.",
+      "assumptions": [
+        "User explicitly adopts illustrative PLA properties and all listed print settings for software verification.",
+        "Steady room-temperature, small-strain static loading.",
+        "No self-weight, contact, bolts or preload.",
+        "Print orientation and physical strength are not validated by this approximate model."
+      ],
+      "id": "ded6df2125624dfb85e07f66aea996e7",
+      "model_id": "9737ceeb435f40c6855ecef6bacf518a",
+      "source_context": {
+        "print": {
+          "enabled": true,
+          "rotation_deg": [
+            0,
+            0,
+            0
+          ],
+          "infill_pattern": "gyroid",
+          "infill_density": 0.2,
+          "wall_count": 3,
+          "line_width_mm": 0.4,
+          "layer_height_mm": 0.2,
+          "top_layers": 4,
+          "bottom_layers": 4
+        },
+        "model_id": "9737ceeb435f40c6855ecef6bacf518a",
+        "geometry": {
+          "name": "print-coupon",
+          "kind": "stl",
+          "length": 80,
+          "width": 40,
+          "height": 60,
+          "thickness": 8,
+          "hole_diameter": 8,
+          "mesh_size": 7,
+          "features": [],
+          "step_id": null,
+          "stl_id": "3e9a0f396e5644dead46a1722eb6930f",
+          "unit_scale": 1,
+          "feature_angle_deg": 40,
+          "accept_stl_preprocessing": false,
+          "provenance": "stl_import",
+          "assumptions": []
+        },
+        "material": {
+          "name": "Aluminum \u00b7 illustrative",
+          "young_mpa": 69000,
+          "poisson": 0.33,
+          "yield_mpa": 240,
+          "density_kg_m3": 2700
+        },
+        "fixed_faces": [],
+        "loads": [],
+        "notes": "Synthetic demonstration only. Rear X=0 is fully fixed; total [0,0,-100] N is uniformly distributed on X=80. Bores are unloaded. No fillets, contact, bolts or preload. Check actual dimensions, material condition and mesh convergence before real use.",
+        "reference_id": "52b767032c7c4646b91b72ffaec2670c",
+        "annotations": [
+          {
+            "id": "fe7d69b2-5349-4f62-a68b-60629f0dceba",
+            "tool": "dimension",
+            "start": [
+              0.23424369747899154,
+              0.7241115196078431
+            ],
+            "end": [
+              0.6081932773109243,
+              0.9201899509803922
+            ],
+            "text": "80 mm overall base length (supplied demo specification)"
+          }
+        ]
+      },
+      "source_hash": "4b6a0081fc22741752a1665cec8885803d0abb71c85ce3ff27bc40ce427fdab7"
+    }
+  },
+  {
+    "role": "user",
+    "text": "Synthetic archive validation marker 01; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Synthetic archive validation marker 02; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "user",
+    "text": "Synthetic archive validation marker 03; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Synthetic archive validation marker 04; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "user",
+    "text": "Synthetic archive validation marker 05; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Synthetic archive validation marker 06; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "user",
+    "text": "Synthetic archive validation marker 07; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Synthetic archive validation marker 08; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "user",
+    "text": "Synthetic archive validation marker 09; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Synthetic archive validation marker 10; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "user",
+    "text": "Synthetic archive validation marker 11; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Synthetic archive validation marker 12; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "user",
+    "text": "Synthetic archive validation marker 13; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Synthetic archive validation marker 14; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "user",
+    "text": "Synthetic archive validation marker 15; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Synthetic archive validation marker 16; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "user",
+    "text": "Synthetic archive validation marker 17; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Synthetic archive validation marker 18; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "user",
+    "text": "Synthetic archive validation marker 19; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Synthetic archive validation marker 20; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "user",
+    "text": "Synthetic archive validation marker 21; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Synthetic archive validation marker 22; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "user",
+    "text": "Synthetic archive validation marker 23; no change to engineering inputs.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "Synthetic archive validation marker 24; no change to engineering inputs.",
+    "live": false,
+    "questions": [
+      "Which total force in global XYZ is already assigned to the loaded face?"
+    ]
+  },
+  {
+    "role": "user",
+    "text": "This is a software traceability check. Repeat the exact question shown in the immediately preceding assistant message. Do not change geometry or propose a setup.",
+    "live": false
+  },
+  {
+    "role": "assistant",
+    "text": "",
+    "live": true,
+    "questions": [
+      "Which total force in global XYZ is already assigned to the loaded face?"
+    ]
+  }
+]

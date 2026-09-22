@@ -179,6 +179,43 @@ def test_archive_preserves_interview_proposal_and_reproduces(context,draft,tmp_p
     assert actual['element_order'] == order
     assert actual['setup']['setup_proposal_id']==proposal['id']
 
+def test_long_interview_preserves_questions_and_review_cards_through_gpu_and_archive(context,draft,tmp_path):
+    import json, os, subprocess, sys, zipfile
+    from backend.simulation_proposals import propose_setup, apply_setup
+    from backend.schemas import Analysis, GPUSolution
+    from backend.solver import prepare_gpu, finish_gpu, solve_model, assemble_system
+    from backend.storage import resource, read_json
+    from backend.report import export_report
+    import numpy as np
+    proposal = propose_setup(draft, context)
+    transcript = [{'role': 'user' if i % 2 == 0 else 'assistant', 'text': f'Interview message {i}',
+                   'live': bool(i % 2)} for i in range(36)]
+    transcript[0]['text'] = 'Original loading requirement; must survive the whole interview.'
+    transcript[3].update(questions=['Which face supports the part?', 'What is the total force?'],
+                         proposal=context['geometry'], interviewFor=context['model_id'])
+    transcript[-1]['simulation_proposal'] = proposal
+    setup = Analysis.model_validate({**apply_setup(proposal['id'], context), 'confirmed': True,
+                                    'conversation': transcript})
+    cpu = solve_model(setup)
+    system = prepare_gpu(setup)
+    assert read_json(resource('systems', system['id'])/'setup.json')['conversation'] == transcript
+    with np.load(resource('runs', cpu['id'])/'solution.npz') as solved:
+        values = solved['dof_displacement'][assemble_system(setup)['free']].tolist()
+    # Exercise the GPU submission path with a verified CPU vector. This does
+    # not claim hardware GPU execution; actual hardware has separate evidence.
+    gpu = finish_gpu(GPUSolution(system_id=system['id'], displacement=values,
+        device='Test CPU vector through GPU verification', iterations=1, refinements=1, seconds=.1))
+    assert gpu['setup']['conversation'] == transcript
+    with zipfile.ZipFile(export_report(gpu['id'], 'zip')) as archive:
+        assert json.loads(archive.read('interview.json')) == transcript
+        assert json.loads(archive.read('result.json'))['setup']['conversation'] == transcript
+        archive.extractall(tmp_path)
+    reproduced = subprocess.run([sys.executable, str(tmp_path/'reproduce.py')], cwd=tmp_path,
+        env={**os.environ, 'PYTHONPATH': ''}, capture_output=True, text=True, timeout=60)
+    assert reproduced.returncode == 0, reproduced.stderr
+    actual = json.loads(next((tmp_path/'reproduced/runs').glob('*/result.json')).read_text())
+    assert actual['setup']['conversation'] == transcript
+
 def test_live_print_answer_cannot_default_entire_print_setup(context, draft):
     from backend.schemas import PrintSettings
     from backend.assistant import normalize_answer

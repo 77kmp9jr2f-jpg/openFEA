@@ -1,0 +1,78 @@
+{
+  "source_study_id": "4266b85b6f0a4548b7ddb27c79e9ea83",
+  "source_study_sha256": "219cd4e093335cca99e025aecf9b9740aec607c720c4e24efa406092b4104971",
+  "validation_study_id": "1a12acfbb1a448c1be7c440633b461ed",
+  "seeded_message_count": 36,
+  "synthetic_markers": 24,
+  "real_prior_messages": 12,
+  "scope": "Disposable copy of the preserved synthetic print-coupon study; appended markers are explicitly labelled synthetic and live=false. Original study and immutable results are unchanged.",
+  "date": "2026-09-22",
+  "gpu_run": "72e5b30c71144a789ac1c0ec33bbfdeb",
+  "model_id": "9737ceeb435f40c6855ecef6bacf518a",
+  "completed_study_id": "2d412e8480f948a1883c9bdb7a13b6fd",
+  "completed_study_updated_at": 1790068302.2660758,
+  "message_count": 38,
+  "geometry_cards": 1,
+  "simulation_cards": 2,
+  "messages_with_questions": 6,
+  "live_context_check": {
+    "prompt": "This is a software traceability check. Repeat the exact question shown in the immediately preceding assistant message. Do not change geometry or propose a setup.",
+    "response": {
+      "role": "assistant",
+      "text": "",
+      "live": true,
+      "questions": [
+        "Which total force in global XYZ is already assigned to the loaded face?"
+      ]
+    },
+    "expected_question": "Which total force in global XYZ is already assigned to the loaded face?",
+    "passed": true
+  },
+  "gpu_execution": {
+    "backend": "webgpu",
+    "device": "apple \u00b7 metal-3",
+    "precision": "GPU float32 with browser float64 iterative refinement",
+    "method": "WebGPU conjugate gradient, symmetric Jacobi scaling",
+    "iterations": 2340,
+    "refinements": 3,
+    "gpu_seconds": 0.4729000000953674,
+    "device_source": "Browser-reported adapter; numerical residual independently verified on server"
+  },
+  "dofs": 4455,
+  "elements": 807,
+  "gpu_relative_residual": 4.4417297104891446e-10,
+  "max_displacement_mm": 0.09956538701685158,
+  "archive_sha256": "c7f19616bcf5682e3c9d3a67ea84424c57c7fd38ea07e2ee5064b3419e8c2ec0",
+  "manifest_entries_verified": 28,
+  "reproduction": {
+    "exit_code": 0,
+    "full_displacement_relative_l2_error": 8.075714520419737e-13,
+    "interview_exactly_preserved": true,
+    "directory": "/var/folders/lp/fqhbdqjd7xx4vf_5nh4zwny00000gn/T/openfea-full-interview-z_k8_297"
+  },
+  "source_study_unchanged": true,
+  "saved_study_message_equality": true,
+  "frontend_build": "index-qwa9gDzx.js",
+  "automated_checks": {
+    "backend": 104,
+    "frontend": 17,
+    "build": "passed"
+  },
+  "browser_reload": {
+    "saved_study_id": "2d412e8480f948a1883c9bdb7a13b6fd",
+    "report_href": "/api/runs/72e5b30c71144a789ac1c0ec33bbfdeb/report/pdf",
+    "synthetic_markers_visible": 24,
+    "question_occurrences_visible": 2,
+    "captured_console_errors": [],
+    "screenshot": "evidence/interview-retention-browser.png"
+  },
+  "original_browser_restored": {
+    "report_href": "/api/runs/12f9942450724ed1876b14254905a847/report/pdf",
+    "synthetic_markers_visible": 0
+  },
+  "source_sha256": {
+    "frontend/src/interview.ts": "a6b567b364841c3b21947291e943904eef7569206b5b95dea892705a5a7ad146",
+    "frontend/src/App.tsx": "df8782280826b88023b6b0148c0ba64a995522f3c869f23d5427797f6a97650c",
+    "backend/schemas.py": "8c937cfff8922fb4a30a057ad9b2d4c07271a5e385207145a2a31ea422884c2d"
+  }
+}
