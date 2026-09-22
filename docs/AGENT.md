@@ -8,6 +8,7 @@ Agents set up and run OpenFEA through the HTTP API. They do not scrape the works
 
 - `confirmed` must be `true` on `POST /api/solve`. The schema rejects anything else.
 - The solver rejects a free-DOF relative residual ≥ `1e-7`.
+- Readiness derives the actual quadratic DOF count from the immutable mesh and blocks systems above 500,000 DOFs. Request a coarser mesh; new solves never silently downgrade interpolation. Historical linear-element reports remain reproducible.
 - Scope is one connected solid, small-strain static linear elasticity, optional homogenized print equivalent.
 - Model-generated CAD or solver code is never executed. Agents send schema-constrained JSON.
 - `POST /api/solve` is the local CPU reference solver. GPU is an explicit browser WebGPU path (`/api/gpu/prepare` then `/api/gpu/finish`) and is not headless.

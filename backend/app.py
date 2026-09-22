@@ -46,14 +46,14 @@ def agent():
 
 @app.get('/api/models/{mid}/readiness')
 def model_readiness(mid: str):
-    from .readiness import analysis_readiness
-    return analysis_readiness(read_json(resource('models', mid) / 'model.json'))
+    from .readiness import analysis_readiness, load_readiness_model
+    return analysis_readiness(load_readiness_model(mid))
 
 @app.post('/api/readiness')
 def readiness(body: ReadinessRequest):
-    from .readiness import analysis_readiness
+    from .readiness import analysis_readiness, load_readiness_model
     return analysis_readiness(
-        read_json(resource('models', body.model_id) / 'model.json'),
+        load_readiness_model(body.model_id),
         body.model_dump(),
     )
 

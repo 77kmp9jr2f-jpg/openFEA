@@ -7,6 +7,7 @@ def box_model(**overrides):
         'id': 'a' * 32,
         'spec': {'name': 'Box', 'kind': 'stl', 'provenance': 'stl_import', 'assumptions': []},
         'tetrahedra': 200,
+        'quadratic_dofs': 3000,
         'volume_mm3': 3200,
         'min_quality': 0.4,
         'bounds': [[0, 0, 0], [40, 10, 8]],
@@ -83,6 +84,34 @@ def test_unusable_mesh_is_blocked():
     assert verdict['status'] == 'blocked'
     assert 'mesh_usable' in verdict['missing']
     assert 'faces_selectable' in verdict['missing']
+
+
+def test_quadratic_capacity_is_checked_before_inviting_a_solve():
+    draft = {'material': PLA, 'fixed_faces': [1],
+             'loads': [{'face_id': 2, 'vector': [0, 0, -40]}], 'confirmed': True}
+    verdict = analysis_readiness(box_model(quadratic_dofs=500001), draft)
+    assert verdict['status'] == 'blocked'
+    assert verdict['can_solve'] is False
+    assert 'mesh_usable' in verdict['missing']
+    assert 'coarser' in verdict['next'].lower()
+    assert '500,001' in next(c['detail'] for c in verdict['checks'] if c['id'] == 'mesh_usable')
+    assert analysis_readiness(box_model(quadratic_dofs=500000), draft)['ready'] is True
+
+
+def test_legacy_model_capacity_uses_its_mesh_without_rewriting_it():
+    import numpy as np
+    from backend.readiness import load_readiness_model
+    from backend.storage import resource, write_json
+    model = box_model()
+    del model['quadratic_dofs']
+    folder = resource('models', model['id'])
+    folder.mkdir(exist_ok=True)
+    write_json(folder/'model.json', model)
+    before = (folder/'model.json').read_bytes()
+    np.savez(folder/'mesh.npz', points=np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1]]),
+             tets=np.array([[0,1,2,3]]))
+    assert load_readiness_model(model['id'])['quadratic_dofs'] == 30
+    assert (folder/'model.json').read_bytes() == before
 
 
 def test_agent_contract_names_gates_and_forbids_ui_scraping():

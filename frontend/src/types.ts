@@ -132,6 +132,7 @@ export type ReadinessCheckId =
   | "confirm"
   | "scope";
 export type Readiness = {
+  model: { id: string; quadratic_dofs: number | null };
   status: "blocked" | "incomplete" | "ready";
   ready: boolean;
   can_solve: boolean;

@@ -140,6 +140,8 @@ export default function App() {
     [featureError, setFeatureError] = useState("");
   const [compute, setCompute] = useState<"webgpu" | "cpu">("cpu");
   const [readiness, setReadiness] = useState<Readiness | null>(null);
+  const [readinessError, setReadinessError] = useState("");
+  const [readinessAttempt, setReadinessAttempt] = useState(0);
   const [setupPreview, setSetupPreview] = useState<SimulationProposal | null>(
     null,
   );
@@ -228,6 +230,17 @@ export default function App() {
     };
   }
   async function restore(s: Saved) {
+    // Fetch every dependency before changing the workspace. Failed restores
+    // leave the current study and its autosave state intact.
+    const [inspection, comparisonRun, restoredModel, restoredResult] =
+      await Promise.all([
+        s.spec.kind === "stl" && s.spec.stl_id
+          ? api<StlInspect>(`/stls/${s.spec.stl_id}?scale=${s.spec.unit_scale}`)
+          : null,
+        s.pinnedId ? api<Result>("/runs/" + s.pinnedId) : null,
+        s.modelId ? api<Model>("/models/" + s.modelId) : null,
+        s.resultId && s.modelId ? api<Result>("/runs/" + s.resultId) : null,
+      ]);
     setSpec(normalizeGeometry(s.spec));
     setMaterial(s.material);
     setFixed(s.fixed || []);
@@ -241,27 +254,15 @@ export default function App() {
     setSetupPreview(null);
     setSelected(null);
     setConfirmed(false);
-    setResult(null);
-    setModel(null);
-    setPinned(null);
+    setResult(
+      restoredResult?.model_id === restoredModel?.id ? restoredResult : null,
+    );
+    setModel(restoredModel);
+    setPinned(comparisonRun);
     setCompare(null);
-    setStlInspect(null);
+    setStlInspect(inspection);
     setField("solid");
-    if (s.spec.kind === "stl" && s.spec.stl_id)
-      setStlInspect(
-        await api<StlInspect>(
-          `/stls/${s.spec.stl_id}?scale=${s.spec.unit_scale}`,
-        ),
-      );
-    if (s.pinnedId) setPinned(await api<Result>("/runs/" + s.pinnedId));
-    if (s.modelId) {
-      const m = await api<Model>("/models/" + s.modelId);
-      setModel(m);
-    }
-    if (s.resultId && s.modelId) {
-      const r = await api<Result>("/runs/" + s.resultId);
-      if (r.model_id === s.modelId) setResult(r);
-    }
+    setReady(true);
   }
   async function build(
     next = spec,
@@ -278,6 +279,7 @@ export default function App() {
     try {
       const m = await job<Model>("/models", next, undefined, controller.signal);
       setModel(m);
+      setReady(true);
       setSpec(m.spec);
       const preset = flags.demo || flags.firstAnalysis;
       setFixed(preset ? [m.recommended.fixed_face] : []);
@@ -332,27 +334,25 @@ export default function App() {
     if (started.current) return;
     started.current = true;
     (async () => {
+      let engineReady = false;
       try {
         const h = await api<{ assistant: { available: boolean } }>("/health");
+        engineReady = true;
         setAiAvailable(h.assistant.available);
         setStatus("Local engine ready");
         const saved =
           localStorage.getItem("openfea-current") ||
           localStorage.getItem("fea-r-current");
         if (saved) {
-          try {
-            await restore(JSON.parse(saved));
-          } catch {
-            localStorage.removeItem("openfea-current");
-            localStorage.removeItem("fea-r-current");
-            await startFirstAnalysis();
-          }
+          await restore(JSON.parse(saved));
         } else await startFirstAnalysis();
       } catch (e) {
-        setError((e as Error).message);
-        setStatus("Local engine offline");
-      } finally {
-        setReady(true);
+        setError(
+          `${(e as Error).message} Browser autosave is paused and the previous snapshot is preserved. Restart the local engine and reload, or open a saved study.`,
+        );
+        setStatus(
+          engineReady ? "Workspace restore failed" : "Local engine offline",
+        );
       }
     })();
   }, []);
@@ -419,11 +419,13 @@ export default function App() {
       .catch(() => setCompare(null));
   }, [pinned, result]);
   useEffect(() => {
+    setReadinessError("");
     if (!model || dirty) {
       setReadiness(null);
       return;
     }
     let cancelled = false;
+    setReadiness(null);
     api<Readiness>("/readiness", {
       model_id: model.id,
       material,
@@ -435,13 +437,22 @@ export default function App() {
       .then((value) => {
         if (!cancelled) setReadiness(value);
       })
-      .catch(() => {
-        if (!cancelled) setReadiness(null);
+      .catch((e) => {
+        if (!cancelled) setReadinessError((e as Error).message);
       });
     return () => {
       cancelled = true;
     };
-  }, [model, dirty, material, fixed, loads, confirmed, print]);
+  }, [
+    model,
+    dirty,
+    material,
+    fixed,
+    loads,
+    confirmed,
+    print,
+    readinessAttempt,
+  ]);
   async function upload(file: File) {
     if (busy) return;
     setBusy("Importing reference");
@@ -773,6 +784,8 @@ export default function App() {
       !!fixed.length &&
       !!loads.length &&
       confirmed &&
+      readiness?.model.id === model.id &&
+      readiness.can_solve &&
       !previewing &&
       (compute === "cpu" || gpu.available) &&
       !busy;
@@ -1788,6 +1801,21 @@ export default function App() {
           </div>
         )}
         {(tab === "model" || tab === "print" || tab === "setup") &&
+          model &&
+          !dirty &&
+          readinessError && (
+            <div className="error-banner" role="alert">
+              <span>Readiness check failed: {readinessError}</span>
+              <button
+                className="subtle-button"
+                disabled={!!busy}
+                onClick={() => setReadinessAttempt((attempt) => attempt + 1)}
+              >
+                Retry readiness
+              </button>
+            </div>
+          )}
+        {(tab === "model" || tab === "print" || tab === "setup") &&
           readiness &&
           !dirty && (
             <ReadinessPanel
@@ -2040,6 +2068,7 @@ export default function App() {
               <h2>Your saved studies</h2>
               <button
                 aria-label="Close studies"
+                disabled={!!busy}
                 onClick={() => setLibrary(null)}
               >
                 <X size={19} />
@@ -2058,14 +2087,22 @@ export default function App() {
               <button
                 className="library-row"
                 key={s.id}
+                disabled={!!busy || aiBusy}
                 onClick={async () => {
+                  setBusy("Opening study");
+                  setError("");
                   try {
                     const v = await api<{ state: Saved }>("/studies/" + s.id);
                     await restore(v.state);
                     setLibrary(null);
                     flash("Study restored.");
                   } catch (e) {
-                    setError((e as Error).message);
+                    setLibrary(null);
+                    setError(
+                      `Could not open study: ${(e as Error).message} The current workspace was preserved.`,
+                    );
+                  } finally {
+                    setBusy("");
                   }
                 }}
               >

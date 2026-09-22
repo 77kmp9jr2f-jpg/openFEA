@@ -3,6 +3,28 @@
 One verdict answers: can this model be solved inside the stated scope, and
 what is still missing. The workspace and /api/agent use the same checks.
 """
+from functools import lru_cache
+from .schemas import MAX_SOLVER_DOFS
+from .storage import resource, read_json
+
+
+@lru_cache(maxsize=128)
+def _quadratic_capacity(mesh_path: str, mesh_hash: str) -> int:
+    # Model meshes are immutable. Cache only the count, never the mesh arrays.
+    import numpy as np
+    from skfem import MeshTet
+    with np.load(mesh_path) as arrays:
+        mesh = MeshTet(arrays['points'].T, arrays['tets'].T)
+        return int(3 * (mesh.nvertices + mesh.edges.shape[1]))
+
+
+def load_readiness_model(mid: str) -> dict:
+    folder = resource('models', mid)
+    model = read_json(folder/'model.json')
+    # Derive capacity for every revision, including historical models, without
+    # modifying their archived JSON, geometry hashes or interpolation history.
+    model['quadratic_dofs'] = _quadratic_capacity(str(folder/'mesh.npz'), model['mesh_sha256'])
+    return model
 
 SCOPE = {
     'physics': (
@@ -59,10 +81,13 @@ def analysis_readiness(model: dict, draft: dict | None = None) -> dict:
             item['fix'] = fix
         return item
 
+    quadratic_dofs = model.get('quadratic_dofs')
+    capacity_ok = quadratic_dofs is not None and 0 < quadratic_dofs <= MAX_SOLVER_DOFS
     mesh_ok = (
         1 <= int(model.get('tetrahedra') or 0) <= 200000
         and float(model.get('volume_mm3') or 0) > 0
         and float(model.get('min_quality') or 0) > 0
+        and capacity_ok
     )
     faces_ok = len(faces) >= 2
     known = set(faces)
@@ -79,9 +104,12 @@ def analysis_readiness(model: dict, draft: dict | None = None) -> dict:
             (
                 f"{model.get('tetrahedra', 0)} tetrahedra, volume "
                 f"{model.get('volume_mm3', 0):.4g} mm³, min quality "
-                f"{model.get('min_quality', 0):.3g}."
+                f"{model.get('min_quality', 0):.3g}; {quadratic_dofs:,} quadratic DOFs."
                 if mesh_ok
-                else 'The mesh is not a usable single solid. Repair geometry or increase mesh size.'
+                else (f'{quadratic_dofs:,} quadratic DOFs exceeds the {MAX_SOLVER_DOFS:,} limit. '
+                      'Use a coarser mesh; interpolation is never silently reduced.'
+                      if quadratic_dofs and quadratic_dofs > MAX_SOLVER_DOFS
+                      else 'The mesh or its quadratic capacity is not verified as usable. Repair geometry or increase mesh size.')
             ),
             'POST /api/models with a watertight STL/STEP or a parametric solid.',
         ),
@@ -154,7 +182,9 @@ def analysis_readiness(model: dict, draft: dict | None = None) -> dict:
     blocked = any(item['id'] in ('mesh_usable', 'faces_selectable') and not item['ok'] for item in checks)
     status = 'blocked' if blocked else ('ready' if not missing else 'incomplete')
     if blocked:
-        nxt = 'Repair the solid so it meshes as one watertight body with at least two selectable faces.'
+        nxt = ('Increase mesh size or export a coarser STL to stay within the quadratic solver limit.'
+               if quadratic_dofs and quadratic_dofs > MAX_SOLVER_DOFS
+               else 'Repair the solid so it meshes as one watertight body with at least two selectable faces.')
         agent_next = nxt
     elif 'fixture' in missing or 'load' in missing:
         nxt = (
@@ -194,6 +224,7 @@ def analysis_readiness(model: dict, draft: dict | None = None) -> dict:
             'name': spec.get('name'),
             'kind': spec.get('kind'),
             'tetrahedra': model.get('tetrahedra'),
+            'quadratic_dofs': quadratic_dofs,
             'volume_mm3': model.get('volume_mm3'),
             'bounds_mm': model.get('bounds'),
             'sha256': model.get('sha256'),
