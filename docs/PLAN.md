@@ -22,13 +22,15 @@ Currently implemented analysis scope: one connected solid; small-strain static e
 - Homogenized print model (orientation, walls, skins, infill) that changes stiffness, mass, results and reports. Not a slicer. Not coupon-calibrated. See [PRINT-STL.md](PRINT-STL.md).
 - Pin-and-compare table for two print configs; job cancel; CI, CONTRIBUTING, example coupon; product name OpenFEA.
 
+Latest local maintenance verification: **116 backend tests**, **17 frontend tests**, and the production build passed on October 9, 2026. See [VALIDATION.md](VALIDATION.md#repository-maintenance-verification--2026-10-09) for the checked source, environment, warnings and continuity notes. The [GitHub CI workflow](https://github.com/77kmp9jr2f-jpg/openFEA/actions/workflows/ci.yml) reports remote Linux results separately; it contains no deployment step.
+
 ## Outstanding requested scope
 
 ### Integration repair and next workflow pass (2026-09-20)
 
 - [x] Correct arbitrary-angle stiffness rotation; synchronize job cancellation; align the 500,000-DOF GPU contract; disclose comparison context changes. Regression tests reproduce the reviewed defects.
 - [x] Remove automatic P1 downgrade. Oversized quadratic systems request a coarser mesh until a separately reviewed interpolation option has numerical evidence.
-- [x] Install Linux Gmsh GLU dependency in CI. A fresh remote run remains pending an authorized push.
+- [x] Install Linux Gmsh GLU dependency in CI. Check the GitHub Actions run for the exact pushed commit to establish remote Linux verification.
 - [x] Preserve original/working STL provenance, reject empty STEP downloads, retain preprocessing warnings and require review of altered geometry.
 - [x] Require real-part setup confirmation; add operation-specific cancellation through the WebGPU loop.
 - [x] Bind print settings to Astra interview/proposals and restore pinned comparisons; show print axes alongside the model.
@@ -61,4 +63,4 @@ Currently implemented analysis scope: one connected solid; small-strain static e
 2. Extend the [30-case slicer matrix and three supported oblique cases](SLICER-MATRIX.md) to other printer families, wall generators, infill patterns and broader support-aware toolpaths. The initial 27 measured cases differ by -14.37% to +7.09%, and orientation rankings can disagree; the three original oblique rejections remain retained alongside the separate supported measurements. Physical mass and stiffness coupons across orientations remain necessary. Keep nominal bead-envelope limits, globally homogenized stiffness and illustrative pattern factors explicit; spatial wall/infill mechanics need separate validation before adoption.
 3. Exercise another GPU hardware family and physical driver loss. Chrome and the in-app browser now agree on the same Apple GPU, and the large-plate export has been reproduced on CPU. Mocked loss/deadline tests and real Apple GPU cancellation/retry pass. The 157,239-DOF plate and freshly reduced 82,491-DOF tube match CPU; the historical 84,324-DOF tube failure remains unchanged. Further conditioning/mesh guidance is needed for arbitrary inputs. The 500,000-DOF request contract is covered; a real solve at that limit is not established.
 4. Execute the proposed image-to-3D benchmark on known CAD after selecting providers and an explicit spending budget. The research report is complete; no assets or paid trials were generated.
-5. Run updated Linux CI after an explicitly authorized push. Keep Sites hosting in planning until service isolation, hosted authentication and persistence are implemented and separately approved for release.
+5. Check updated Linux CI for each authorized push and resolve any failures. Keep Sites hosting in planning until service isolation, hosted authentication and persistence are implemented and separately approved for release.

@@ -56,7 +56,7 @@ The browser sends the ten most recent messages, including their questions and pr
 - Optional print model: actual layer contours estimate wall/skin/core volumes, which set a uniform transversely isotropic equivalent stiffness using infill density/pattern and print-axis rotation. Individual wall/infill mechanics are not spatially resolved. Assumptions are written into the result. Not sliced geometry, not coupon-calibrated, not certified printed-part strength.
 - No assemblies/contact, friction, bolt preload, plasticity, large deformations, buckling, fatigue, dynamics, thermal loading, or explicit infill geometry.
 - Material presets are illustrative values. An imported or photograph-inspired geometry, a converged algebraic solve, and a physical strength validation are different kinds of evidence. Sharp fixture edges and unfilleted corners may have non-convergent peak stress.
-- The prototype bounds job time and mesh size (200,000 tetrahedra / 500,000 DOFs) and rejects disconnected solids. Dense CAD STL exports are accepted up to 80 MB and coarsened when needed. Readiness counts the actual quadratic DOFs before solving. Oversized meshes require coarsening; new analyses never silently switch to linear tetrahedra. Historical P1 archives retain their recorded interpolation when reproduced.
+- The prototype bounds job time and mesh size (200,000 tetrahedra / 500,000 DOFs) and rejects disconnected solids. STL uploads are limited to 80 MB and working surfaces to 80,000 triangles. Dense exports are reduced only when topology, volume and sampled surface-fidelity gates pass; unsupported inputs are rejected. The assessed original 1.44-million-triangle part remains unsupported; see [its validation record](docs/ORIGINAL-STL-VALIDATION.md). Readiness counts the actual quadratic DOFs before solving. Oversized meshes require coarsening; new analyses never silently switch to linear tetrahedra. Historical P1 archives retain their recorded interpolation when reproduced.
 
 ## Verify
 
@@ -70,13 +70,17 @@ npm run build
 
 The numerical suite includes the exact uniform 3D tension field (`nu=0`), a Timoshenko cantilever displacement comparison at two mesh sizes, force/moment equilibrium, energy, load/stiffness scaling, STEP round trips, custom boolean geometry, STL watertightness and print-stiffness comparison, invalid inputs and report hashes. See [CONTRIBUTING.md](CONTRIBUTING.md), [docs/PRINT-STL.md](docs/PRINT-STL.md), and [examples/print-coupon.stl](examples/print-coupon.stl). Test output is isolated from user studies. See [docs/VALIDATION.md](docs/VALIDATION.md) for the recorded prototype checks and their limits.
 
+The October 9, 2026 local verification passed **116 backend tests**, **17 frontend tests**, and the production build. The [CI workflow](.github/workflows/ci.yml) runs the standard tests and build on Ubuntu for pushes to `main` and `print-stl-workspace`, and for pull requests. Check [GitHub Actions](https://github.com/77kmp9jr2f-jpg/openFEA/actions/workflows/ci.yml) for the result associated with a specific commit; local checks do not establish Linux CI success.
+
 ## ChatGPT Sites
 
-Publishing is planned in [docs/SITES-PUBLISHING-PLAN.md](docs/SITES-PUBLISHING-PLAN.md). The browser GPU solver is implemented. Hosted CAD/assembly, Astra authentication, persistence and reports still require a service boundary; a static upload alone cannot provide the working application. Nothing has been pushed or deployed.
+Publishing is planned in [docs/SITES-PUBLISHING-PLAN.md](docs/SITES-PUBLISHING-PLAN.md). The browser GPU solver is implemented. Hosted CAD/assembly, Astra authentication, persistence and reports still require a service boundary; a static upload alone cannot provide the working application. The checked-in GitHub workflow runs tests and builds without a deployment step. Sites hosting remains unimplemented and requires a separately approved release.
 
 ## Storage and portability
 
 All runtime artifacts live in `data/` (ignored by Git), or `FEAR_DATA_DIR` when set. Back up this directory to keep studies and all original references and models. The active browser workspace is stored in localStorage; use Save study before switching browsers. The ZIP's `reproduce.py` re-solves the original mesh without a running server.
+
+Repository updates preserve completed runs and their recorded print methods. Historical uploads that used the earlier STL welding method must be re-uploaded and pass the current preprocessing checks before building a new mesh; existing models, results and reports remain available. See [STL preprocessing and provenance](docs/PRINT-STL.md) before resuming an older study.
 
 This server is intended for the local machine. It rejects foreign browser origins and non-local hostnames. It has no multi-user login or public-service hardening; do not expose it to the internet.
 

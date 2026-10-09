@@ -1,6 +1,6 @@
 # ChatGPT Sites publishing plan
 
-Status: planned, not deployed. The current working application runs locally. No Site has been registered, source pushed, secret provisioned or version published.
+Status: planned, not deployed. The current working application runs locally. No Site has been registered, Sites secret provisioned or Sites version published. Repository pushes to GitHub run the checked-in CI workflow; that workflow does not deploy the application. A Sites release requires its own implementation, verification and explicit approval.
 
 ## Intended hosted experience
 

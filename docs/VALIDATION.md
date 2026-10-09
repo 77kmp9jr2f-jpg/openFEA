@@ -1,6 +1,39 @@
-# Validation record — updated 2026-09-22
+# Validation record — updated 2026-10-09
 
 This records software and numerical evidence, not physical acceptance or a generally validated CAD reconstruction service.
+
+## Repository maintenance verification — 2026-10-09
+
+The checkout was clean at application commit `6082c0e`, with 31 commits ahead of
+the freshly fetched `origin/main`. Before the requested documentation update and
+push, the following checks ran against that application source on macOS arm64,
+Python **3.12.14**, and Node.js **26.10.0**:
+
+| Check | Result |
+|---|---|
+| `.venv/bin/python -m pytest -q tests` | **116 passed** in 47.52 seconds; two dependency deprecation warnings |
+| `node --experimental-strip-types --test tests/frontend-*.test.ts` | **17 passed**, no failures or skips |
+| `npm run build` | TypeScript and Vite production build passed; existing chunk-size advisory |
+| `.venv/bin/python -m pip check` | No broken requirements |
+
+The dependency warnings concern Starlette's HTTPX test client and AnyIO's
+`BlockingPortal` alias. The build emits a 794.33 kB JavaScript chunk before gzip,
+above Vite's 500 kB advisory threshold. Neither warning failed its check.
+
+Only documentation changed in this maintenance pass. Hardware GPU, live Astra,
+browser interaction, the longer import/refinement benchmarks and physical print
+checks were not rerun; the dated evidence below retains its original scope.
+The [CI workflow](../.github/workflows/ci.yml) uses Ubuntu, Python 3.12 and Node 22;
+its [per-commit results](https://github.com/77kmp9jr2f-jpg/openFEA/actions/workflows/ci.yml)
+must be checked independently of these local results. The workflow has no
+deployment step, and Sites remains a planned, separately approved release.
+
+Upgrade continuity: refresh pinned Python and npm dependencies as described in
+the README, preserve ignored `data/` (or `FEAR_DATA_DIR`) and browser storage,
+and retain immutable completed runs and historical print methods. Earlier welded
+STL uploads require a fresh upload and current fidelity checks before new meshing;
+their saved models/results remain available. The original dense STL rejection and
+remaining acceptance items in [PLAN.md](PLAN.md) are unchanged.
 
 ## Astra interpretation of recorded print runs — 2026-09-22
 
